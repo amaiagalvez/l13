@@ -8,16 +8,13 @@ description: "PHP style, Chisel markers, type hints, PHPDoc, factories, Pint wor
 ## Chisel
 - `chisel.php` / `chisel-paths.php` strip unused code marked with `/* @chisel-... */` … `/* @end-chisel-... */`.
 - Those markers are **machine-read**: never remove or reformat them, and never regenerate `chisel.php` unless asked.
-- **Integrity test**: `testing13/chisel-integrity-test.php` validates all markers are properly paired. Run via:
+- **Integrity test**: `testing13/tests/chisel-integrity-test.php` validates all markers are properly paired. Run via:
   ```bash
   # From workspace root (l13/):
-  docker compose -f projects/demo13/docker-compose.yml run --rm -e XDEBUG_MODE=off -v "$(pwd)/testing13:/testing13" -w /app-docker laravel13 php /testing13/chisel-integrity-test.php
+  docker compose -f projects/demo13/docker-compose.yml run --rm --no-deps -e XDEBUG_MODE=off -v "$(pwd)/testing13:/testing13" -w /app-docker --entrypoint php laravel13 /testing13/tests/chisel-integrity-test.php
   ```
-  Or copy to project first:
-  ```bash
-  cp testing13/chisel-integrity-test.php projects/demo13/
-  docker compose -f projects/demo13/docker-compose.yml run --rm -e XDEBUG_MODE=off -w /app-docker laravel13 php chisel-integrity-test.php
-  ```
+  From `projects/demo13/`, use `-f docker-compose.yml` and mount `"$(pwd)/../../testing13:/testing13"` instead. The main service does not mount `/testing13`; the explicit bind mount is required.
+  The scan excludes root-level `.git`, `dc-data`, `node_modules`, `storage`, and `vendor` directories.
 
 ## Code Style
 - Curly braces always.
