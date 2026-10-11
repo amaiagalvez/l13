@@ -2,7 +2,7 @@
 set -euo pipefail
 
 workspace_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-app_root="$workspace_root/demo13"
+app_root="$workspace_root/projects/demo13"
 php_args=()
 
 for argument in "$@"; do
@@ -11,7 +11,7 @@ for argument in "$@"; do
     elif [[ "$argument" == "$workspace_root/packages/"* ]]; then
         php_args+=("/packages/${argument#"$workspace_root/packages/"}")
     elif [[ "$argument" == "$workspace_root/"* ]]; then
-        printf 'Error: el archivo no pertenece a demo13/ ni a packages/: %s\n' "$argument" >&2
+        printf 'Error: el archivo no pertenece a projects/demo13/ ni a packages/: %s\n' "$argument" >&2
         exit 1
     else
         php_args+=("$argument")

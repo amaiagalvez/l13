@@ -5,6 +5,8 @@
 			"command": "/usr/bin/docker",
 			"args": [
 				"compose",
+				"-f",
+				"projects/demo13/docker-compose.yml",
 				"exec",
 				"-T",
 				"-e",

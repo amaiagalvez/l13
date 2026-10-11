@@ -14,7 +14,7 @@
           "/usr/bin/docker",
           "compose",
           "-f",
-          "demo13/docker-compose.yml",
+          "projects/demo13/docker-compose.yml",
           "exec",
           "-T",
           "-e",

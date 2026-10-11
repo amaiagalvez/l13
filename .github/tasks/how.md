@@ -16,11 +16,13 @@ bash testing13/agents/link-claude-assets.sh
 Ambos localizan la raíz del repositorio automáticamente y son seguros de volver a ejecutar:
 
 * OpenCode descubre agentes en `.opencode/agents/`; son symlinks a `.github/agents/*.agent.md`. El instalador intenta reiniciar automáticamente su servicio en segundo plano con `opencode service restart`.
-* Claude Code descubre agentes en `.claude/agents/`; son archivos generados con `name` en kebab-case y el frontmatter que Claude espera. Edita siempre el original, no esos archivos generados.
+* Claude Code descubre agentes en `.claude/agents/`; son symlinks directos a `.github/agents/*.agent.md`, sin copiar ni adaptar el frontmatter. Los permisos de Copilot/OpenCode no se convierten a restricciones de herramientas de Claude.
 * Las skills quedan enlazadas en `.opencode/skills/` y `.claude/skills/`, respectivamente, desde `.github/skills/`.
 * Los archivos `.github/instructions/*.instructions.md` siguen siendo instrucciones de Copilot. OpenCode y Claude necesitan seguir las indicaciones de zona de `AGENTS.md` o de las propias skills; el `applyTo` de Copilot no se aplica en esos clientes.
 
-Los scripts eliminan primero los symlinks previos en sus carpetas de agentes y vuelven a crearlos. En Claude solo eliminan los archivos que ellos mismos generaron; respetan otros archivos de agentes. Las salidas generadas están en `.gitignore`.
+Los scripts eliminan primero los symlinks previos en sus carpetas de agentes y vuelven a crearlos. Claude retira también las copias generadas por la versión anterior del script; otros archivos normales se conservan. Los enlaces están en `.gitignore`.
+
+Las rutas `.claude/{agents,skills}/` y `.opencode/{agents,skills}/` son de solo lectura en VS Code, tanto al abrir la carpeta como el workspace. Edita agentes y skills desde `.github/`; los cambios de contenido se reflejan inmediatamente en los enlaces. Ejecuta los scripts para reconstruirlos tras añadir, borrar o renombrar archivos. Este bloqueo es del editor: los symlinks no impiden escribir en los originales desde un terminal u otro editor.
 
 Si el script no encuentra el CLI o falla el reinicio, informa del problema; en ese caso ejecuta `opencode service restart` manualmente.
 
