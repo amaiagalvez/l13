@@ -1,3 +1,4 @@
+/.claude
 /.opencode
 /d13
 /dc-data
@@ -6,6 +7,3 @@
 /packages
 /testing
 /vendor
-/.claude/agents/
-/.claude/skills
-/.claude/settings.local.json
