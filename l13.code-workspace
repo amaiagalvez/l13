@@ -13,6 +13,7 @@
 		},
 		"git.autoRepositoryDetection": true,
 		"git.scanRepositories": [
+			"testing13",
 			"projects/demo13",
 			"packages/basics13",
 			"packages/customers13",
