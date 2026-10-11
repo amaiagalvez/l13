@@ -21,6 +21,49 @@ Customers → Projects → Epics (+ epic comments). Soft deletes, trash list, re
 - Tests: `tests/Feature`, `tests/Unit`, Dusk in `tests/Browser`.
 - Structural changes: read `.github/docs/architecture/ARCHITECTURE.md` first.
 
+## Skills (source of truth for detailed rules)
+Rules are organized as skills in `.github/skills/`. OpenCode loads them on demand; Copilot/Claude read this file and the zone rules below.
+
+| Domain | Skill | Zone rules (applyTo) |
+|--------|-------|----------------------|
+| Core conventions | `project-rules` | — |
+| PHP style, Chisel, Pint | `php-conventions` | — |
+| Docker, DX, MCP Boost | `docker-commands` | — |
+| Test location, traits, checklist | `test-rules` | `tests.instructions.md` |
+| Models, relationships, soft deletes | `zone-rules-models` | `models.instructions.md` |
+| HTTP, controllers, policies, queries | `zone-rules-http` | `http.instructions.md` |
+| Views, forms, lists, Flux, i18n, UX | `zone-rules-views` | `views.instructions.md` |
+| Test types, Dusk, races | `zone-rules-tests` | `tests.instructions.md` |
+| Laravel best practices | `laravel-best-practices` | — |
+| Testing best practices | `testing-best-practices` | — |
+| Livewire, Flux UI, Tailwind, UX | `livewire-development`, `fluxui-development`, `tailwindcss-development`, `ux-design` | — |
+| Guided flows | `new-feature`, `new-resource`, `full-review`, `fix-review`, `fix-tests`, `consistency-review`, `ux-implement` | — |
+
+## When to Load Each Skill (OpenCode)
+
+| Task | Skills to Load |
+|------|----------------|
+| **Any conversation** | `project-rules` (auto-loaded via `opencode.jsonc`) |
+| Edit PHP files (models, controllers, etc.) | `php-conventions` |
+| Run Docker commands, tests, builds, MCP | `docker-commands` |
+| Write or modify tests | `test-rules` + `testing-best-practices` |
+| Edit `app/Models/**` | `zone-rules-models` |
+| Edit `app/Http/**`, `Policies`, `Queries`, `Transformers` | `zone-rules-http` |
+| Edit `resources/views/**`, `lang/**` | `zone-rules-views` + `ux-design` |
+| Edit `tests/**` | `zone-rules-tests` |
+| New CRUD resource | `new-resource` + `laravel-best-practices` |
+| New feature (action, filter, column, email) | `new-feature` + `laravel-best-practices` |
+| Full code review | `full-review` |
+| Fix review findings | `fix-review` |
+| Fix failing tests | `fix-tests` |
+| Check cross-resource consistency | `consistency-review` |
+| Implement UX improvements | `ux-implement` + `ux-design` |
+| Livewire component work | `livewire-development` + `fluxui-development` |
+| Tailwind styling | `tailwindcss-development` |
+| Fortify auth changes | `fortify-development` |
+
+**Usage:** `skill("skill-name")` loads the skill for the current conversation. Multiple skills can be loaded.
+
 ## Boost / docs
 - Prefer Boost MCP tools over shell: `database-query` (read-only), `database-schema`, `get-absolute-url`, `browser-logs`, `search-docs`.
 - `search-docs` before version-specific Laravel-ecosystem APIs (skip for copy/styling). Broad topic queries, no package names in the query, scope with `packages`. Reuse earlier results.
@@ -28,43 +71,3 @@ Customers → Projects → Epics (+ epic comments). Soft deletes, trash list, re
 - Reviewer agent sources live in `.github/agents/`. OpenCode and Claude read direct symlinks in `.opencode/agents/` and `.claude/agents/`. Skills are symlinked from `.github/skills/` to each client's native skills directory. The linked paths are read-only in VS Code; edit only the originals in `.github/`. Content changes are visible through the links immediately. Run `bash testing13/agents/link-opencode-assets.sh` and `bash testing13/agents/link-claude-assets.sh` to rebuild links after adding, deleting or renaming assets; both scripts locate the repository when run from another directory. The scripts do not adapt agent metadata or permissions between clients.
 - Guided flows (new-feature, new-resource, full-review, fix-review, fix-tests, consistency-review, ux-implement) are skills in `.github/skills/<name>/SKILL.md`, not `/commands`: activate them by skill, not with a slash command.
 - Activate the matching skill in `.github/skills` for its domain. No verification scripts/tinker when tests cover it.
-
-## PHP
-- Chisel: `chisel.php` / `chisel-paths.php` strip unused code marked with `/* @chisel-... */` … `/* @end-chisel-... */`. Those markers are machine-read: never remove or reformat them, and never regenerate `chisel.php` unless asked.
-- Curly braces always; constructor property promotion; explicit return and parameter types; Enum keys TitleCase.
-- PHPDoc over inline comments (array shapes in PHPDoc).
-- Named routes with `route()`. Models get factories (use existing states). Faker: follow existing style.
-- After editing PHP: `DX ./vendor/bin/pint --dirty --format agent`. Never `--test` while writing code: it only reports. A read-only review may use `--test`, which is the correct check there because it must not rewrite files.
-
-## Livewire
-State server-side; validate and authorize in actions. Alpine is already bundled.
-
-## Tests (PHPUnit)
-- Add/update tests for behavior changes (not for copy/styling). Cover the change and its key failures only. Read the `testing-best-practices` skill first.
-- Create: `DX php artisan make:test --phpunit Name` (feature; `--unit` for unit; no suite dir in name).
-- Run the narrowest: `DX php artisan test --compact <path|--filter=name>`; add `--parallel` for local speed (never in CI — shared DB) with flags before the path: `DX php artisan test --parallel --compact <path>`. Rerun after each fix.
-- Before you call a change done, run the 4 architecture tests: `DX php artisan test --compact tests/Unit/ArchitectureTest tests/Unit/ValidationCoverageTest tests/Unit/ModelSchemaParityTest tests/Unit/ResourceUniformityTest`. They guard the per-resource set, validated input, model↔schema parity and cross-resource uniformity.
-- CI enforces at least 80% total code coverage and uploads a Clover report; run `docker compose run --rm laravel13-phpunit` locally to check the same threshold.
-- Static analysis: run `DX ./vendor/bin/phpstan analyse` (level 9).
-
-### Test Location Rules (apply on EVERY test creation/modification)
-**Decide where the test belongs BEFORE writing it:**
-
-| Test Type | Location | DB? | Trait |
-|-----------|----------|-----|-------|
-| Pure logic (rules, policies, helpers, middleware config, query structure, translations) | `tests/Unit/...` | ❌ No | none |
-| Validation rules (FormRequest `rules()`, `authorize()`, `prepareForValidation()`) | `tests/Unit/Validation/*RequestTest.php` | ❌ No | none |
-| Policy methods (`viewAny`, `create`, `update`, etc.) | `tests/Unit/Policies/*PolicyTest.php` | ❌ No | none |
-| Query builders (`ListQueryBase`, search patterns, state counts) | `tests/Unit/Queries/*ListQueryTest.php` | ❌ No | none |
-| HTTP integration (full request/response, view rendering) | `tests/Feature/...` | ✅ Yes | `RefreshDatabase` |
-| Read-light Feature tests (auth pages, query tests with 1 create, middleware) | `tests/Feature/...` | ✅ Yes (lazy) | `LazilyRefreshDatabase` |
-
-**Decision checklist for new tests:**
-1. Can it run without touching the database? → `tests/Unit/`
-2. Does it only validate rules/authorize/prepareForValidation? → `tests/Unit/Validation/`
-3. Does it test a Policy method directly? → `tests/Unit/Policies/`
-4. Does it test query structure (constants, method signatures, search patterns)? → `tests/Unit/Queries/`
-4. Does it need HTTP + DB (CRUD, Trash, ListQuery with real data)? → `tests/Feature/` + `RefreshDatabase`
-5. Does it only create 0-1 records and mostly reads? → `tests/Feature/` + `LazilyRefreshDatabase`
-
-**Refactoring existing tests:** When touching a Feature test that only does pure logic, move it to Unit. When touching a Feature test with few creates, consider `LazilyRefreshDatabase`.
