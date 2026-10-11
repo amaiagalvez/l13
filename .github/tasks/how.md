@@ -4,36 +4,25 @@
 * .github/instructions/ (reglas que se inyectan solas al tocar cada ruta: http, models, views y tests)
 * los agentes de .github/agents/ y los flujos guiados (skills) de .github/skills/
 
-## Y en OpenCode
+## Reutilización en OpenCode y Claude Code
 
-Nada está duplicado: los agentes viven **una sola vez** en `.github/agents/` (los que Copilot ya leía) y OpenCode los lee a través de symlinks en `.opencode/agents/`, así que corriges un agente en un único sitio y los dos clientes lo toman.
-
-* `.github/agents/*.agent.md` → symlink en `.opencode/agents/*.md` (18 agentes: 17 revisores de solo lectura + `review-orchestrator`, que sí escribe reports en `.github/reviews/**`)
-* `.github/skills/<nombre>/SKILL.md` → sin symlink: `"skills": [".github/skills"]` ya los carga, en ambos clientes. **No hay comandos `/`**: los antiguos prompts se convertieron en skills, así que se activan por nombre (skill tool), no escribiéndolos con `/`
-* `.github/instructions/*` → también sin symlink; OpenCode no resuelve `applyTo`, así que su router es AGENTS.md (ver abajo)
-* `opencode.jsonc` en la raíz: MCP de Boost y permisos (espejo de `chat.tools.terminal.autoApprove`)
-
-Los 7 flujos guiados son: `new-feature`, `new-resource`, `full-review`, `fix-review`, `fix-tests`, `consistency-review` y `ux-implement`.
-
-El frontmatter de los agentes es compartido, y **cada cliente lee una key distinta para lo mismo**:
-
-* `mode: subagent` → la usan los dos (sin ella OpenCode registra el agente como `primary` y te aparece en el ciclo del Tab).
-* `permissions:` (array `action`/`resource`/`effect`) → **solo Copilot**. OpenCode la ignora y se la manda al provider como parámetro muerto.
-* `permission:` (objeto, en singular) → **solo OpenCode**. Es la que aplica de verdad: `edit: deny`, `bash: deny`.
-
-Por eso los agentes llevan las dos keys: si quitas una, el revisor pierde el solo lectura en uno de los dos clientes. Verifícalo con `opencode debug agents`: cada revisor debe salir con `edit deny` y `shell * deny`. No uses `tools:`; la docs la marca como *deprecated* y su sustituta es `permission`.
-
-Lo único que cambia en el flujo: no hay `applyTo`, así que el agente tiene que abrir a mano el `.instructions.md` de la zona que toca antes de editar. Y la skill `full-review` corre en sesión hija con el agente `review-orchestrator`, que lanza a los especialistas.
-
-`.opencode/` está en `.gitignore` (son enlaces, no contenido). **En un ordenador nuevo, después de clonar, ejecuta:**
+Los originales siguen en `.github/agents/` y `.github/skills/`. Ejecuta los dos scripts desde la raíz del repositorio después de clonar o al añadir o renombrar un agente o una skill:
 
 ```
-bash /packages/basics13/tooling/link-opencode-assets.sh
+bash testing13/agents/link-opencode-assets.sh
+bash testing13/agents/link-claude-assets.sh
 ```
 
-Es idempotente: puedes ejecutarlo cada vez que clones o añadas un agente. Sin él, OpenCode arranca sin agentes. También avisa si el sistema no soporta symlinks y limpia enlaces colgantes de agentes que hayas borrado.
+Ambos localizan la raíz del repositorio automáticamente y son seguros de volver a ejecutar:
 
-Un detalle operativo: al editar un agente, OpenCode recarga con ficheros normales pero **no** a través del symlink. Si no ves el cambio, `opencode service restart`. Las skills se recargan solas (viven en `.github/skills`, sin symlink).
+* OpenCode descubre agentes en `.opencode/agents/`; son symlinks a `.github/agents/*.agent.md`. El instalador intenta reiniciar automáticamente su servicio en segundo plano con `opencode service restart`.
+* Claude Code descubre agentes en `.claude/agents/`; son archivos generados con `name` en kebab-case y el frontmatter que Claude espera. Edita siempre el original, no esos archivos generados.
+* Las skills quedan enlazadas en `.opencode/skills/` y `.claude/skills/`, respectivamente, desde `.github/skills/`.
+* Los archivos `.github/instructions/*.instructions.md` siguen siendo instrucciones de Copilot. OpenCode y Claude necesitan seguir las indicaciones de zona de `AGENTS.md` o de las propias skills; el `applyTo` de Copilot no se aplica en esos clientes.
+
+Los scripts eliminan primero los symlinks previos en sus carpetas de agentes y vuelven a crearlos. En Claude solo eliminan los archivos que ellos mismos generaron; respetan otros archivos de agentes. Las salidas generadas están en `.gitignore`.
+
+Si el script no encuentra el CLI o falla el reinicio, informa del problema; en ese caso ejecuta `opencode service restart` manualmente.
 
 # Punto de partida común (los 3 flujos)
 
