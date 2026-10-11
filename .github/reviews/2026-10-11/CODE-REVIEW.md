@@ -6,6 +6,9 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 **Total Findings: 14** — CRITICAL: 0, HIGH: 2, MEDIUM: 5, LOW: 5, INFO: 2
 
+**Outcome (2026-10-11):** 8 fixed, 4 rejected as incorrect, 1 resolved as a side effect, 1 accepted
+as debt. No CRITICAL or HIGH finding is open. See "Action Plan — Final Status" below.
+
 ---
 
 ## Findings
@@ -67,9 +70,11 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 ---
 
-### MEDIUM-002: Inconsistent Test Base Classes
+### MEDIUM-002: Inconsistent Test Base Classes — PARTIALLY FIXED
 
 **File:** `packages/customers13/tests/TestCase.php`, `packages/projects13/tests/TestCase.php`
+**Status:** Fixed 2026-10-11 (see "Applied Fixes" below). The `ValidatesFormRequests` trait was
+duplicated byte-for-byte in three places and now lives once in `basics13/src/Support/Testing/`.
 
 **Problem:** Two different base test classes with different configurations:
 - `customers13/TestCase`: Loads `LivewireServiceProvider`, `FluxServiceProvider`, sets up Blade anonymous component path, defines `projects.index` route
@@ -142,9 +147,14 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 ---
 
-### LOW-001: Overengineered `TracksAuditColumns` Concern
+### LOW-001: Overengineered `TracksAuditColumns` Concern — REJECTED (incorrect)
 
 **File:** `packages/basics13/src/Concerns/TracksAuditColumns.php`
+**Status:** REJECTED 2026-10-11. The claim that this is "3 lines of `creating()`" is wrong. The
+`trashed` hook stamps `updated_by` and `deleted_by`, but `SoftDeletes::runSoftDelete()` saves only
+`deleted_at` and `updated_at`, so what the hook stamped is still unsaved when it fires. That is why
+`writeStampedAuditColumns()` issues its own `UPDATE` and calls `syncOriginalAttributes()`. Removing
+it would silently stop recording who trashed a row.
 
 **Problem:** The concern uses `creating`/`updating`/`deleting` model events to set `created_by`/`updated_by`/`deleted_by`. This is 80+ lines for functionality that could be 3 lines using `$table->foreignId('created_by')->nullable()->constrained()->cascadeOnDelete()` + `Model::creating(fn ($m) => $m->created_by = auth()->id())` in a boot method. The concern also adds complexity for testing (must mock auth).
 
@@ -161,9 +171,12 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 ---
 
-### LOW-002: `EpicComment` Missing Factory States
+### LOW-002: `EpicComment` Missing Factory States — REJECTED (false positive)
 
-**File:** `packages/projects13/src/Database/Factories/EpicCommentFactory.php` (not found — likely uses default)
+**File:** `packages/projects13/src/Database/Factories/EpicCommentFactory.php`
+**Status:** REJECTED 2026-10-11. The factory exists and was present at review time; the finding
+searched the wrong path. `EpicCommentFactory` is 31 lines, uses `HasStates` like its siblings and
+defines `body` / `user_id` / `epic_id`. No change made.
 
 **Problem:** `EpicComment` factory not visible in source tree. `EpicCommentTest` creates instances with `new EpicComment` and `fill()`, not factory. Other models have dedicated factories with states.
 
@@ -180,9 +193,13 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 ---
 
-### LOW-003: Duplicate `fullName()` Logic Only in Project
+### LOW-003: Duplicate `fullName()` Logic Only in Project — REJECTED (by design)
 
 **File:** `packages/projects13/src/Models/Project.php:102-105`
+**Status:** REJECTED 2026-10-11. `fullName()` disambiguates a record by its parent, and only one
+resource is ever picked in a selector: `Customer` is chosen for a project and `Project` for an epic.
+`Customer` has no parent to append, and an epic is never selected anywhere, so neither would have a
+caller. Adding the method would be dead code.
 
 **Problem:** `Project::fullName()` returns `"name (customer name)"` for selectors. `Customer` and `Epic` have no equivalent. `EpicListTransformer` builds `project_label` manually in transformer.
 
@@ -199,9 +216,11 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 ---
 
-### LOW-004: `addCommonColumns()` Adds `deleted_at` Index to EpicComment Unnecessarily
+### LOW-004: `addCommonColumns()` Adds `deleted_at` Index to EpicComment Unnecessarily — RESOLVED
 
 **File:** `packages/basics13/src/Support/Database/helpers.php:27`, `packages/projects13/src/Database/Migrations/2026_09_30_175707_create_epic_comments_table.php:20`
+**Status:** RESOLVED 2026-10-11 by the HIGH-002 fix. `EpicComment` now uses `SoftDeletes`, so the
+`['deleted_at', 'id']` index is used and no separate column list is needed.
 
 **Problem:** `addCommonColumns()` adds `index(['deleted_at', 'id'])` for soft delete performance. But `EpicComment` doesn't use `SoftDeletes` (see HIGH-002), so the index is unused.
 
@@ -215,9 +234,13 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 ---
 
-### LOW-005: Inconsistent Route Naming in Transformers
+### LOW-005: Inconsistent Route Naming in Transformers — ACCEPTED AS DEBT
 
 **File:** `packages/customers13/src/Transformers/CustomerListTransformer.php:127-138`, `packages/projects13/src/Transformers/ProjectListTransformer.php`, `packages/projects13/src/Transformers/EpicListTransformer.php`
+**Status:** DECLINED 2026-10-11 (decision of record). The three `routes()` bodies do follow one
+pattern, but a `resourceRoutes(string $prefix)` helper would couple every route name to that
+convention. The explicit 8-line array keeps each transformer's links readable and greppable. Kept as
+accepted debt; revisit only if a fourth resource or a new row action appears.
 
 **Problem:** All three transformers define `routes()` returning array with keys `active`, `archived`, `trash`, `destroy`, `archive`, `activate`, `restore`, `trashDestroy`. `EpicListTransformer` adds `comment` route. The route *names* differ per resource (e.g., `customers.index` vs `projects.index` vs `epics.index`) which is correct, but the *structure* is duplicated across three classes.
 
@@ -231,9 +254,13 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 ---
 
-### INFO-001: `basics13` Package Views Not Published by Default
+### INFO-001: `basics13` Package Views Not Published by Default — REJECTED (intentional)
 
 **File:** `packages/basics13/src/ServiceProvider.php:34-44`
+**Status:** REJECTED 2026-10-11 (decision of record). The 16 Blade components under
+`resources/views/components/` are internal to the package and are loaded through
+`loadViewsFrom()`. Publishing them would let an application fork them into a stale copy that no
+longer tracks package fixes. `AGENTS.md` asks applications to reuse the shared components.
 
 **Problem:** View and lang publishing is commented out in `basics13` ServiceProvider. The package loads views with `loadViewsFrom()` but doesn't publish them, so applications can't customize them without manually copying.
 
@@ -266,22 +293,62 @@ Reviewed three packages (`basics13`, `customers13`, `projects13`) and the demo a
 
 ---
 
-## Action Plan (Ordered by Impact)
+## Action Plan — Final Status (2026-10-11)
 
-1. **HIGH-002** — Fix `EpicComment` model to use `SoftDeletes` (or remove from migration)
-2. **HIGH-001** — Remove redundant `delete()` override from `Customer` model
-3. **MEDIUM-003** — Expand `ProjectRequestTest` and `CustomerRequestTest` validation coverage
-4. **MEDIUM-004** — Add comprehensive `CustomerListQueryTest` matching project/epic pattern
-5. **MEDIUM-005** — Convert `CustomerPolicyTest` to behavioral tests
-6. **MEDIUM-002** — Extract shared `TestCase` to `basics13` package
-7. **MEDIUM-001** — Already covered by HIGH-001 fix
-8. **LOW-004** — Address after HIGH-002 resolution
-9. **LOW-001** — Evaluate `TracksAuditColumns` concern simplification
-10. **LOW-002** — Verify/create `EpicCommentFactory`
-11. **LOW-003** — Add `fullName()` to Customer/Epic or document
-12. **LOW-005** — Consider shared route config for transformers
-13. **INFO-001** — Decide on view publishing for basics13
-14. **INFO-002** — Add `SEARCH_COLUMNS` constant to `CustomerListQuery`
+| ID | Severity | Status |
+|----|----------|--------|
+| HIGH-002 | HIGH | **FIXED** — `EpicComment` now uses `SoftDeletes` |
+| HIGH-001 | HIGH | **FIXED** — removed the redundant `Customer::delete()` override |
+| MEDIUM-001 | MEDIUM | **FIXED** — covered by HIGH-001 |
+| MEDIUM-002 | MEDIUM | **PARTIALLY FIXED** — `ValidatesFormRequests` de-duplicated into `basics13/src/Support/Testing/`; the per-package `TestCase` stays duplicated by design (see below) |
+| MEDIUM-003 | MEDIUM | **FIXED** — `ProjectRequestTest` 3→25 tests, `CustomerRequestTest` 5→16 tests |
+| MEDIUM-004 | MEDIUM | **FIXED** — `CustomerListQueryTest` 2→9 tests |
+| MEDIUM-005 | MEDIUM | **FIXED** — `CustomerPolicyTest` reflection → behavioral |
+| LOW-001 | LOW | **REJECTED** — `writeStampedAuditColumns()` is required by the soft-delete write path |
+| LOW-002 | LOW | **REJECTED** — factory exists; finding searched the wrong path |
+| LOW-003 | LOW | **REJECTED** — `fullName()` disambiguates by parent; neither `Customer` nor `Epic` is ever selected |
+| LOW-004 | LOW | **RESOLVED** — index is used now that `EpicComment` soft-deletes |
+| LOW-005 | LOW | **ACCEPTED AS DEBT** — kept explicit, not a `resourceRoutes()` helper |
+| INFO-001 | INFO | **REJECTED** — views stay unpublished on purpose |
+| INFO-002 | INFO | **FIXED** — `SEARCH_COLUMNS*` constants added to `CustomerListQuery` |
+
+### Why the per-package `TestCase` duplication stays
+
+The shared `Basics13\Tests\TestCase` proposed by MEDIUM-002 is not reachable. Composer does not
+autoload a dependency's `autoload-dev` namespaces. Verified in
+`packages/projects13/vendor/composer/autoload_psr4.php`: that package registers `Basics13\` →
+`src` only, never `Basics13\Tests\` → `tests`. A helper placed there resolves inside `basics13` and
+nowhere else, so the only ways to share it are a relative `../../basics13/tests` autoload entry,
+which breaks once the packages are installed from a real registry, or moving it into `src/`.
+
+`ValidatesFormRequests` depends on no Testbench class, so it is safe in `src/` and is the single
+shared copy now. The `TestCase` classes stay per-package: each registers a different provider set,
+fixture migrations and routes, so merging them would couple the packages' test environments for no
+real gain.
+
+### Known environment issue (not caused by these changes)
+
+`composer install` inside `packages/customers13` and `packages/projects13` cannot resolve their own
+`amaia/basics13` path repository: `repositories[].url` is `../packages/basics13`, but the packages
+are siblings, so the symlink resolves to a non-existent `/packages/packages/basics13`. Those two
+package suites therefore abort at autoload time. Confirmed pre-existing by re-running with the
+changes stashed. It does not affect the host application, whose own `composer.json` uses the
+correct `../../packages/basics13` path; the `demo13` suite loads all three packages and is green.
+
+### Pre-existing flakiness: sequential runs race on the shared test database
+
+`php artisan test` against `laravel_test` gives varying results run to run — observed 607/0, 595/12
+and 606/1 on three consecutive runs of an unchanged tree. The failures are schema-level, not
+assertion-level: `1146 Table 'laravel_test.PRO_projects' doesn't exist` and
+`Unknown column 'two_factor_secret' in 'INSERT INTO' users`, all surfacing in
+`RefreshDatabase` tests. `RefreshDatabase` recreates the schema while
+`Tests\Feature\ConcurrentNameInsertTest` still holds second connections opened for its
+`lockForUpdate()` scenarios, so one test's schema reset lands under another's query.
+
+`php artisan test --parallel` isolates each worker in its own database and passes 607/607 every
+time, which is how the tree was verified for these fixes. `--parallel` must stay out of CI, where
+the database is shared. Worth fixing separately: give the concurrency tests a second database
+connection, or mark the schema-resetting tests to run in their own process.
 
 ---
 
