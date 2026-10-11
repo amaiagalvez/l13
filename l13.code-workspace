@@ -2,13 +2,15 @@
 	"folders": [
 		{
 			"path": "../l13"
-		},
-		{
-			"path": "packages"
 		}
 	],
 	"settings": {
-		"todo-tree.ripgrep.ripgrep": "/snap/code/current/usr/share/code/resources/app/node_modules.asar.unpacked/@vscode/ripgrep-universal/bin/linux-x64/rg",
+		"git.autoRepositoryDetection": true,
+		"git.scanRepositories": [
+			"packages/basics13",
+			"packages/customers13",
+			"packages/projects13",
+		],
 		"Laravel.phpEnvironment": "docker",
 		"Laravel.phpCommand": [
 			"docker",
