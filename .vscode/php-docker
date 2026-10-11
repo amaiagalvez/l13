@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+workspace_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+app_root="$workspace_root/demo13"
+php_args=()
+
+for argument in "$@"; do
+    if [[ "$argument" == "$app_root/"* ]]; then
+        php_args+=("/app-docker/${argument#"$app_root/"}")
+    elif [[ "$argument" == "$workspace_root/packages/"* ]]; then
+        php_args+=("/packages/${argument#"$workspace_root/packages/"}")
+    elif [[ "$argument" == "$workspace_root/"* ]]; then
+        printf 'Error: el archivo no pertenece a demo13/ ni a packages/: %s\n' "$argument" >&2
+        exit 1
+    else
+        php_args+=("$argument")
+    fi
+done
+
+exec docker compose -f "$app_root/docker-compose.yml" exec -T -e XDEBUG_MODE=off laravel13 php "${php_args[@]}"
