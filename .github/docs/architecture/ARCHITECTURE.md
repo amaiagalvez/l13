@@ -18,12 +18,16 @@ deleted from a trash view.
 
 - `customers13`: customer controllers, Form Requests, policy, queries, transformers,
   Eloquent model, views, routes, migrations and customer development/edge-case seeders.
-  A customer may have many projects.
+  It works without projects or the customer/project bridge.
 - `projects13`: project and epic controllers, Form Requests, policies, queries,
-  transformers, Eloquent models, factories, views, routes and migrations. Each project
-  belongs to one customer; each epic belongs to one project. Epics have comments
+  transformers, Eloquent models, factories, views, routes and migrations. Each epic
+  belongs to one project. Projects work without customers or the bridge. Epics have comments
   (author and creation time), added from the epic edit drawer. Planning and timeline
   views and project/epic development/edge-case seeders are part of this package.
+- `customer-projects13`: the optional bridge that makes each project belong to a customer.
+  It owns the cross-domain schema, relationships, validation, queries, deletion guards
+  and UI contributions, using the base packages' extension contracts and configuration.
+- `basics13`: existing shared infrastructure, not a home for customer/project business logic.
 - The host application retains authentication, account settings, shared shell/navigation,
   user seeding and coordination of the installed packages' development seeders, and
   integration tests for the installed packages.
@@ -116,6 +120,14 @@ Blade / Livewire / Vue / Inertia:
 
 ## Important Architectural Decisions
 
+- Domain packages remain independent: `customers13` and `projects13` must not reference
+  each other or `customer-projects13`. The bridge may reference both domains; the domains
+  may use existing shared infrastructure in `basics13`.
+- These boundaries cover implicit dependencies (schema, table/route/view names, payload
+  keys, UI conditions, factories, seeders and tests), not only imports and Composer entries.
+  Base extension points must be domain-neutral and retain standalone defaults.
+  Cross-domain implementations and tests belong in the bridge or, for installed-package
+  integration tests, the host application. Existing coupling is not a precedent.
 - Keep customer and project list querying and presentation transformation separate
 	from controllers.
 - Enforce non-deleted customer-name uniqueness in both Form Request validation and the
@@ -125,8 +137,9 @@ Blade / Livewire / Vue / Inertia:
 	while allowing names belonging to soft-deleted projects to be reused. During
 	creation, if a name is in the trash, the user can choose to create a new record or
 	restore the existing one.
-- Enforce the project-to-customer relationship with a non-null foreign key and an
-	Eloquent `belongsTo` / `hasMany` relationship.
+- When the bridge is installed, it enforces the project-to-customer relationship with
+  a foreign key and dynamically registered Eloquent `belongsTo` / `hasMany` relationships;
+  neither base model declares the other domain.
 - Keep browser tests in a separate CI job because they require a browser and a test
 	database.
 

@@ -4,6 +4,16 @@ Laravel 13 · PHP 8.4 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · D
 Be concise. Create docs only if explicitly asked. Follow sibling files' structure, naming and conventions; reuse existing components. Do not add base folders or change dependencies without approval. Use descriptive names.
 No speculative architecture: no repository, DTO, interface, service or domain layer, no new abstraction and no extra indirection without a concrete need; reuse what the resources already have. Ask before any of those. Full list in `.github/docs/review-rules.md` and `ARCHITECTURE.md`.
 
+## Package boundaries (mandatory)
+- Domain packages must work independently. `customers13` and `projects13` must not depend on each other or on `customer-projects13`.
+- Customer/project coupling belongs in the existing bridge `customer-projects13`, which may reference both domain packages. Dependency direction: bridge -> domains, never domains -> bridge or domain -> domain.
+- Existing shared infrastructure in `basics13` is allowed; do not move cross-domain business logic there to bypass the bridge.
+- Dependencies include Composer entries, imports/FQCNs, container lookups, relationships, foreign keys, table queries, routes, views, assets, translations, factories, seeders and tests. Domain-specific field names, payload keys and UI conditions also create coupling, even without an import.
+- Base packages expose domain-neutral extension points and standalone defaults. Reuse their existing contracts and configuration; the bridge supplies concrete integrations, relationships, schema additions and UI. Follow `CustomerProjectsIntegration`.
+- Before changing a package, identify the owner: behavior needing both domains goes in the bridge. Preserve behavior with and without the bridge installed. Test standalone behavior in the base package and cross-domain behavior in the bridge or host integration tests.
+- Do not add another abstraction, bridge or package dependency without approval. Existing coupling is not permission to extend it; if the boundaries cannot be respected, stop and ask.
+- Before editing `packages/**`, read `.github/instructions/packages.instructions.md` and `.github/docs/architecture/ARCHITECTURE.md`.
+
 ## Commands
 The workspace root is `l13`; the Laravel application is in `projects/demo13/`, and shared packages are in `packages/`. Application paths below and in skills are relative to `projects/demo13/`; customization paths (`.github/`, `.opencode/`, `.vscode/`) are relative to the workspace root.
 Everything runs in Docker. Run the application commands below and in skills from `projects/demo13/` (`cd projects/demo13` from the workspace root). From `l13/`, use `docker compose -f projects/demo13/docker-compose.yml ...` instead. `DX` = `docker compose exec -e XDEBUG_MODE=off laravel13`.

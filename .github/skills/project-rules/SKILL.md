@@ -16,6 +16,12 @@ Laravel 13 · PHP 8.4 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · D
 - **No speculative architecture**: no repository, DTO, interface, service or domain layer, no new abstraction and no extra indirection without a concrete need; reuse what the resources already have. Ask before any of those.
 - Full list in `.github/docs/review-rules.md` and `ARCHITECTURE.md`.
 
+## Package Boundaries
+- Follow the mandatory package boundaries in [AGENTS.md](../../../AGENTS.md#package-boundaries-mandatory).
+- `customers13` and `projects13` stay independent; customer/project coupling belongs in `customer-projects13`. The bridge knows the domains, never the reverse.
+- Shared infrastructure in `basics13` is allowed, not cross-domain business logic.
+- Before editing `packages/**`, read [package instructions](../../instructions/packages.instructions.md) and [architecture](../../docs/architecture/ARCHITECTURE.md). This applies to implicit coupling in schema, payloads, UI and tests as well as imports and Composer dependencies.
+
 ## Workspace Layout
 - Workspace root: `l13/`
 - Laravel app: `projects/demo13/`
