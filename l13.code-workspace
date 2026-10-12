@@ -17,6 +17,7 @@
 			"projects/demo13",
 			"packages/basics13",
 			"packages/customers13",
+			"packages/customer-projects13",
 			"packages/projects13",
 		],
 		"Laravel.phpEnvironment": "docker",

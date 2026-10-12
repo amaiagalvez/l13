@@ -10,10 +10,9 @@ crear un nuevo archivo de configuracion y configurar la ruta register, por defec
 [] crea un plan: crear un nuevo paquete customers13 y pasar todo lo relacionado con Customer, la tabla pasa a llamarse PRO_projects, PRO_epics, PRO_epic_comments (cambiar migration, no esta en producción) todo lo que se pase al nuevo paquete quitar de demo13 y adaptar los namespaces y lo que sea necesario. este nuevo paquete dependara en DEV de basics13 para que puedan pasar los test
 
 [] composer.json require y require-dev pasar a basics los que se pueda (debugbar no)
-
-----------------------------------------------------------------------------------
-[] cladue => diseinuarena pendiente (tokenak berreskuratu arte)
-----------------------------------------------------------------------------------
+[] demo13 cómo pasar los dusk test cada uno al paquete que le corresponda 
+[] demo13 Feature y Unit test mover cada uno al paquete que corresponda, no debería de quedar ninguno aquí
+[] automatizar sentry <== claude begiratu, hor daude config file batzuk
 
 # REVIEWS
 [ ] eres un cliente muy esquisito, repasa la apliación en busca de fallos y propon todas las mejoras que se te ocurran. escribe un task en .github
