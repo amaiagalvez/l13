@@ -27,12 +27,20 @@ deleted from a trash view.
 - `customer-projects13`: the optional bridge that makes each project belong to a customer.
   It owns the cross-domain schema, relationships, validation, queries, deletion guards
   and UI contributions, using the base packages' extension contracts and configuration.
-- `basics13`: existing shared infrastructure, not a home for customer/project business logic.
+- `basics13`: existing shared infrastructure, shared form/list scripts and styles, common
+  JSON translations and browser-runner support, not customer/project business logic.
 - The host application retains authentication, account settings, shared shell/navigation,
   user seeding and coordination of the installed packages' development seeders, and
   integration tests for the installed packages.
 - Authentication and account settings: Laravel Fortify, email verification, passkeys,
   two-factor authentication, profile and password management.
+- Package behavior is tested in each package with its own Testbench fixtures. Cross-domain
+  tests, including the integrated browser flows, belong to `customer-projects13`; the host
+  only retains its authentication/settings tests and installed-package coordination checks.
+- Browser support declares Dusk in the development dependencies of `basics13` and
+  `customer-projects13`, so package analysis does not need the host's development libraries.
+- Policies accept Laravel's authentication contract. Epic comment authors, factories and
+  development seeders use `auth.providers.users.model`, not a concrete host user class.
 
 ---
 
@@ -105,6 +113,9 @@ check and the delete makes the delete wait and then fail.
 Blade / Livewire / Vue / Inertia:
 
 - Blade with Livewire and Flux components, bundled by Vite Plus and Tailwind CSS.
+- Host entry points import installed package assets through `vendor/amaia`; shared scripts
+  and CSS can also be published with `basics13-assets`, and the customer selector with
+  `customer-projects13-assets`. The host retains its branding and asset-bundling setup.
 - Laravel Dusk covers the customer CRUD end to end. Projects and epics have Dusk coverage of
   their CRUD and of the parent selector, but not of their trash, archived lists or drawer;
   those flows are covered by feature tests only.
