@@ -37,7 +37,7 @@ estrictas entre paquetes.
 ## External Dependencies
 - Boost MCP (laravel-boost): queries, schema, docs
 - Reglas: `.github/instructions/*.instructions.md` · skills: `.github/skills/`
-- Arquitectura: `.github/docs/architecture/ARCHITECTURE.md`
+- Arquitectura: `.github/docs/architecture/ARCHITECTURE.md` · manual SDD: `.github/docs/spec_sdd.md`
 
 ## OpenSpec
 Mapa de capabilities → `AGENTS.md` (sección *Spec-Driven Development*). Las specs son invariantes, no

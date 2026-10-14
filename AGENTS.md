@@ -72,9 +72,9 @@ Rules are organized as skills in `.github/skills/`. OpenCode loads them on deman
 ## Spec-Driven Development (OpenSpec)
 
 Specs = invariantes que el código, los tests y las skills ya no expresan. Cambios = proposals en
-`openspec/changes/<id>/`; `openspec/specs/` no se edita a mano. Workflow completo y formato:
-`@/openspec/AGENTS.md`. Contexto: `openspec/project.md`. Client commands: `/openspec-proposal`,
-`/openspec-apply`, `/openspec-archive`.
+`openspec/changes/<id>/`; `openspec/specs/` no se edita a mano. Contexto: `openspec/project.md`.
+Workflow completo y formato: `@/openspec/AGENTS.md`. Manual de uso: `.github/docs/spec_sdd.md`.
+Client commands: `/openspec-proposal`, `/openspec-apply`, `/openspec-archive`.
 
 Mapa (lee solo la fila que toque, no el fichero entero):
 
