@@ -1,22 +1,3 @@
-<!-- OPENSPEC:START -->
-# OpenSpec Instructions
-
-These instructions are for AI assistants working in this project.
-
-Always open `@/openspec/AGENTS.md` when the request:
-- Mentions planning or proposals (words like proposal, spec, change, plan)
-- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
-- Sounds ambiguous and you need the authoritative spec before coding
-
-Use `@/openspec/AGENTS.md` to learn:
-- How to create and apply change proposals
-- Spec format and conventions
-- Project structure and guidelines
-
-Keep this managed block so 'openspec update' can refresh the instructions.
-
-<!-- OPENSPEC:END -->
-
 # Project guidelines
 
 Laravel 13 · PHP 8.4 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · Dusk · Pint.
@@ -69,29 +50,6 @@ Rules are organized as skills in `.github/skills/`. OpenCode loads them on deman
 | Guided flows | `new-feature`, `new-resource`, `full-review`, `fix-review`, `fix-tests`, `consistency-review`, `ux-implement` | — |
 | SDD workflow | `openspec-workflow` | — |
 
-## Spec-Driven Development (OpenSpec)
-
-Specs = invariantes que el código, los tests y las skills ya no expresan. Cambios = proposals en
-`openspec/changes/<id>/`; `openspec/specs/` no se edita a mano. Contexto: `openspec/project.md`.
-Workflow completo y formato: `@/openspec/AGENTS.md`. Manual de uso: `.github/docs/spec_sdd.md`.
-Client commands: `/openspec-proposal`, `/openspec-apply`, `/openspec-archive`.
-
-Mapa (lee solo la fila que toque, no el fichero entero):
-
-| Toca | Lee |
-|------|------|
-| Modelos, casts, columnas, relaciones | `specs/basics-support`, `specs/<dominio>-domain` |
-| Controllers, requests, policies, queries | `specs/basics-crud-base`, `specs/basics-trash-archived`, `specs/<dominio>-domain` |
-| Papelera, restore, archivado, force delete | `specs/basics-trash-archived` |
-| Vistas Flux, componentes compartidos | `specs/basics-shared-views` |
-| Epics y comentarios | `specs/epics-comments` |
-| Planning y timeline (solo lectura) | `specs/planning-timeline` |
-| Relations customer↔project, imports entre paquetes | `specs/customer-projects-bridge`, `specs/package-boundaries` |
-
-Reglas: un proposal = un cambio atómico = un PR · deltas con `## ADDED|MODIFIED|REMOVED Requirements`
-y un `#### Scenario:` por requirement · bug que restaura lo especificado se arregla directo · tras
-mergear, `openspec archive <id> --yes` actualiza las specs.
-
 ## When to Load Each Skill (OpenCode)
 
 | Task | Skills to Load |
@@ -125,3 +83,44 @@ mergear, `openspec archive <id> --yes` actualiza las specs.
 - Reviewer agent sources live in `.github/agents/`. OpenCode and Claude read direct symlinks in `.opencode/agents/` and `.claude/agents/`. Skills are symlinked from `.github/skills/` to each client's native skills directory. The linked paths are read-only in VS Code; edit only the originals in `.github/`. Content changes are visible through the links immediately. Run `bash testing13/agents/link-opencode-assets.sh` and `bash testing13/agents/link-claude-assets.sh` to rebuild links after adding, deleting or renaming assets; both scripts locate the repository when run from another directory. The scripts do not adapt agent metadata or permissions between clients.
 - Guided flows (new-feature, new-resource, full-review, fix-review, fix-tests, consistency-review, ux-implement) are skills in `.github/skills/<name>/SKILL.md`, not `/commands`: activate them by skill, not with a slash command.
 - Activate the matching skill in `.github/skills` for its domain. No verification scripts/tinker when tests cover it.
+
+## Spec-Driven Development (OpenSpec)
+
+Specs = invariantes que el código, los tests y las skills ya no expresan. Cambios = proposals en
+`openspec/changes/<id>/`; `openspec/specs/` no se edita a mano. Contexto: `openspec/project.md`.
+Workflow completo y formato: `@/openspec/AGENTS.md`. Manual de uso: `.github/docs/spec_sdd.md`.
+Client commands: `/openspec-proposal`, `/openspec-apply`, `/openspec-archive`.
+
+Mapa (lee solo la fila que toque, no el fichero entero):
+
+| Toca | Lee |
+|------|------|
+| Modelos, casts, columnas, relaciones | `specs/basics-support`, `specs/<dominio>-domain` |
+| Controllers, requests, policies, queries | `specs/basics-crud-base`, `specs/basics-trash-archived`, `specs/<dominio>-domain` |
+| Papelera, restore, archivado, force delete | `specs/basics-trash-archived` |
+| Vistas Flux, componentes compartidos | `specs/basics-shared-views` |
+| Epics y comentarios | `specs/epics-comments` |
+| Planning y timeline (solo lectura) | `specs/planning-timeline` |
+| Relations customer↔project, imports entre paquetes | `specs/customer-projects-bridge`, `specs/package-boundaries` |
+
+Reglas: un proposal = un cambio atómico = un PR · deltas con `## ADDED|MODIFIED|REMOVED Requirements`
+y un `#### Scenario:` por requirement · bug que restaura lo especificado se arregla directo · tras
+mergear, `openspec archive <id> --yes` actualiza las specs.
+
+<!-- OPENSPEC:START -->
+# OpenSpec Instructions
+
+These instructions are for AI assistants working in this project.
+
+Always open `@/openspec/AGENTS.md` when the request:
+- Mentions planning or proposals (words like proposal, spec, change, plan)
+- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
+- Sounds ambiguous and you need the authoritative spec before coding
+
+Use `@/openspec/AGENTS.md` to learn:
+- How to create and apply change proposals
+- Spec format and conventions
+- Project structure and guidelines
+
+Keep this managed block so 'openspec update' can refresh the instructions.
+<!-- OPENSPEC:END -->

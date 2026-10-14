@@ -39,11 +39,29 @@ Or check `package.json`. Use APIs of the installed major version.
 - Parallel locally (never in CI — shared DB): `DX php artisan test --parallel --compact <path>` (flags before path)
 - Rerun after each fix
 
-### Architecture Tests (run before calling a change done)
+### Guard Rails (run before calling a change done)
+`php artisan test` from the app only covers the app (auth, settings, dashboard, users). The
+resources live in packages and are guarded by their own suites, run from the **workspace root**:
+
 ```bash
-DX php artisan test --compact tests/Unit/ArchitectureTest tests/Unit/ValidationCoverageTest tests/Unit/ModelSchemaParityTest tests/Unit/ResourceUniformityTest
+bash testing13/phpunit.sh projects13              # per-resource set + thin controllers
+bash testing13/phpunit.sh customer-projects13      # validated input, schema parity, uniformity
 ```
-They guard: per-resource set, validated input, model↔schema parity, cross-resource uniformity.
+
+Narrow run inside a package (mount the packages dir at `/packages`, the package at `/app-docker`):
+```bash
+docker run --rm --entrypoint "" -u "$(id -u):$(id -g)" -e XDEBUG_MODE=off -e HOME=/tmp \
+  -v "$PWD/../../packages":/packages -v "$PWD":/app-docker -w /app-docker \
+  "webdevops/php-apache-dev:8.4" \
+  bash -c "XDEBUG_MODE=off vendor/bin/phpunit --testsuite Unit --filter ValidationCoverageTest"
+```
+
+What each guard rail enforces:
+- `projects13/tests/Unit/ArchitectureTest` — per-resource set, thin controllers, FormRequest on every input endpoint.
+- `customer-projects13/tests/Unit/ValidationCoverageTest` — every `#[Fillable]` and every literal input has a FormRequest rule.
+- `customer-projects13/tests/Feature/ModelSchemaParityTest` — model and schema do not drift.
+- `customer-projects13/tests/Feature/ResourceUniformityTest` — customers/projects/epics do not drift from each other.
+- `customers13|projects13/tests/Unit/PackageIsolationTest` — no dependency on the other domain package.
 
 ### CI Coverage
 - CI enforces ≥80% total code coverage, uploads Clover report

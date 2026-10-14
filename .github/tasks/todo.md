@@ -6,16 +6,11 @@ crear un nuevo archivo de configuracion y configurar la ruta register, por defec
     1. si el formulario se abre en modo create, en el select o select2 solo se mostrarán los que tengan active=1
     2. si el formulario se abre en modo edición, en el select o select2 se mostraran el elemento sseleccionado (tenga o no active=1) y el resto de elementos seran solo los que tengan acitive=1 
 [] cachear listados select public function selectOptions y Observer para limpiar la cache ante cualquier modificación en el original
-
-[] crea un plan: crear un nuevo paquete customers13 y pasar todo lo relacionado con Customer, la tabla pasa a llamarse PRO_projects, PRO_epics, PRO_epic_comments (cambiar migration, no esta en producción) todo lo que se pase al nuevo paquete quitar de demo13 y adaptar los namespaces y lo que sea necesario. este nuevo paquete dependara en DEV de basics13 para que puedan pasar los test
-
 [] composer.json require y require-dev pasar a basics los que se pueda (debugbar no)
-[] demo13 cómo pasar los dusk test cada uno al paquete que le corresponda 
-[] demo13 Feature y Unit test mover cada uno al paquete que corresponda, no debería de quedar ninguno aquí
 [] automatizar sentry <== claude begiratu, hor daude config file batzuk
 
 # REVIEWS
-[ ] eres un cliente muy esquisito, repasa la apliación en busca de fallos y propon todas las mejoras que se te ocurran. escribe un task en .github
+[ ] repasa la apliación en busca de fallos y propon todas las mejoras que se te ocurran. escribe un task en .github
 [ ] @full-review analiza demo13 basics13 customer13 projects13 y testing13 busca incongruencias entre los modelos, que tienen de diferente, que se gestiona de forma diferente en un modelo que en otro, que está testeado en uno si y en otro no, que código tienen repetido, donde hay sobreingenieria. escribe un task en .github 
 [ ] skill fix-review .github/reviews/<fecha>/CODE-REVIEW.md antes de modificar pide confirmación y al terminar marca la tarea como realizada
 [ ] @full-review  eres una experta en laravel, testing, seguridad y buenas practicas de programación. analiza demo13 basics13 customer13 y projects13 busca incongruencias entre los modelos, que tienen de diferente, que se gestiona de forma diferente en un modelo que en otro, que está testeado en uno si y en otro no, que código tienen repetido, donde hay sobreingenieria. 

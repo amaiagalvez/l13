@@ -1,15 +1,13 @@
 ---
 name: zone-rules-tests
-description: "Test rules: prefer Feature tests, Dusk only for JS behavior, duplicate-insert races, Dusk against laravel_test with non-English locale. Load when editing tests/**."
+description: "Pointer to the test zone rules (prefer Feature tests, Dusk only for JS behavior, duplicate-insert races, Dusk against laravel_test with non-English locale). Load when editing tests/**."
 ---
 
 # Zone Rules: Tests
 
-## General
-- Prefer Feature tests; Dusk (`tests/Browser`) only for JS behavior.
-- Duplicate-insert races are tested per resource for store, update and restore by simulating a duplicate-key `QueryException`.
-- Dusk runs against `laravel_test` with a non-English default locale, so assert on translated text.
-- Run Dusk as: `docker compose exec -e XDEBUG_MODE=off laravel13-dusk php artisan dusk [tests/Browser/...php]`, never in the default service: only that one gives the runner and the browser server the same `laravel_test` database and its own config cache.
+Two files own this zone. Read them in this order; this skill holds no rules of its own, so it cannot drift from them.
 
-## Test Location Rules
-See `test-rules` skill for the full decision table and checklist.
+1. **`.github/instructions/tests.instructions.md`** — the always-on rules for this zone. Copilot injects it automatically by `applyTo`.
+2. **`.github/skills/test-rules/SKILL.md`** — the full decision table for test location and the writing checklist.
+
+Package suites run in their own PHPUnit (sqlite in memory), not through `php artisan test`: see the `docker-commands` skill.

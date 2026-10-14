@@ -75,6 +75,36 @@
       "effect": "deny"
     }
   ],
+  // Agente para la revisión nocturna desatendida (testing13/nightlyReview.sh).
+  // Solo escribe el informe: los deny se aplican siempre, también con `opencode run --auto`.
+  "agents": {
+    "nightly-review": {
+      "mode": "primary",
+      "description": "Ejecuta la skill full-review completa sin intervención y guarda el informe en .github/reviews/YYYY-MM-DD/.",
+      "permissions": [
+        {
+          "action": "edit",
+          "resource": ".github/reviews/**",
+          "effect": "allow"
+        },
+        {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        },
+        {
+          "action": "subagent",
+          "resource": "*",
+          "effect": "allow"
+        },
+        {
+          "action": "shell",
+          "resource": "git push*",
+          "effect": "deny"
+        }
+      ]
+    }
+  },
   // Pint es el único formateador de PHP; un formateador externo pelea con él y con los
   // @phpstan-ignore de las vistas. Se deja apagado a propósito.
   "formatter": false,
