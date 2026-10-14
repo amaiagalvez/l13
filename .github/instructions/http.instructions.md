@@ -12,3 +12,5 @@ applyTo: "**/app/Http/**,**/app/Policies/**,**/app/Queries/**,**/app/Transformer
 - Form Requests authorize through the resource policy. Policies currently allow every verified user; this is documented in ARCHITECTURE.md, do not add roles unasked.
 - List querying lives in `app/Queries`, row shaping in `app/Transformers`; keep controllers thin.
 - A `max` rule never carries a literal number: it reads `config('validation.max_length.string')` for a varchar-backed field or `config('validation.max_length.longtext')` for a `longText` one. `ValidationCoverageTest::test_string_length_limits_come_from_the_config` fails on a literal or on a key that does not resolve.
+
+> Invariantes de esta zona: `openspec/specs/basics-crud-base/spec.md`, `openspec/specs/basics-trash-archived/spec.md`, `openspec/specs/customers-domain/spec.md`, `openspec/specs/projects-domain/spec.md`.

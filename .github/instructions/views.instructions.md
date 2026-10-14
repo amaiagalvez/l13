@@ -11,3 +11,5 @@ applyTo: "**/resources/views/**,**/lang/**,**/resources/lang/**,**/resources/js/
 - Nothing destructive without an undo or a proper confirmation.
 - Any new user-facing string goes in `lang/*.json` for all 4 locales (same key and `:placeholders`), in sentence case; a unit test checks parity. Default locale is `eu`.
 - A `maxlength` attribute never carries a literal number either: it renders `config('validation.max_length.string')` or `config('validation.max_length.longtext')`, the same value the FormRequest validates, so the browser cannot stop the input the server would accept.
+
+> Invariantes de esta zona: `openspec/specs/basics-shared-views/spec.md`, `openspec/specs/customers-domain/spec.md`, `openspec/specs/projects-domain/spec.md`, `openspec/specs/customer-projects-bridge/spec.md`.

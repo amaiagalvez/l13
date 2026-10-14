@@ -1,3 +1,22 @@
+<!-- OPENSPEC:START -->
+# OpenSpec Instructions
+
+These instructions are for AI assistants working in this project.
+
+Always open `@/openspec/AGENTS.md` when the request:
+- Mentions planning or proposals (words like proposal, spec, change, plan)
+- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
+- Sounds ambiguous and you need the authoritative spec before coding
+
+Use `@/openspec/AGENTS.md` to learn:
+- How to create and apply change proposals
+- Spec format and conventions
+- Project structure and guidelines
+
+Keep this managed block so 'openspec update' can refresh the instructions.
+
+<!-- OPENSPEC:END -->
+
 # Project guidelines
 
 Laravel 13 · PHP 8.4 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · Dusk · Pint.
@@ -48,6 +67,30 @@ Rules are organized as skills in `.github/skills/`. OpenCode loads them on deman
 | Testing best practices | `testing-best-practices` | — |
 | Livewire, Flux UI, Tailwind, UX | `livewire-development`, `fluxui-development`, `tailwindcss-development`, `ux-design` | — |
 | Guided flows | `new-feature`, `new-resource`, `full-review`, `fix-review`, `fix-tests`, `consistency-review`, `ux-implement` | — |
+| SDD workflow | `openspec-workflow` | — |
+
+## Spec-Driven Development (OpenSpec)
+
+Specs = invariantes que el código, los tests y las skills ya no expresan. Cambios = proposals en
+`openspec/changes/<id>/`; `openspec/specs/` no se edita a mano. Workflow completo y formato:
+`@/openspec/AGENTS.md`. Contexto: `openspec/project.md`. Client commands: `/openspec-proposal`,
+`/openspec-apply`, `/openspec-archive`.
+
+Mapa (lee solo la fila que toque, no el fichero entero):
+
+| Toca | Lee |
+|------|------|
+| Modelos, casts, columnas, relaciones | `specs/basics-support`, `specs/<dominio>-domain` |
+| Controllers, requests, policies, queries | `specs/basics-crud-base`, `specs/basics-trash-archived`, `specs/<dominio>-domain` |
+| Papelera, restore, archivado, force delete | `specs/basics-trash-archived` |
+| Vistas Flux, componentes compartidos | `specs/basics-shared-views` |
+| Epics y comentarios | `specs/epics-comments` |
+| Planning y timeline (solo lectura) | `specs/planning-timeline` |
+| Relations customer↔project, imports entre paquetes | `specs/customer-projects-bridge`, `specs/package-boundaries` |
+
+Reglas: un proposal = un cambio atómico = un PR · deltas con `## ADDED|MODIFIED|REMOVED Requirements`
+y un `#### Scenario:` por requirement · bug que restaura lo especificado se arregla directo · tras
+mergear, `openspec archive <id> --yes` actualiza las specs.
 
 ## When to Load Each Skill (OpenCode)
 
@@ -63,6 +106,7 @@ Rules are organized as skills in `.github/skills/`. OpenCode loads them on deman
 | Edit `tests/**` | `zone-rules-tests` |
 | New CRUD resource | `new-resource` + `laravel-best-practices` |
 | New feature (action, filter, column, email) | `new-feature` + `laravel-best-practices` |
+| SDD: create / apply / archive a proposal | `openspec-workflow` |
 | Full code review | `full-review` |
 | Fix review findings | `fix-review` |
 | Fix failing tests | `fix-tests` |

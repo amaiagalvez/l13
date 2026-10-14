@@ -15,3 +15,5 @@ Follow [AGENTS.md](../../AGENTS.md#package-boundaries-mandatory) and read
 - Do not disguise dependencies as strings, container lookups, table names, route/view names, domain-specific payload keys or UI conditions. The rule also covers assets, translations, factories, seeders and tests, not only PHP imports or Composer entries.
 - Keep standalone tests in the base packages; put cross-domain tests in the bridge or host integration suite. Preserve behavior when the bridge is absent.
 - If an extension point is insufficient, ask before adding an abstraction or dependency. Do not copy existing coupling as a precedent.
+
+> Invariantes de esta zona: `openspec/specs/package-boundaries/spec.md`.
