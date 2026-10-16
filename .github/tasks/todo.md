@@ -1,7 +1,11 @@
-[] crear el CRUD de usuarios
+[] user demo13-tik basics-era pasa
+[] command bat eguneratzeko laravel13-tik basics13-ra
+[] crear el CRUD de usuarios en basics13
 crear un nuevo archivo de configuracion y configurar la ruta register, por defecto sera false y entonces no se podran registrar nuevos usuarios desde fuera
-[] añadir datatables
 [] gestion de roles y permisos
+[] en el full-review añadir el repasar la configuracion de agentes, skills, openspec en busca de duplicados, incongruencias con el código y cómo evitar que se consuman demasiados tokens
+[] crear estructura de la base de datos y en full-review añadir que se mantenga actualizada
+[] añadir datatables
 [x] en los select hay dos opciones: 
     1. si el formulario se abre en modo create, en el select o select2 solo se mostrarán los que tengan active=1
     2. si el formulario se abre en modo edición, en el select o select2 se mostraran el elemento sseleccionado (tenga o no active=1) y el resto de elementos seran solo los que tengan acitive=1 

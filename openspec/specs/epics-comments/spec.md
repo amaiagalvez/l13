@@ -43,3 +43,18 @@ quedar huérfano si su autor desaparece.
 #### Scenario: Un comentario falló la validación
 - **WHEN** el cuerpo de un comentario es inválido
 - **THEN** el error aparece junto al comentario, no junto a los campos del epic
+
+### Requirement: El comentario es un "Half-Resource" sin ciclo de vida independiente
+Un comentario NO es un recurso completo: NO usa soft deletes, NO tiene flag `active` ni archivo/restauración, NO tiene list query propia ni select options, y NO tiene rutas de lista/creación/edición/eliminación independientes. Existe SOLO como agregado del epic a través de `Epic::comments()` y se gestiona via `EpicCommentController::store()` y `EpicCommentController::show()` (para carga reciente en el epic). Su policy (`EpicCommentPolicy`) permite todas las acciones por consistencia, pero la autorización real se delega al epic (`$user->can('comment', $epic)` en `EpicCommentRequest`).
+
+#### Scenario: El comentario no tiene papelera ni archivo
+- **WHEN** se consulta la tabla `PRO_epic_comments`
+- **THEN** no existe columna `deleted_at` ni `active`, y no hay controladores `EpicCommentTrashController` ni `EpicCommentInactiveController`
+
+#### Scenario: El comentario no aparece en listados ni selects globales
+- **WHEN** se buscan list queries o select options para comentarios
+- **THEN** no existe `EpicCommentListQuery` ni `EpicCommentSelectOptionsQuery`; los comentarios solo se cargan via `Epic::comments()->with('user')->latest()->limit(...)`
+
+#### Scenario: La policy existe pero la autorización real está en el epic
+- **WHEN** se evalúa `EpicCommentPolicy::create()`
+- **THEN** retorna `true`, pero `EpicCommentRequest::authorize()` verifica `$user->can('comment', $epic)` que sí aplica reglas de negocio
