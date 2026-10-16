@@ -58,3 +58,15 @@ Un comentario NO es un recurso completo: NO usa soft deletes, NO tiene flag `act
 #### Scenario: La policy existe pero la autorización real está en el epic
 - **WHEN** se evalúa `EpicCommentPolicy::create()`
 - **THEN** retorna `true`, pero `EpicCommentRequest::authorize()` verifica `$user->can('comment', $epic)` que sí aplica reglas de negocio
+
+### Requirement: El comentario se mantiene como modelo independiente (decisión de no fusionar)
+Se evaluó fusionar `EpicComment` en `Epic` como value object o relación embebida, y la decisión es NO
+hacerlo. El comentario conserva su modelo Eloquent, su tabla `PRO_epic_comments`, su factory y su
+controller dedicado: el modelo es la implementación del agregado, no un recurso completo, y las
+propiedades del patrón "Half-Resource" anteriores ya cubren la ausencia de ciclo de vida propio.
+Cualquier refactor en esta dirección sería un cambio breaking que requeriría confirmación del
+dominio y una propuesta en `openspec/changes/`.
+
+#### Scenario: El comentario sigue siendo una tabla y un modelo propios
+- **WHEN** se inspecciona el paquete `projects13`
+- **THEN** existen `EpicComment`, `PRO_epic_comments`, `EpicCommentFactory`, `EpicCommentRequest` y `EpicCommentController` como implementación del agregado de comentarios del epic
