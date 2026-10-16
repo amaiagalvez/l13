@@ -40,7 +40,8 @@ Customers → Projects → Epics (+ epic comments).
 Per resource, inside its owning package (`X` = resource name):
 - `src/Models/X.php`, `src/Policies/XPolicy.php`, `src/Http/Requests/{XRequest,XListRequest,XRestoreRequest}`
 - `src/Http/Controllers/{XController,XTrashController,XArchivedController}` (archived extends `Basics13\Http\Controllers\ArchivedController`)
-- `src/Queries/Xs/XListQuery.php`, `src/Transformers/XListTransformer.php`, `src/Database/Factories/XFactory.php`
+- `src/Queries/Xs/XListQuery.php`, `src/Transformers/XListTransformer.php`,
+  `database/factories/XFactory.php`, `database/migrations/`, `database/seeders/`
 - Views: `resources/views/xs/{list,form}.blade.php`; shared parts come from `<x-list.*>` / `<x-forms.*>` in `basics13`
 - Duplicate-name races: `Basics13\Support\Database\UniqueConstraintViolation`
 - i18n: `resources/lang/*.json`, 4 locales (en/es/eu/fr), parity checked by a test

@@ -12,7 +12,7 @@ Resource: $ARGUMENTS (ask if empty). Build the full CRUD set mirroring `Customer
 2. **Pick the owning package first.** A new resource belongs to a domain package (`customers13`, `projects13`) or to the `customer-projects13` bridge when it spans both. Everything below happens there, under that package's PSR-4 root (`Customers13\`, `Projects13\`, `CustomerProjects13\` → `src/`) — never under `projects/demo13/app`.
 3. TDD first: write failing tests mirroring `customers13/tests/{Feature/Customers,Unit/Validation}` and the bridge's shared `customer-projects13/tests/Feature/{ResourceAccessTest,ResourceWriteAccessTest,ResourceActivationTest}.php`. Run them narrowest-first inside the package.
 4. Generate the complete set (paths relative to the owning package):
-   - `database/migrations/*_create_x_table.php` (unique-among-active index, FKs) + `src/Database/Factories/XFactory.php` with the existing states (`trashed()`, `archived()`)
+   - `database/migrations/*_create_x_table.php` (unique-among-active index, FKs) + `database/factories/XFactory.php` with the existing states (`trashed()`, `archived()`)
    - `src/Models/X.php`: `#[Fillable]`, `#[UsePolicy]`, `casts()`, typed relationships, soft deletes
    - `src/Http/Requests/{XRequest,XListRequest,XRestoreRequest}` (rules + `authorize()` via policy), `src/Policies/XPolicy.php`
    - `src/Http/Controllers/{XController,XTrashController,XArchivedController}` (the archived one extends `Basics13\Http\Controllers\ArchivedController`), `src/Queries/Xs/XListQuery.php`, `src/Transformers/XListTransformer.php`

@@ -27,16 +27,20 @@ deleted from a trash view.
 - `customer-projects13`: the optional bridge that makes each project belong to a customer.
   It owns the cross-domain schema, relationships, validation, queries, deletion guards
   and UI contributions, using the base packages' extension contracts and configuration.
-- `basics13`: existing shared infrastructure, shared form/list scripts and styles, common
-  JSON translations and browser-runner support, not customer/project business logic.
-- The host application retains authentication, account settings, shared shell/navigation,
-  user seeding and coordination of the installed packages' development seeders, and
-  integration tests for the installed packages.
-- Authentication and account settings: Laravel Fortify, email verification, passkeys,
-  two-factor authentication, profile and password management.
+- `basics13`: shared infrastructure, shared form/list scripts and styles, common JSON
+  translations, browser-runner support, and reusable Fortify authentication/account
+  settings. Its default user model, auth flows, migrations, factory and seeder are
+  configurable by the host and contain no customer/project business logic.
+- The host application retains its authentication configuration and middleware wiring,
+  shared shell/navigation, dashboard, asset bundling and coordination of the installed
+  packages' development seeders, plus integration tests for the installed packages.
+- Authentication and account settings are provided by `basics13`: Laravel Fortify, email
+  verification, passkeys, two-factor authentication, profile and password management.
+  Hosts configure `auth.providers.users.model` to select the default package model or
+  their own authenticatable Eloquent model.
 - Package behavior is tested in each package with its own Testbench fixtures. Cross-domain
   tests, including the integrated browser flows, belong to `customer-projects13`; the host
-  only retains its authentication/settings tests and installed-package coordination checks.
+  retains authentication/settings integration tests and installed-package coordination checks.
 - Browser support declares Dusk in the development dependencies of `basics13` and
   `customer-projects13`, so package analysis does not need the host's development libraries.
 - Policies accept Laravel's authentication contract. Epic comment authors, factories and
