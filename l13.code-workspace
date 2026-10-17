@@ -11,6 +11,17 @@
 			"**/.opencode/agents/**": true,
 			"**/.opencode/skills/**": true
 		},
+		"files.exclude": {
+			"**/projects/packages": true
+		},
+		"search.exclude": {
+			"**/projects/packages": true,
+			"**/vendor": true,
+			"**/storage": true,
+			"**/coverage": true,
+			"**/dc-data": true,
+			"**/.git": true
+		},
 		"git.autoRepositoryDetection": true,
 		"git.scanRepositories": [
 			"testing13",
