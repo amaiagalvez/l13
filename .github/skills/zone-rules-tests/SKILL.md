@@ -1,6 +1,6 @@
 ---
 name: zone-rules-tests
-description: "Pointer to the test zone rules (prefer Feature tests, Dusk only for JS behavior, duplicate-insert races, Dusk against laravel_test with non-English locale). Load when editing tests/**."
+description: "Pointer to the test zone rules (prefer Feature tests, Dusk only for JS behavior, duplicate-insert races, Dusk against laravel_dusk with non-English locale). Load when editing tests/**."
 ---
 
 # Zone Rules: Tests
