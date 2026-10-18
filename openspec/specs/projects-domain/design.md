@@ -5,7 +5,7 @@
 ### 1. `entity_id` es nullable en el esquema y obligatorio en la aplicación
 
 - `zone-rules-models` dice que `projects.entity_id` es una FK `NOT NULL` con `restrictOnDelete`.
-- La migración del bridge la crea `nullable()->constrained('CUM_entities')->restrictOnDelete()`.
+- La migración del bridge la crea `nullable()->constrained('ENT_entities')->restrictOnDelete()`.
 
 El motivo está escrito en `packages/entity-projects13/config/entity-projects13.php` y es doble: la
 tabla ya tenía filas cuando el bridge se instaló (y SQLite no admite añadir una columna `NOT NULL` a

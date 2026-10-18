@@ -1,5 +1,5 @@
 ## 1. Database & Model
-- [ ] 1.1 Create migration `create_cum_entity_types_table.php` with fields: id, name_eu, name_es, name_fr, name_en, notes, active, timestamps, softDeletes, audit columns (created_by, updated_by, deleted_by)
+- [ ] 1.1 Create migration `create_ent_entity_types_table.php` with fields: id, name_eu, name_es, name_fr, name_en, notes, active, timestamps, softDeletes, audit columns (created_by, updated_by, deleted_by)
 - [ ] 1.2 Add composite partial unique indexes for each language: unique on (name_eu) where deleted_at is null, same for name_es, name_fr, name_en
 - [ ] 1.3 Create `EntityType` model with Fillable, UsePolicy, UseFactory attributes, HasFactory, SoftDeletes, TracksAuditColumns, TransactionalDelete traits
 - [ ] 1.4 Add casts for active (boolean) and dates
