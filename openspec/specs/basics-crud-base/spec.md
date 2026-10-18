@@ -15,14 +15,6 @@ delegar en el Form Request y reportar el resultado.
 - **WHEN** un endpoint tiene que acotar un conjunto de registros
 - **THEN** el criterio va en la clase de query, no en el controller
 
-### Requirement: Toda entrada validada pasa por un Form Request
-Cada endpoint con payload MUST declarar un Form Request que autorice por la policy del recurso y
-declare sus reglas. El controller MUST NOT validar entrada ni repetir lo que el request ya hace.
-
-#### Scenario: Se añade un campo a un formulario
-- **WHEN** un campo nuevo entra en un formulario de recurso
-- **THEN** su regla, su etiqueta y su autorización viven en el request del recurso
-
 ### Requirement: La unicidad de nombre se declara en dos capas
 La unicidad del nombre entre los no eliminados MUST estar en las reglas del request, para el error en
 el campo correcto, y MUST estar respaldada por un índice, para que la validación no sea la única

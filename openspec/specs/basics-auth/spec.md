@@ -5,6 +5,7 @@ Define el stack de autenticación y gestión de cuenta reutilizable que ofrece `
 trasladar responsabilidades específicas del host.
 
 ## Requirements
+
 ### Requirement: El paquete base proporciona autenticación reutilizable
 `basics13` MUST proporcionar el stack reutilizable de autenticación y gestión de cuenta, incluyendo
 la integración Fortify, sus páginas, settings, middleware, migraciones y traducciones. El host MUST
@@ -32,20 +33,6 @@ creación de usuarios de Fortify.
 - **WHEN** el host configura otro modelo compatible con Fortify en `auth.providers.users.model`
 - **THEN** las acciones y los flujos de autenticación usan ese modelo sin requerir `App\Models\User`
 
-### Requirement: El paquete configura las funciones de autenticación
-Las funciones `registration`, `email_verification`, `two_factor_authentication`, `passkeys` y
-`password_confirmation` MUST poder configurarse como booleanos en
-`basics13.auth.features`. Todas MUST estar habilitadas por defecto para conservar el comportamiento
-actual de `demo13`.
-
-#### Scenario: Una función está deshabilitada
-- **WHEN** el host deshabilita una función en `basics13.auth.features`
-- **THEN** el paquete no expone el flujo de usuario correspondiente
-
-#### Scenario: Una función está habilitada
-- **WHEN** el host habilita una función en `basics13.auth.features`
-- **THEN** el paquete registra el flujo existente de esa función y respeta las opciones propias de Fortify
-
 ### Requirement: Las migraciones de autenticación preservan las instalaciones
 El paquete MUST proporcionar el esquema de usuarios, 2FA y passkeys, conservando los nombres base
 históricos de sus migraciones. Su integración MUST permitir que una instalación existente adopte el
@@ -54,15 +41,3 @@ paquete sin perder datos ni volver a ejecutar destructivamente migraciones ya ap
 #### Scenario: Una instalación existente adopta el paquete
 - **WHEN** el host integra `basics13` después de haber creado sus tablas de autenticación
 - **THEN** los datos existentes se conservan y Laravel omite las migraciones cuyos nombres ya están registrados
-
-### Requirement: Las vistas y rutas de cuenta son extensibles por el host
-El paquete MUST registrar las vistas Livewire y las rutas de settings de cuenta trasladadas, y MUST
-permitir publicar sobrescrituras de las vistas.
-
-#### Scenario: El host personaliza una vista
-- **WHEN** el host publica una sobrescritura de una vista provista por el paquete
-- **THEN** la aplicación usa la vista sobrescrita sin modificar el paquete
-
-#### Scenario: El host carga las rutas de settings
-- **WHEN** se registra el proveedor de `basics13`
-- **THEN** las rutas de cuenta trasladadas están disponibles y las rutas del shell y dashboard siguen en el host
