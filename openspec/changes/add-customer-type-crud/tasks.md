@@ -16,7 +16,7 @@
 - [ ] 4.2 Create `CustomerTypeDestroyRequest` for delete authorization
 - [ ] 4.3 Create `CustomerTypeRestoreRequest` for restore authorization with name conflict handling
 - [ ] 4.4 Create `CustomerTypeListRequest` for list filters
-- [ ] 4.5 Create `CustomerTypeSelectOptionsRequest` for select options
+- [x] 4.5 Create `CustomerTypeSelectOptionsRequest` for select options
 
 ## 5. Queries
 - [ ] 5.1 Create `CustomerTypeListQuery` extending ListQueryBase with active/archived/trashed scopes and stateCounts
@@ -38,6 +38,7 @@
 - [ ] 9.1 Create `resources/views/customer-types/list.blade.php` with Flux table, language selector tabs (eu/es/fr/en), status badges, action buttons
 - [ ] 9.2 Create `resources/views/customer-types/form.blade.php` with 4 language inputs, notes textarea, Flux field components
 - [ ] 9.3 Create shared list components if needed (reusing existing components from basics-shared-views)
+- [x] 9.4 Add Customer Types menu item to sidebar navigation (projects/demo13/resources/views/layouts/app/sidebar.blade.php)
 
 ## 10. Language Files (i18n)
 - [ ] 10.1 Create lang/eu/validation.php, messages.php, actions.php
