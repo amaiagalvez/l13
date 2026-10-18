@@ -1,7 +1,6 @@
 [] user demo13-tik basics-era pasa
 [] command bat eguneratzeko laravel13-tik basics13-ra
-[] crear el CRUD de usuarios en basics13
-crear un nuevo archivo de configuracion y configurar la ruta register, por defecto sera false y entonces no se podran registrar nuevos usuarios desde fuera
+[] crear un nuevo archivo de configuracion y configurar la ruta register, por defecto sera false y entonces no se podran registrar nuevos usuarios desde fuera
 [] gestion de roles y permisos
 [] crear estructura de la base de datos y en full-review añadir que se mantenga actualizada
 [] añadir datatables

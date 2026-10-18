@@ -7,7 +7,7 @@ estrictas entre paquetes.
 
 ## Tech Stack
 - Laravel 13, PHP 8.4, Livewire 4, Flux (free), Tailwind 4
-- PHPUnit 12, Dusk 8, Pint, Larastan/PHPStan nivel 9
+- PHPUnit 12, Dusk 8, Pint, Larastan/PHPStan nivel 7
 - Todo en Docker: `DX` = `docker compose exec -e XDEBUG_MODE=off laravel13` (desde `projects/demo13`)
 
 ## Project Conventions
