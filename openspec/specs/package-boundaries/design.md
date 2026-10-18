@@ -4,11 +4,11 @@
 
 | Paquete | Contiene | Domain-neutral |
 |---------|----------|----------------|
-| `basics13` | `Controller`, `TrashController`, `ArchivedController`, `RestoreRequest`, `TrashDestroyRequest`, `TrashRecordRequest`, `SearchableListRequest`, `SearchableSelectOptionsRequest`, `ListQueryBase`, `ListTransformer`, `TracksAuditColumns`, `TransactionalDelete`, `HasStates`, `UniqueConstraintViolation` + helpers, `FieldHints`, `MaxLength`, `DuskTestCase`, `ValidatesFormRequests`, componentes `list/` y `forms/`, `config/basics13.php` | sí |
+| `basics13` | `User` (modelo de cuenta, sustituible por el host vía `auth.providers.users.model`), `Controller`, `TrashController`, `ArchivedController`, `RestoreRequest`, `TrashDestroyRequest`, `TrashRecordRequest`, `SearchableListRequest`, `SearchableSelectOptionsRequest`, `ListQueryBase`, `ListTransformer`, `TracksAuditColumns`, `TransactionalDelete`, `HasStates`, `UniqueConstraintViolation` + helpers, `FieldHints`, `MaxLength`, `DuskTestCase`, `ValidatesFormRequests`, componentes `list/` y `forms/`, `config/basics13.php` | sí |
 | `customers13` | `Customer`, `CustomerPolicy`, `CustomerController`, `CustomerTrashController`, `CustomerArchivedController`, sus requests, `CustomerListQuery`, `CustomerSelectOptionsQuery`, `CustomerListTransformer`, vista `customers/{list,form}`, rutas, migraciones, `lang/` | sí (contrato `CustomerIntegration`) |
 | `projects13` | `Project`, `Epic`, `EpicComment`, sus policies, controllers, requests, queries de `Projects/`, `Epics/`, `Planning/`, `Timeline/`, transformers, vistas de proyectos/epics/planning/timeline, rutas, migraciones, `lang/` | sí (contratos `ProjectDisplay/Query/ValidationIntegration`) |
 | `customer-projects13` | `CustomerProjectsIntegration`, `CustomerCountsIntegration`, `ServiceProvider`, 2 migraciones, partials de `customers/`, `projects/`, `epics/`, `lang/` JSON, assets | — |
-| `projects/demo13` | Auth (Fortify), `User`, settings, shell, middleware de usuario activo, seeders coordinadores | fuera del sistema de paquetes |
+| `projects/demo13` | Auth (Fortify), settings, shell, middleware de usuario activo, seeders coordinadores | fuera del sistema de paquetes |
 
 ## Dónde vive cada invariante de frontera
 
