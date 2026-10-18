@@ -39,6 +39,12 @@ Or check `package.json`. Use APIs of the installed major version.
 - Parallel locally (never in CI — shared DB): `DX php artisan test --parallel --compact <path>` (flags before path)
 - Rerun after each fix
 
+### Authenticated browser checks
+- If a local browser check redirects to login, inspect
+  `packages/basics13/database/seeders/UserSeeder.php` for the development user's credentials.
+  `BasicsDevelopSeeder` calls this seeder. Use that account to inspect authenticated screens
+  instead of treating the redirect as an access problem.
+
 ### Guard Rails (run before calling a change done)
 `php artisan test` from the app only covers the app (auth, settings, dashboard, users). The
 resources live in packages and are guarded by their own suites, run from the **workspace root**:

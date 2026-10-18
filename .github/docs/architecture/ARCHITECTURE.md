@@ -79,10 +79,11 @@ only archived, non-deleted records and append the last modification date. Trash 
 include every deleted record regardless of `active`; restoring preserves that flag.
 Deactivation does not cascade to children. Index rows offer deactivation instead of
 deletion when a customer has projects or a project has epics, including deleted children.
-Parent selectors show only active customers when creating or changing a project and
-only active projects when creating or changing an epic. In edit mode, the current
-parent remains selected even if it has since become archived; other archived parents
-are not offered.
+Database-backed form selectors (select, select2, checkbox and radio) show only active,
+non-deleted records when creating. When editing, they also retain the selected
+non-deleted record even if it is archived; other archived records are not offered.
+This applies to customer types on customers, customers on projects, and projects on
+epics.
 The `active` flag is never mass assignable on users or resources. Resource activation
 changes only through the dedicated deactivate/reactivate actions, not through create,
 update, or other request payloads.
