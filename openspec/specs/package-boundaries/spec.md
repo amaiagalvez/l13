@@ -1,7 +1,7 @@
 # Límites de paquete
 
 ## Purpose
-Garantiza que `customers13` y `projects13` sigan siendo instalables y testeables por separado, y que
+Garantiza que `entities13` y `projects13` sigan siendo instalables y testeables por separado, y que
 todo lo que necesita conocer ambos dominios viva en un único punto de cruce: el bridge.
 
 ## Requirements
@@ -13,14 +13,14 @@ seeders, tests, claves de payload y condiciones de UI. El bridge MUST poder depe
 
 #### Scenario: Un dominio necesita algo del otro dominio
 - **WHEN** un cambio en `projects13` necesita leer o escribir un dato de cliente
-- **THEN** se implementa en `customer-projects13` a través de un contrato, sin tocar `customers13`
+- **THEN** se implementa en `entity-projects13` a través de un contrato, sin tocar `entities13`
 
 ### Requirement: Los dominios funcionan sin el bridge
 Cada paquete de dominio MUST registrar un valor por defecto neutral para sus contratos de
 integración, de modo que sea operable sin ningún paquete de integración y sin que el consumidor
 tenga que comprobar si la integración existe.
 
-#### Scenario: Se instala `projects13` sin `customer-projects13`
+#### Scenario: Se instala `projects13` sin `entity-projects13`
 - **WHEN** el bridge no está instalado
 - **THEN** los proyectos se crean, listan, archivan y borran igual, sin nada de cliente
 
@@ -30,7 +30,7 @@ expone, sin añadir abstracciones nuevas. El base MUST seguir siendo dueño de s
 aporta la implementación concreta, el esquema, las relaciones, las guardas y los partials de vista.
 
 #### Scenario: El bridge añade una columna a la tabla de otro paquete
-- **WHEN** `customer-projects13` añade `customer_id` a la tabla de proyectos
+- **WHEN** `entity-projects13` añade `entity_id` a la tabla de proyectos
 - **THEN** lo hace con su propia migración y registra las relaciones en ejecución
 
 ### Requirement: La infraestructura compartida no absorbe lógica entre dominios

@@ -1,16 +1,16 @@
 ## Context
-Add a new `CustomerType` resource to the `customers13` package for categorizing customers. The key difference from existing resources is multilingual name fields (name_eu, name_es, name_fr, name_en) instead of a single `name` field.
+Add a new `EntityType` resource to the `entities13` package for categorizing entities. The key difference from existing resources is multilingual name fields (name_eu, name_es, name_fr, name_en) instead of a single `name` field.
 
 ## Goals
 - Implement full CRUD following existing canonical patterns
 - Support 4 languages with euskera as required primary language
 - Maintain unique active name per language (partial indexes)
 - Full i18n parity (eu/es/fr/en) verified by tests
-- Zero breaking changes to existing Customer resource
+- Zero breaking changes to existing Entity resource
 
 ## Non-Goals
-- No changes to `Customer` model or its relations
-- No bridge package changes (customer-projects13)
+- No changes to `Entity` model or its relations
+- No bridge package changes (entity-projects13)
 - No API resources - only web UI with Flux
 - No new domain packages
 
@@ -65,7 +65,7 @@ Add a new `CustomerType` resource to the `customers13` package for categorizing 
 1. Create migration with 4 name columns + common columns
 2. Add 4 partial unique indexes in same migration
 3. Run migration in demo13
-4. Verify with `CustomerTypeMigrationTest`
+4. Verify with `EntityTypeMigrationTest`
 
 ## Open Questions
 - Should the select options search across all 4 languages or only name_eu? (Current: all 4)

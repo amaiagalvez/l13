@@ -2,12 +2,12 @@
 
 ## Discrepancias documentadas, no resueltas
 
-### 1. `customer_id` es nullable en el esquema y obligatorio en la aplicación
+### 1. `entity_id` es nullable en el esquema y obligatorio en la aplicación
 
-- `zone-rules-models` dice que `projects.customer_id` es una FK `NOT NULL` con `restrictOnDelete`.
-- La migración del bridge la crea `nullable()->constrained('CUM_customers')->restrictOnDelete()`.
+- `zone-rules-models` dice que `projects.entity_id` es una FK `NOT NULL` con `restrictOnDelete`.
+- La migración del bridge la crea `nullable()->constrained('CUM_entities')->restrictOnDelete()`.
 
-El motivo está escrito en `packages/customer-projects13/config/customer-projects13.php` y es doble: la
+El motivo está escrito en `packages/entity-projects13/config/entity-projects13.php` y es doble: la
 tabla ya tenía filas cuando el bridge se instaló (y SQLite no admite añadir una columna `NOT NULL` a
 una tabla poblada), y el paquete base no puede declarar una FK a una tabla que no debe conocer.
 
@@ -23,7 +23,7 @@ no restricción de base de datos.
 Existe `projects13/src/Http/Requests/UniqueProjectName.php` (implementa `DataAwareRule` + `Rule`, con
 un `setData()` vacío y una comprobación manual de `Project::where('name', …)->first()` que **no**
 aplica `whereNull('deleted_at')`). `ProjectRequest` no lo usa: su regla es un `Rule::unique(Project::class)`
-como el de `CustomerRequest`. No hay ninguna referencia al símbolo en el resto del repositorio.
+como el de `EntityRequest`. No hay ninguna referencia al símbolo en el resto del repositorio.
 
 Es decir: una regla que parece controlar el nombre frente a los eliminados pero no lo hace, junto a
 la que sí lo hace, mientras el nombre de la clase sugiere que es la regla canónica del proyecto.
@@ -34,7 +34,7 @@ la que sí lo hace, mientras el nombre de la clase sugiere que es la regla canó
 ### 3. Doble búsqueda por nombre en papelera
 
 `ListQueryBase::findTrashedByName()` acepta un `$projectId` opcional para que `EpicController` busque
-el nombre **dentro de un proyecto**, y `CustomerController`/`ProjectController` la llaman sin él. El
+el nombre **dentro de un proyecto**, y `EntityController`/`ProjectController` la llaman sin él. El
 diálogo de conflicto de nombre se abre igual en los tres casos, pero solo el epic acotó el alcance.
 `ARCHITECTURE.md` describe el diálogo en singular para los tres.
 

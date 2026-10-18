@@ -33,7 +33,7 @@ Si el script no encuentra el CLI o falla el reinicio, informa del problema; en e
 * Abre VS Code en la raíz del repo y comprueba en el chat: Boost MCP activo (laravel-boost en el selector de tools) y modo Agent (no "Ask": necesitas que edite archivos).
 Nueva sesión por tarea. El contexto de AGENTS.md + las instrucciones de ruta entran solos; no se lo repitas.
 * Los comandos seguros (php artisan test, pint --dirty, make:, npm run build, docker compose up) se ejecutan sin pedirte clic. Si pide otra cosa, revísala.
-* **Ojo con dónde vive el código**: `projects/demo13` es solo el contenedor (auth/Fortify, User, ajustes) con 11 ficheros en `app/`. Customers, projects, epics y la infra compartida viven en `packages/{basics13,customers13,projects13,customer-projects13}`, cada uno con su propio PHPUnit. Un cambio que toque ambos dominios va al bridge `customer-projects13`; los dominios no se conocen entre sí.
+* **Ojo con dónde vive el código**: `projects/demo13` es solo el contenedor (auth/Fortify, User, ajustes) con 11 ficheros en `app/`. Entities, projects, epics y la infra compartida viven en `packages/{basics13,entities13,projects13,entity-projects13}`, cada uno con su propio PHPUnit. Un cambio que toque ambos dominios va al bridge `entity-projects13`; los dominios no se conocen entre sí.
 
 ## Añadir una funcionalidad
 1. Activa la skill `new-feature` y pásale la descripción:
@@ -49,7 +49,7 @@ skill new-feature — CRUD de facturas: listado con búsqueda, formulario, papel
 
 Sin skill también funciona: describe la feature y el agente acabará en lo mismo. La skill ya no aporta la regla de no montar abstracciones de más (eso vive ahora en `AGENTS.md`, siempre activo); lo que aporta es el guion fijo: plan antes de escribir, TDD, las guardas de paquete al final y el informe.
 
-Si lo que quieres es un **recurso CRUD entero** (modelo + migración + vistas), usa la skill `new-resource` y pásale el nombre: `skill new-resource — Invoice`. Monta el set completo calcado a Customer (XController + XTrashController + XArchivedController, XRequest/XListRequest/XRestoreRequest, policy, XListQuery, XListTransformer, vistas con x-list.table y x-forms.tracked-resource, lang en 4 locales) dentro del paquete dueño, siguiendo TDD, y termina exigiendo pint, PHPStan y las guardas de paquete en verde. `new-feature` sigue siendo lo indicado para features que no son un recurso completo.
+Si lo que quieres es un **recurso CRUD entero** (modelo + migración + vistas), usa la skill `new-resource` y pásale el nombre: `skill new-resource — Invoice`. Monta el set completo calcado a Entity (XController + XTrashController + XArchivedController, XRequest/XListRequest/XRestoreRequest, policy, XListQuery, XListTransformer, vistas con x-list.table y x-forms.tracked-resource, lang en 4 locales) dentro del paquete dueño, siguiendo TDD, y termina exigiendo pint, PHPStan y las guardas de paquete en verde. `new-feature` sigue siendo lo indicado para features que no son un recurso completo.
 
 ## Revisar incongruencias
 Cuatro niveles, de menos a más:
@@ -68,7 +68,7 @@ Cuatro niveles, de menos a más:
 
 ### Consistencia entre recursos
 * skill `consistency-review`
-* Compara customers/projects/epics (o el recurso nuevo) contra los patrones canónicos de forms y listados y lista las divergencias con IDs (PAT-001…). Útil tras varios `new-resource` seguidos: la forma del último recurso nuevo se va desvianzando sin que nadie se dé cuenta.
+* Compara entities/projects/epics (o el recurso nuevo) contra los patrones canónicos de forms y listados y lista las divergencias con IDs (PAT-001…). Útil tras varios `new-resource` seguidos: la forma del último recurso nuevo se va desvianzando sin que nadie se dé cuenta.
 
 Flujo recomendado: `full-review` → abre el CODE-REVIEW.md → selecciona los hallazgos que te convenzan → sesión nueva → skill `fix-review` con los IDs:
 
@@ -101,16 +101,16 @@ Dos suites distintas, y conviene no confundirlas:
 **2. Los paquetes**, cada uno con su PHPUnit y su sqlite en memoria. Desde la raíz del repo:
 ```
 bash testing13/phpunit.sh projects13
-bash testing13/phpunit.sh customer-projects13
+bash testing13/phpunit.sh entity-projects13
 ```
 (o `bash testing13/runAll.sh <paquete>` para la cadena completa: dump-autoload, composer install, pint, phpstan, phpunit).
 
 Las guardas que vigilan la coherencia de los recursos están ahí, no en la app:
 * **projects13/tests/Unit/ArchitectureTest** — cada recurso trae su set completo (controller, controller de papelera, archived controller, requests, policy, list query, transformer) y los controllers son thin: sin `DB::`/`Schema::`/`dd()`/`paginate()` y con FormRequest declarado en todo endpoint que recibe input.
-* **customer-projects13/tests/Unit/ValidationCoverageTest** — todo lo que un modelo puede asignar en masa (`#[Fillable]`) y todo lo que los controllers leen con `$request->string()/boolean()` tiene su regla en un FormRequest. Sube un campo, una migration o un flag de formulario sin validar y se pone rojo.
-* **customer-projects13/tests/Feature/ModelSchemaParityTest** — modelos y esquema no se desincronizan: una columna nueva sin `#[Fillable]` falla hasta que la añades (o la declaras como columna de servidor).
-* **customer-projects13/tests/Feature/ResourceUniformityTest** — los recursos no se desvían entre sí: mismo orden de reglas y mismo `reuse_deleted_name` en los `XRequest`, mismas reglas de búsqueda en los `XListRequest`, mismas habilidades de policy con su call-site HTTP, factories con los mismos estados, mismo estado `archived` en todo modelo con flag `active`, mismo page size y desempate en las list queries, y el mismo sobre de acciones y `editPayload` allowlisted en los transformers. Un recurso nuevo que se desvíe se pone rojo aquí.
-* **customers13|projects13/tests/Unit/PackageIsolationTest** — un dominio no depende del otro ni del bridge.
+* **entity-projects13/tests/Unit/ValidationCoverageTest** — todo lo que un modelo puede asignar en masa (`#[Fillable]`) y todo lo que los controllers leen con `$request->string()/boolean()` tiene su regla en un FormRequest. Sube un campo, una migration o un flag de formulario sin validar y se pone rojo.
+* **entity-projects13/tests/Feature/ModelSchemaParityTest** — modelos y esquema no se desincronizan: una columna nueva sin `#[Fillable]` falla hasta que la añades (o la declaras como columna de servidor).
+* **entity-projects13/tests/Feature/ResourceUniformityTest** — los recursos no se desvían entre sí: mismo orden de reglas y mismo `reuse_deleted_name` en los `XRequest`, mismas reglas de búsqueda en los `XListRequest`, mismas habilidades de policy con su call-site HTTP, factories con los mismos estados, mismo estado `archived` en todo modelo con flag `active`, mismo page size y desempate en las list queries, y el mismo sobre de acciones y `editPayload` allowlisted en los transformers. Un recurso nuevo que se desvíe se pone rojo aquí.
+* **entities13|projects13/tests/Unit/PackageIsolationTest** — un dominio no depende del otro ni del bridge.
 
 El resto del automatismo:
 * `composer ci:check` (en `projects/demo13`) = `config:clear` + pint --test + PHPStan (nivel 9) + suite de la app con cobertura mínima del 80% y Clover en `storage/logs/coverage.xml`. Cubre **solo la app**: ni este script ni el workflow de CI ejecutan un solo test de paquete. Cada paquete se cubre con su propio `composer ci:check`, desde su repo.
@@ -118,7 +118,7 @@ El resto del automatismo:
 * Restaurar desde la papelera ya pide `XRestoreRequest` (policy + `resolve_name_conflict` validado). Si añades un endpoint con input, la validación va en su FormRequest, nunca en el controller.
 * CI (master y PRs): cache de Composer y npm, un job Dusk, y se salta entera si el diff solo toca `.md`. Dependabot cubre composer, npm, docker y github-actions.
 
-> Ojo: cada repo (`l13`, `demo13`, `basics13`, `customers13`, `projects13`, `customer-projects13`) tiene su propio remoto, y los paquetes están en `.gitignore` de `l13`. Un cambio de paquete se commitea en **su** repo, no en `l13`; y viceversa: este doc solo se versiona aquí.
+> Ojo: cada repo (`l13`, `demo13`, `basics13`, `entities13`, `projects13`, `entity-projects13`) tiene su propio remoto, y los paquetes están en `.gitignore` de `l13`. Un cambio de paquete se commitea en **su** repo, no en `l13`; y viceversa: este doc solo se versiona aquí.
 
 ## Reglas del juego
 * Recordar una convención: edita a mano `.github/instructions/<zona>.instructions.md` (http, models, views, tests y packages; mismo `applyTo`, añade el bullet). Ahí vive todo lo que no quieras repetir.

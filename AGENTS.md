@@ -5,11 +5,11 @@ Be concise. Create docs only if explicitly asked. Follow sibling files' structur
 No speculative architecture: no repository, DTO, interface, service or domain layer, no new abstraction and no extra indirection without a concrete need; reuse what the resources already have. Ask before any of those. Full list in `.github/docs/review-rules.md` and `ARCHITECTURE.md`.
 
 ## Package boundaries (mandatory)
-- Domain packages must work independently. `customers13` and `projects13` must not depend on each other or on `customer-projects13`.
-- Customer/project coupling belongs in the existing bridge `customer-projects13`, which may reference both domain packages. Dependency direction: bridge -> domains, never domains -> bridge or domain -> domain.
+- Domain packages must work independently. `entities13` and `projects13` must not depend on each other or on `entity-projects13`.
+- Entity/project coupling belongs in the existing bridge `entity-projects13`, which may reference both domain packages. Dependency direction: bridge -> domains, never domains -> bridge or domain -> domain.
 - Existing shared infrastructure in `basics13` is allowed; do not move cross-domain business logic there to bypass the bridge.
 - Dependencies include Composer entries, imports/FQCNs, container lookups, relationships, foreign keys, table queries, routes, views, assets, translations, factories, seeders and tests. Domain-specific field names, payload keys and UI conditions also create coupling, even without an import.
-- Base packages expose domain-neutral extension points and standalone defaults. Reuse their existing contracts and configuration; the bridge supplies concrete integrations, relationships, schema additions and UI. Follow `CustomerProjectsIntegration`.
+- Base packages expose domain-neutral extension points and standalone defaults. Reuse their existing contracts and configuration; the bridge supplies concrete integrations, relationships, schema additions and UI. Follow `EntityProjectsIntegration`.
 - Before changing a package, identify the owner: behavior needing both domains goes in the bridge. Preserve behavior with and without the bridge installed. Test standalone behavior in the base package and cross-domain behavior in the bridge or host integration tests.
 - Do not add another abstraction, bridge or package dependency without approval. Existing coupling is not permission to extend it; if the boundaries cannot be respected, stop and ask.
 - Before editing `packages/**`, read `.github/instructions/packages.instructions.md` and `.github/docs/architecture/ARCHITECTURE.md`.
@@ -23,10 +23,10 @@ Everything runs in Docker. Run the application commands below and in skills from
 - Package versions: `DX composer show --direct`, or package.json. Use APIs of the installed major version.
 
 ## Project map
-Customers → Projects → Epics (+ epic comments). Soft deletes, trash list, restore, force delete. `active` flag with its own list plus deactivate/reactivate. Names unique among active records (DB-enforced).
+Entities → Projects → Epics (+ epic comments). Soft deletes, trash list, restore, force delete. `active` flag with its own list plus deactivate/reactivate. Names unique among active records (DB-enforced).
 - Per resource: `XController` + `XTrashController` + `XInactiveController` (extends the shared `InactiveController`), `app/Http/Requests`, `app/Policies`, `app/Queries/*/XListQuery`, `app/Transformers`.
 - Package database assets: `database/factories`, `database/migrations`, and `database/seeders`.
-- Views: `resources/views/{customers,projects,epics}/{list,form}.blade.php`; shared parts in `resources/views/components/list/`.
+- Views: `resources/views/{entities,projects,epics}/{list,form}.blade.php`; shared parts in `resources/views/components/list/`.
 - Duplicate-name races: `App\Support\Database\UniqueConstraintViolation`.
 - i18n: `lang/*.json`, 4 locales, parity checked by a unit test.
 - Tests: `tests/Feature`, `tests/Unit`, Dusk in `tests/Browser`.
@@ -102,7 +102,7 @@ Mapa (lee solo la fila que toque, no el fichero entero):
 | Vistas Flux, componentes compartidos | `specs/basics-shared-views` |
 | Epics y comentarios | `specs/epics-comments` |
 | Planning y timeline (solo lectura) | `specs/planning-timeline` |
-| Relations customer↔project, imports entre paquetes | `specs/customer-projects-bridge`, `specs/package-boundaries` |
+| Relations entity↔project, imports entre paquetes | `specs/entity-projects-bridge`, `specs/package-boundaries` |
 
 Reglas: un proposal = un cambio atómico = un PR · deltas con `## ADDED|MODIFIED|REMOVED Requirements`
 y un `#### Scenario:` por requirement · bug que restaura lo especificado se arregla directo · tras

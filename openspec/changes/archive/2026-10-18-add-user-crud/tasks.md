@@ -21,7 +21,7 @@
 
 ## 6. Vistas y rutas
 - [x] 6.1 `resources/views/users/{list,form}.blade.php` reutilizando `x-basics13::*` (aplicar skill `ux-design`)
-- [x] 6.2 `routes/users.php` (`users.index|store|update|destroy`, `users.options`, `users.archived.*`, `users.trash.*`) dentro del grupo `['web','auth','verified']`, como customers/projects, cargado desde `ServiceProvider::boot()`
+- [x] 6.2 `routes/users.php` (`users.index|store|update|destroy`, `users.options`, `users.archived.*`, `users.trash.*`) dentro del grupo `['web','auth','verified']`, como entities/projects, cargado desde `ServiceProvider::boot()`
 - [x] 6.3 Enlazar `{user}` con `Route::model('user', config('auth.providers.users.model'))` (CRUD y archivado) y usar `{trashedUser}` en las rutas de papelera, leído por sus requests, porque el binding por defecto excluye los registros en la papelera
 
 ## 7. i18n

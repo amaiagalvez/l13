@@ -7,4 +7,4 @@ description: "Pointer to the HTTP/domain zone rules (canonical resource pattern,
 
 **Read `.github/instructions/http.instructions.md`** — it is the single source of truth for this zone and Copilot injects it automatically by `applyTo`. This skill exists only so the non-Copilot clients can reach the same rules by loading a skill; do not restate or copy its content here, or the two will drift.
 
-Invariants: `openspec/specs/basics-crud-base/spec.md`, `openspec/specs/basics-trash-archived/spec.md`, `openspec/specs/customers-domain/spec.md`, `openspec/specs/projects-domain/spec.md`.
+Invariants: `openspec/specs/basics-crud-base/spec.md`, `openspec/specs/basics-trash-archived/spec.md`, `openspec/specs/entities-domain/spec.md`, `openspec/specs/projects-domain/spec.md`.

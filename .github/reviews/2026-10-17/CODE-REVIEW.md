@@ -2,14 +2,14 @@
 
 ## Executive Summary
 
-Focused, read-only review of the five reported customers13 PHPStan errors.
+Focused, read-only review of the five reported entities13 PHPStan errors.
 All five were reproduced. Three accepted findings cover the analysis failure,
 stale seeder references, and an additional seeder/test behavior mismatch.
 This is not a full repository audit.
 
 ## Detected Stack
 
-- Package: `amaia/customers13`, Composer PHP constraint `^8.3`.
+- Package: `amaia/entities13`, Composer PHP constraint `^8.3`.
 - Validation runtime: local Docker image `webdevops/php-apache-dev:8.4`.
 - Declared development tools: Larastan `^3.9`, Testbench `^11.3`,
   PHPUnit `^12.0`, Pint `^1.27`, Dusk `^8.7`.
@@ -26,7 +26,7 @@ This is not a full repository audit.
   docker run --rm --pull=never --entrypoint "" \
     -u "$(id -u):$(id -g)" -e XDEBUG_MODE=off -e HOME=/tmp \
     -v "$PWD/packages":/packages \
-    -v "$PWD/packages/customers13":/app-docker \
+    -v "$PWD/packages/entities13":/app-docker \
     -w /app-docker webdevops/php-apache-dev:8.4 \
     ./vendor/bin/phpstan analyse --no-progress --no-interaction
   ```
@@ -49,15 +49,15 @@ None identified in scope.
 
 Severity: MEDIUM  
 Category: Static analysis  
-File: packages/customers13/src/Transformers/CustomerListTransformer.php  
+File: packages/entities13/src/Transformers/EntityListTransformer.php  
 Line: 83  
 Confidence: HIGH
 
-Problem: `editPayload()` promises `customer_type_ids: list<string>`, but PHPStan
+Problem: `editPayload()` promises `entity_type_ids: list<string>`, but PHPStan
 infers `array<int, decimal-int-string>`.
 
 Evidence: reproduced `return.type` error. The implementation already calls
-`values()->all()`, and the diff removes the parameter's `Customer` PHPDoc.
+`values()->all()`, and the diff removes the parameter's `Entity` PHPDoc.
 
 Impact: package analysis fails. No malformed runtime list was demonstrated.
 
@@ -70,12 +70,12 @@ model type evident without changing the inherited method's native signature.
 
 Severity: MEDIUM  
 Category: Testing  
-File: packages/customers13/tests/Feature/Seeders/EdgeCaseCustomerSeederTest.php  
+File: packages/entities13/tests/Feature/Seeders/EdgeCaseEntitySeederTest.php  
 Line: 16  
 Confidence: HIGH
 
-Problem: tests still invoke removed `EdgeCaseCustomerSeeder` and
-`EdgeCaseCustomerTypeSeeder` classes.
+Problem: tests still invoke removed `EdgeCaseEntitySeeder` and
+`EdgeCaseEntityTypeSeeder` classes.
 
 Evidence: Git marks both seeder files deleted. The second test file invokes its
 missing class at lines 16, 28 and 40. PHPStan reports all four missing-class
@@ -83,23 +83,23 @@ errors. Composer already defines the seeders namespace mapping.
 
 Impact: static analysis fails and those tests cannot execute their seeding.
 
-Recommendation: align tests with the intended seeder migration. Customer-type
-edge fixtures now live in `DevelopCustomerTypeSeeder`; the old customer edge
-fixtures are not supplied by `DevelopCustomerSeeder`. Decide whether those
-customer fixtures remain required before removing their coverage.
+Recommendation: align tests with the intended seeder migration. Entity-type
+edge fixtures now live in `DevelopEntityTypeSeeder`; the old entity edge
+fixtures are not supplied by `DevelopEntitySeeder`. Decide whether those
+entity fixtures remain required before removing their coverage.
 
 ### TEST-002 — Development seeder counts changed without matching tests
 
 Severity: MEDIUM  
 Category: Correctness / Testing  
-File: packages/customers13/database/seeders/DevelopCustomerTypeSeeder.php  
+File: packages/entities13/database/seeders/DevelopEntityTypeSeeder.php  
 Line: 24  
 Confidence: HIGH
 
 Problem: five fixed types are created in addition to the requested bulk count.
 
 Evidence: `run(20)` creates five fixtures then twenty loop iterations, whereas
-`DevelopCustomerTypeSeederTest.php:18` expects twenty total rows. Expected
+`DevelopEntityTypeSeederTest.php:18` expects twenty total rows. Expected
 source-derived state counts are now 15 active, 6 archived and 4 trashed, rather
 than the asserted 12, 5 and 3. The default-count test also expects twenty rows.
 

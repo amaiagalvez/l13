@@ -67,7 +67,7 @@ Contract boundary dependency:
 ```php
 interface PaymentGateway
 {
-    public function charge(int $amount, string $customerId): PaymentResult;
+    public function charge(int $amount, string $entityId): PaymentResult;
 }
 
 class OrderService
@@ -194,14 +194,14 @@ Follow Laravel conventions unless the domain or an existing schema requires an o
 Customized schema:
 
 ```php
-class Customer extends Model
+class Entity extends Model
 {
-    protected $table = 'Customer';
-    protected $primaryKey = 'customer_id';
+    protected $table = 'Entity';
+    protected $primaryKey = 'entity_id';
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Role::class, 'role_customer', 'customer_id', 'role_id');
+        return $this->belongsToMany(Role::class, 'role_entity', 'entity_id', 'role_id');
     }
 }
 ```
@@ -209,7 +209,7 @@ class Customer extends Model
 Conventional schema:
 
 ```php
-class Customer extends Model
+class Entity extends Model
 {
     public function roles(): BelongsToMany
     {

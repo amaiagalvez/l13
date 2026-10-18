@@ -26,12 +26,12 @@ Instructions for AI coding assistants using OpenSpec for spec-driven development
 | `basics-crud-base` | Thin controller, Form Request, unique name in two layers |
 | `basics-shared-views` | Canonical Flux forms/lists, shared components |
 | `basics-trash-archived` | Trash/restore, archive flag, delete guards, transactional delete, unique-name race |
-| `customer-projects-bridge` | Cross-domain coupling in bridge only, domains standalone |
-| `customers-domain` | Customer + CustomerType CRUD, multilingual types |
+| `entity-projects-bridge` | Cross-domain coupling in bridge only, domains standalone |
+| `entities-domain` | Entity + EntityType CRUD, multilingual types |
 | `epics-comments` | Epic unique per project, inherits project, delete guarded by comments, comments = half-resource |
 | `package-boundaries` | Dependency direction: bridge → domains, never domain → domain |
 | `planning-timeline` | Shared calendar/bar/status logic, extracted collaborator |
-| `projects-domain` | Project + Epic CRUD, customer_id nullable in DB, required in validation |
+| `projects-domain` | Project + Epic CRUD, entity_id nullable in DB, required in validation |
 
 ## When to Create a Proposal
 Create proposal for: new features, breaking changes, architecture shifts, security/performance changes.
@@ -50,7 +50,7 @@ Create proposal for: new features, breaking changes, architecture shifts, securi
 - **Flux views, shared components** → `specs/basics-shared-views`
 - **Epics & comments** → `specs/epics-comments`
 - **Planning & timeline** → `specs/planning-timeline`
-- **Customer↔Project relations, imports** → `specs/customer-projects-bridge`, `specs/package-boundaries`
+- **Entity↔Project relations, imports** → `specs/entity-projects-bridge`, `specs/package-boundaries`
 
 ## CLI Essentials
 ```bash

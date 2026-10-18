@@ -7,4 +7,4 @@ description: "Pointer to the model zone rules (fillable, policies, casts, relati
 
 **Read `.github/instructions/models.instructions.md`** — it is the single source of truth for this zone and Copilot injects it automatically by `applyTo`. This skill exists only so the non-Copilot clients can reach the same rules by loading a skill; do not restate or copy its content here, or the two will drift.
 
-Invariants: `openspec/specs/basics-support/spec.md`, `openspec/specs/customers-domain/spec.md`, `openspec/specs/projects-domain/spec.md`, `openspec/specs/epics-comments/spec.md`.
+Invariants: `openspec/specs/basics-support/spec.md`, `openspec/specs/entities-domain/spec.md`, `openspec/specs/projects-domain/spec.md`, `openspec/specs/epics-comments/spec.md`.

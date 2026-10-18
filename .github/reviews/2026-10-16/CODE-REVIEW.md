@@ -8,8 +8,8 @@
 
 | File | Change |
 |------|--------|
-| `packages/projects13/src/Queries/Projects/ProjectListQuery.php` | new `private const CUSTOMER_ALIAS = 'project_customers'`, used in `scoped()` and `applyOrderings()` |
-| `packages/projects13/src/Queries/Epics/EpicListQuery.php` | new `private const CUSTOMER_ALIAS = 'epic_customers'`, used in `scoped()` and `withIntegrationOrderings()` |
+| `packages/projects13/src/Queries/Projects/ProjectListQuery.php` | new `private const ENTITY_ALIAS = 'project_entities'`, used in `scoped()` and `applyOrderings()` |
+| `packages/projects13/src/Queries/Epics/EpicListQuery.php` | new `private const ENTITY_ALIAS = 'epic_entities'`, used in `scoped()` and `withIntegrationOrderings()` |
 | `packages/projects13/tests/Unit/Queries/ProjectSelectOptionsQueryTest.php` | **new** — 2 reflection tests of the `ListQueryBase` contract (`getModelClass`, `integration()` identity) |
 | `.github/tasks/02.full-review-action-plan.md` | tasks 6, 13–17 marked completed (documentation only) |
 
@@ -18,16 +18,16 @@ Session context: tasks 6 and 13–17 of `.github/tasks/02.full-review-action-pla
 ## Verification already executed
 
 - `projects13`: 388 tests, 1678 assertions ✅
-- `customers13`: 74 tests, 302 assertions ✅
-- `customer-projects13`: 447 tests, 1896 assertions ✅ (5 skipped, environment-dependent)
+- `entities13`: 74 tests, 302 assertions ✅
+- `entity-projects13`: 447 tests, 1896 assertions ✅ (5 skipped, environment-dependent)
 - PHPStan (`projects13`): PASS ✅ · Pint (`projects13`): PASS ✅
-- `customers13` / `projects13` `PackageIsolationTest`: PASS ✅ (boundary enforcement)
+- `entities13` / `projects13` `PackageIsolationTest`: PASS ✅ (boundary enforcement)
 
 ## Findings
 
 **SEC: no findings** — no new inputs, routes, authorization or payload changes (constant extraction, identical values).
 
-**BUG: no findings** — both call sites per file verified against the bridge contract `CustomerProjectsIntegration::aliasFor()` (`'epic' => 'epic_customers'`, default `project_customers`); values, argument order and types unchanged. `searchColumns()` takes no alias per contract — correctly not constantized.
+**BUG: no findings** — both call sites per file verified against the bridge contract `EntityProjectsIntegration::aliasFor()` (`'epic' => 'epic_entities'`, default `project_entities`); values, argument order and types unchanged. `searchColumns()` takes no alias per contract — correctly not constantized.
 
 **DB: no findings** — no SQL, schema or query-shaped change; the strings cross the integration contract verbatim as before.
 
@@ -37,7 +37,7 @@ Session context: tasks 6 and 13–17 of `.github/tasks/02.full-review-action-pla
 
 **DEVIL-ADVOCATE VERDICTS** (both observations dropped as action items, kept as notes):
 - (a) Remaining inline aliases in `ProjectSelectOptionsQuery`, `PlanningQuery`, `TimelineQuery` — they pass the alias once (the new constant earned its keep because the list queries cross the seam twice: `scope()` + `orderings()`); aligning them now would be pattern-driven refactoring of untouched code ("existing coupling is not permission to extend it"). Extract on a demonstrated second seam use only.
-- (b) Same constant name `CUSTOMER_ALIAS` with different values in two classes — both private; name collision impossible, and each value must match what the integration joins under. Intended, not drift.
+- (b) Same constant name `ENTITY_ALIAS` with different values in two classes — both private; name collision impossible, and each value must match what the integration joins under. Intended, not drift.
 
 ## Action Plan
 

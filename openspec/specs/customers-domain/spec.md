@@ -1,4 +1,4 @@
-# Customers
+# Entities
 
 ## Purpose
 Garantiza los invariantes del recurso cliente que no se deducen de su tabla: el alcance real de la

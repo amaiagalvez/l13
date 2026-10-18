@@ -48,11 +48,11 @@ Regla mental: **`specs/` es el presente, `changes/` es el futuro, `archive/` es 
 | `basics-trash-archived` | Papelera, restore con conflicto, borrado definitivo |
 | `basics-support` | Transacciones, auditoría, carreras de nombre único |
 | `basics-shared-views` | Componentes de lista y formulario, estado vacío |
-| `customers-domain` | Invariantes de cliente |
+| `entities-domain` | Invariantes de cliente |
 | `projects-domain` | Invariantes de proyecto |
 | `epics-comments` | Epic y sus comentarios |
 | `planning-timeline` | Las dos pantallas agregadas (solo lectura) |
-| `customer-projects-bridge` | Único punto de cruce entre dominios |
+| `entity-projects-bridge` | Único punto de cruce entre dominios |
 
 No hay una capability por paquete ni por clase. Si al añadir una spec te preguntas *"¿esto ya lo
 deduce el agente leyendo el código, una skill o un test?"*, la respuesta es sí → **no la escribas**.
@@ -217,7 +217,7 @@ documentación que están pendientes de decidir.
 - `specs/basics-trash-archived/design.md` — el código dice `ArchivedController`/`archive`, la doc dice
   `InactiveController`/`deactivate`; `app/…` vs `packages/*/src/…`; claves de config.
 - `specs/package-boundaries/design.md` — mapa de propietarios y dónde vive cada invariante.
-- `specs/projects-domain/design.md` — `customer_id` nullable vs `NOT NULL`; `UniqueProjectName` es
+- `specs/projects-domain/design.md` — `entity_id` nullable vs `NOT NULL`; `UniqueProjectName` es
   código muerto.
 
 Cuando una spec documenta un comportamiento que **cambia**, va como delta `MODIFIED` o `REMOVED`,

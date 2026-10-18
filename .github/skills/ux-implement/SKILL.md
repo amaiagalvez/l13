@@ -3,6 +3,7 @@ name: ux-implement
 description: Implement a batch of UX improvements following the ux-design skill
 disable-model-invocation: true
 ---
+
 # IMPLEMENTAR MEJORAS DE UX
 
 Lee:
@@ -65,9 +66,9 @@ DX php artisan test --compact
 
 docker compose run --rm --no-deps --entrypoint npm laravel13-npm run build
 
-Dusk afectado, por ejemplo: docker compose exec -e XDEBUG_MODE=off laravel13-dusk php artisan dusk tests/Browser/Customers (nunca en `laravel13`: ver `tests.instructions.md`)
+Dusk afectado, por ejemplo: docker compose exec -e XDEBUG_MODE=off laravel13-dusk php artisan dusk tests/Browser/Entities (nunca en `laravel13`: ver `tests.instructions.md`)
 
-Nota: existe un fallo previo en Dusk (`ProjectCustomerSelectTest` espera inglés con `APP_LOCALE=eu`); no lo atribuyas a tus cambios.
+Nota: existe un fallo previo en Dusk (`ProjectEntitySelectTest` espera inglés con `APP_LOCALE=eu`); no lo atribuyas a tus cambios.
 
 # INFORME FINAL
 

@@ -15,6 +15,7 @@
 			"**/projects/packages": true
 		},
 		"search.exclude": {
+			".git/, vendor/, projects/packages/, storage/, tests/coverage/, node_modules/, .phpunit.result.cache, composer.lock": true,
 			"**/projects/packages": true,
 			"**/vendor": true,
 			"**/storage": true,
@@ -27,8 +28,8 @@
 			"testing13",
 			"projects/demo13",
 			"packages/basics13",
-			"packages/customers13",
-			"packages/customer-projects13",
+			"packages/entities13",
+			"packages/entity-projects13",
 			"packages/projects13",
 		],
 		"Laravel.phpEnvironment": "docker",

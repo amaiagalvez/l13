@@ -4,12 +4,13 @@ description: Implement a feature end to end with tests, Pint and build. Use for 
 disable-model-invocation: true
 argument-hint: describe the feature
 ---
+
 # NEW FEATURE
 
 Implement the feature the user describes in this Laravel 13 · Livewire 4 · Flux · Tailwind monorepo.
 
 1. Read `AGENTS.md`. Read `.github/docs/architecture/ARCHITECTURE.md` first for structural changes. Read `.github/instructions/*.instructions.md` files whose `applyTo` matches the paths you will touch.
-2. **Locate the owner before writing anything.** A change touching both `customers13` and `projects13` belongs in the `customer-projects13` bridge; each domain package must keep working without the other. If the boundary cannot be respected, stop and ask.
+2. **Locate the owner before writing anything.** A change touching both `entities13` and `projects13` belongs in the `entity-projects13` bridge; each domain package must keep working without the other. If the boundary cannot be respected, stop and ask.
 3. Plan briefly: files to create/change, validation, authorization, i18n keys, test cases. Ask if the scope is ambiguous.
 4. Write failing tests first, in the owning package (`tests/Feature/...` there, not `projects/demo13`), run them narrowest-first. App-only changes use `DX php artisan make:test --phpunit Name` + `DX php artisan test --compact <path>`; package changes run in the package with its own PHPUnit (see `docker-commands`).
 5. Implement the smallest change following sibling-file conventions inside the owning package: `XController` + `XTrashController` + `XArchivedController` (when the model has an `active` flag), Form Requests, policy, `src/Queries/*/XListQuery`, `src/Transformers/XListTransformer`. Reuse `<x-list.*>` from `basics13` and use Flux components where one exists; keep controllers thin.

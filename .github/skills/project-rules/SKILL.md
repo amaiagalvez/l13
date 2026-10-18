@@ -6,9 +6,11 @@ description: "Core project conventions: stack, structure, naming, architecture g
 # Project Rules (Core)
 
 ## Stack
+
 Laravel 13 · PHP 8.4 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · Dusk · Pint.
 
 ## Conventions
+
 - Be concise. Create docs only if explicitly asked.
 - Follow sibling files' structure, naming and conventions; reuse existing components.
 - Do not add base folders or change dependencies without approval.
@@ -17,27 +19,32 @@ Laravel 13 · PHP 8.4 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · D
 - Full list in `.github/docs/review-rules.md` and `ARCHITECTURE.md`.
 
 ## Package Boundaries
+
 - Follow the mandatory package boundaries in [AGENTS.md](../../../AGENTS.md#package-boundaries-mandatory).
-- `customers13` and `projects13` stay independent; customer/project coupling belongs in `customer-projects13`. The bridge knows the domains, never the reverse.
+- `entities13` and `projects13` stay independent; entity/project coupling belongs in `entity-projects13`. The bridge knows the domains, never the reverse.
 - Shared infrastructure in `basics13` is allowed, not cross-domain business logic.
 - Before editing `packages/**`, read [package instructions](../../instructions/packages.instructions.md) and [architecture](../../docs/architecture/ARCHITECTURE.md). This applies to implicit coupling in schema, payloads, UI and tests as well as imports and Composer dependencies.
 
 ## Workspace Layout
+
 - Workspace root: `l13/` — this repo holds only the AI setup: `AGENTS.md`, `.github/`, `openspec/`, `.vscode/`.
 - Laravel app: `projects/demo13/` (a separate repo; it only hosts auth/Fortify, `User` and settings).
-- Shared packages: `packages/{basics13,customers13,projects13,customer-projects13}` — each a separate repo.
+- Shared packages: `packages/{basics13,entities13,projects13,entity-projects13}` — each a separate repo.
 - `projects/`, `packages/` and `testing13/` are gitignored from `l13`, so a change in a package is committed **in that package's repo**, never here.
 - Application paths in skills are relative to `projects/demo13/`; package paths are relative to the owning package under `packages/`.
 - Customization paths (`.github/`, `.opencode/`, `.vscode/`) are relative to workspace root (`l13/`)
 - `testing13/mount.sh` maintains `projects/packages -> ../packages` so Composer's relative symlinks created under `/app-docker` also resolve on the host. Keep the Docker paths `/app-docker` and `/packages`.
 
 ## Project Map
-Customers → Projects → Epics (+ epic comments).
+
+Entities → Projects → Epics (+ epic comments).
+
 - Soft deletes, trash list, restore, force delete.
 - `active` flag with its own archived list plus archive/activate.
 - Names unique among active records (DB-enforced).
 
 Per resource, inside its owning package (`X` = resource name):
+
 - `src/Models/X.php`, `src/Policies/XPolicy.php`, `src/Http/Requests/{XRequest,XListRequest,XRestoreRequest}`
 - `src/Http/Controllers/{XController,XTrashController,XArchivedController}` (archived extends `Basics13\Http\Controllers\ArchivedController`)
 - `src/Queries/Xs/XListQuery.php`, `src/Transformers/XListTransformer.php`,
@@ -49,6 +56,7 @@ Per resource, inside its owning package (`X` = resource name):
 - Structural changes: read `.github/docs/architecture/ARCHITECTURE.md` first
 
 ## Boost / Docs
+
 - Prefer Boost MCP tools over shell: `database-query` (read-only), `database-schema`, `get-absolute-url`, `browser-logs`, `search-docs`.
 - `search-docs` before version-specific Laravel-ecosystem APIs (skip for copy/styling). Broad topic queries, no package names in the query, scope with `packages`. Reuse earlier results.
 - Zone rules live in `.github/instructions/*.instructions.md` (`models`, `http`, `views`, `tests`, `packages`) at the workspace root and cover the nested application and packages: Copilot injects them automatically by `applyTo`; any other agent reads the one matching the paths it edits before touching them.

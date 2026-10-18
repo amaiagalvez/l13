@@ -1,4 +1,4 @@
-# Bridge customer-projects
+# Bridge entity-projects
 
 ## Purpose
 Garantiza que el cruce entre clientes y proyectos quede contenido en un único paquete, que instalar

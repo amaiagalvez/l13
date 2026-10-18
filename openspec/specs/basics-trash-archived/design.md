@@ -12,7 +12,7 @@ una spec**: corregirlas es un proposal.
 |--------|-------------|
 | Columna y cast | `active` (bool, por defecto `true`) |
 | Controller base | `Basics13\Http\Controllers\ArchivedController` |
-| Controller de recurso | `XArchivedController` (`CustomerArchivedController`, `ProjectArchivedController`, `EpicArchivedController`) |
+| Controller de recurso | `XArchivedController` (`EntityArchivedController`, `ProjectArchivedController`, `EpicArchivedController`) |
 | Verbos del controller | `archiveRecord()`, `activateRecord()` |
 | Rutas | `{plural}.archived.index`, `{singular}.archive`, `{plural}.archived.activate` |
 | Estados del transformer | `'active'`, `'archived'`, `'trash'` |
@@ -28,13 +28,13 @@ zone rules no existen; las reales son `archive`/`archived.activate`.
 
 La documentación histórica (`AGENTS.md`, zone rules) sitúa requests, policies, queries y transformers
 en `app/Http/…`, `app/Policies`, `app/Queries`, `app/Transformers`, y las vistas en
-`resources/views/{customers,projects,epics}/`. El código los tiene **dentro de cada paquete**:
+`resources/views/{entities,projects,epics}/`. El código los tiene **dentro de cada paquete**:
 
 ```
 packages/basics13/src/{Http,Policies,Queries,Transformers,Concerns,Support,Database}/
-packages/customers13/src/…  packages/customers13/resources/views/customers/{list,form}.blade.php
+packages/entities13/src/…  packages/entities13/resources/views/entities/{list,form}.blade.php
 packages/projects13/src/…   packages/projects13/resources/views/{projects,epics,planning,timeline}/
-packages/customers13/routes/web.php   packages/projects13/routes/web.php
+packages/entities13/routes/web.php   packages/projects13/routes/web.php
 ```
 
 ### 3. Claves de configuración y traducción
@@ -42,7 +42,7 @@ packages/customers13/routes/web.php   packages/projects13/routes/web.php
 - Límites de longitud: `MaxLength::string()` / `::longText()` leen
   `config('basics13.validation.max_length.{string,longtext}')`. Las zone rules escriben
   `config('validation.max_length.string')`, clave que ya no existe.
-- Mensajes: `__('basics13::messages.…')` y `__('customers13::messages.…')` desde
+- Mensajes: `__('basics13::messages.…')` y `__('entities13::messages.…')` desde
   `packages/*/resources/lang/{es,eu,fr,en}/` + `*.json`. Las zone rules hablan de `lang/*.json` en la
   aplicación.
 

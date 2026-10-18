@@ -35,7 +35,7 @@ que `Basics13\Models\User` no lleve la policy atada por atributo.
 **Decisión**: `Route::model('user', config('auth.providers.users.model'))` para el CRUD y el archivado;
 las rutas de papelera usan `{trashedUser}` y sus requests leen `route('trashedUser')`.
 **Razón**: el binding implícito del resto de recursos funciona por type-hint del controller
-(`update(Customer $customer)`), imposible con un modelo configurable. `Route::model` resuelve `{user}`
+(`update(Entity $entity)`), imposible con un modelo configurable. `Route::model` resuelve `{user}`
 sin fijar una clase, pero su scope por defecto excluye los trashed, así que la papelera no puede
 compartir el nombre del parámetro: si lo hiciera, `SubstituteBindings` daría 404 antes de llegar al
 request, que es quien resuelve el registro con `onlyTrashed()`.
@@ -51,7 +51,7 @@ se generaliza la base compartida.
 **Decisión**: correo único **global** (también frente a la papelera), no entre activos.
 **Razón**: el correo identifica la cuenta; reutilizarlo tras un borrado lógico permitiría suplantar o
 colisionar identidades, y el índice actual ya es global. Es una **excepción intencionada** al patrón
-`customers-domain` / `basics-crud-base` ("único entre los no eliminados"), que aplica a los nombres
+`entities-domain` / `basics-crud-base` ("único entre los no eliminados"), que aplica a los nombres
 de dominio. No relajar el índice a parcial ni añadir `whereNull('deleted_at')` a la regla.
 
 ### Reutilización de validación
@@ -69,7 +69,7 @@ y se adaptan sin relanzar ni inventar un flag nuevo.
 ### Rutas
 **Decisión**: `routes/users.php` cargado desde `ServiceProvider::boot()`, sin feature gate.
 **Razón**: `basics13` no tiene `web.php`; se sigue el patrón de `settings.php`, y como en
-`customers13`/`projects13` las rutas van dentro de `['web','auth','verified']`, no tras un flag.
+`entities13`/`projects13` las rutas van dentro de `['web','auth','verified']`, no tras un flag.
 
 ## Risks / Trade-offs
 

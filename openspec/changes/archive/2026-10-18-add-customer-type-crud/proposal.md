@@ -1,8 +1,8 @@
 ## Why
-The application needs a way to categorize customers by type (e.g., "Enterprise", "SME", "Individual", "Partner"). These types must support multilingual names in Basque, Spanish, French, and English to match the project's i18n requirements.
+The application needs a way to categorize entities by type (e.g., "Enterprise", "SME", "Individual", "Partner"). These types must support multilingual names in Basque, Spanish, French, and English to match the project's i18n requirements.
 
 ## What Changes
-- Create new `CustomerType` model in `customers13` package with fields: `name_eu`, `name_es`, `name_fr`, `name_en`
+- Create new `EntityType` model in `entities13` package with fields: `name_eu`, `name_es`, `name_fr`, `name_en`
 - Add migration with unique active name index per language (composite partial index)
 - Implement full CRUD: Controller, TrashController, ArchivedController (extends shared InactiveController)
 - Create FormRequest with validation for 4 language fields (required in EU, optional in others)
@@ -15,7 +15,7 @@ The application needs a way to categorize customers by type (e.g., "Enterprise",
 - Add routes: resource + archived + trash + options
 
 ## Impact
-- Affected specs: `customers-domain` (new resource follows same patterns)
-- Affected code: `packages/customers13/` (new model, controllers, requests, queries, transformers, views, lang, migrations, factories, tests, routes)
-- No breaking changes - adds new resource alongside existing Customer
-- Follows existing package boundaries: stays within `customers13` domain
+- Affected specs: `entities-domain` (new resource follows same patterns)
+- Affected code: `packages/entities13/` (new model, controllers, requests, queries, transformers, views, lang, migrations, factories, tests, routes)
+- No breaking changes - adds new resource alongside existing Entity
+- Follows existing package boundaries: stays within `entities13` domain
