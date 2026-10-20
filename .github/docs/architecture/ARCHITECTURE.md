@@ -9,7 +9,7 @@ Update it when important architectural decisions are made.
 ## System Purpose
 
 Authenticated users manage entities, their projects, and project epics. These resources can be
-created, edited, searched, paginated, deactivated, reactivated, soft-deleted, restored, and permanently
+created, edited, searched, paginated, archived, activated, soft-deleted, restored, and permanently
 deleted from a trash view.
 
 ---
@@ -53,7 +53,7 @@ deleted from a trash view.
 - Fortify provides authentication and account security features.
 - The `active` flag on users is read but never written by the application: nothing in `app/` sets
   it to false. Deactivating a user is a pending capability (user CRUD, `todo.md`), so the flag can
-  only be set out of band for now. The three resources do have deactivate/reactivate endpoints.
+  only be set out of band for now. The three resources do have archive/activate endpoints.
 - Inactive users cannot authenticate with passwords, two-factor challenges, passkeys,
   or remember-me cookies. A web middleware checks persisted user activity and logs out
   existing sessions on their next request after deactivation.
@@ -77,7 +77,7 @@ Entities, projects, epics, and users have an `active` boolean, defaulting to tru
 Resource index lists include only active, non-deleted records; archived lists include
 only archived, non-deleted records and append the last modification date. Trash lists
 include every deleted record regardless of `active`; restoring preserves that flag.
-Deactivation does not cascade to children. Index rows offer deactivation instead of
+Archiving does not cascade to children. Index rows offer archiving instead of
 deletion when a entity has projects or a project has epics, including deleted children.
 Database-backed form selectors (select, select2, checkbox and radio) show only active,
 non-deleted records when creating. When editing, they also retain the selected
@@ -85,7 +85,7 @@ non-deleted record even if it is archived; other archived records are not offere
 This applies to entity types on entities, entities on projects, and projects on
 epics.
 The `active` flag is never mass assignable on users or resources. Resource activation
-changes only through the dedicated deactivate/reactivate actions, not through create,
+changes only through the dedicated archive/activate actions, not through create,
 update, or other request payloads.
 
 Important constraints: entity and project names are unique among non-deleted records,

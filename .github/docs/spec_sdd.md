@@ -214,8 +214,8 @@ complicada, una carrera de concurrencia. Ahí sí van rutas, mapas y extractos.
 Ya existen tres, y **no resuelven** lo que documentan: describen discrepancias entre el código y la
 documentación que están pendientes de decidir.
 
-- `specs/basics-trash-archived/design.md` — el código dice `ArchivedController`/`archive`, la doc dice
-  `InactiveController`/`deactivate`; `app/…` vs `packages/*/src/…`; claves de config.
+- `specs/basics-trash-archived/design.md` — ~~el código dice `ArchivedController`/`archive`, la doc dice
+  `InactiveController`/`deactivate`;~~ **RESUELTO**: documentación unificada con el código (`archive`/`archived`); `app/…` vs `packages/*/src/…`; claves de config.
 - `specs/package-boundaries/design.md` — mapa de propietarios y dónde vive cada invariante.
 - `specs/projects-domain/design.md` — `entity_id` nullable vs `NOT NULL`; `UniqueProjectName` es
   código muerto.

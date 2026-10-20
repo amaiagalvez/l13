@@ -23,13 +23,13 @@ Everything runs in Docker. Run the application commands below and in skills from
 - Package versions: `DX composer show --direct`, or package.json. Use APIs of the installed major version.
 
 ## Project map
-Entities → Projects → Epics (+ epic comments). Soft deletes, trash list, restore, force delete. `active` flag with its own list plus deactivate/reactivate. Names unique among active records (DB-enforced).
-- Per resource: `XController` + `XTrashController` + `XInactiveController` (extends the shared `InactiveController`), `app/Http/Requests`, `app/Policies`, `app/Queries/*/XListQuery`, `app/Transformers`.
-- Package database assets: `database/factories`, `database/migrations`, and `database/seeders`.
-- Views: `resources/views/{entities,projects,epics}/{list,form}.blade.php`; shared parts in `resources/views/components/list/`.
-- Duplicate-name races: `App\Support\Database\UniqueConstraintViolation`.
-- i18n: `lang/*.json`, 4 locales, parity checked by a unit test.
-- Tests: `tests/Feature`, `tests/Unit`, Dusk in `tests/Browser`.
+Entities → Projects → Epics (+ epic comments). Soft deletes, trash list, restore, force delete. `active` flag with its own list plus archive/activate. Names unique among active records (DB-enforced).
+- Per resource: `XController` + `XTrashController` + `XArchivedController` (extends the shared `ArchivedController`), `packages/*/src/Http/Requests`, `packages/*/src/Policies`, `packages/*/src/Queries/*/XListQuery`, `packages/*/src/Transformers`.
+- Package database assets: `packages/*/database/factories`, `packages/*/database/migrations`, and `packages/*/database/seeders`.
+- Views: `packages/*/resources/views/{entities,projects,epics}/{list,form}.blade.php`; shared parts in `packages/basics13/resources/views/components/list/`.
+- Duplicate-name races: `Basics13\Support\Database\UniqueConstraintViolation`.
+- i18n: `packages/*/resources/lang/*.json`, 4 locales, parity checked by a unit test.
+- Tests: `packages/*/tests/Feature`, `packages/*/tests/Unit`, Dusk in `packages/*/tests/Browser`.
 - Structural changes: read `.github/docs/architecture/ARCHITECTURE.md` first.
 
 ## Skills (source of truth for detailed rules)
@@ -59,10 +59,10 @@ Rules are organized as skills in `.github/skills/`. OpenCode loads them on deman
 | Edit PHP files (models, controllers, etc.) | `php-conventions` |
 | Run Docker commands, tests, builds, MCP | `docker-commands` |
 | Write or modify tests | `test-rules` + `testing-best-practices` |
-| Edit `app/Models/**` | `zone-rules-models` |
-| Edit `app/Http/**`, `Policies`, `Queries`, `Transformers` | `zone-rules-http` |
-| Edit `resources/views/**`, `lang/**` | `zone-rules-views` + `ux-design` |
-| Edit `tests/**` | `zone-rules-tests` |
+| Edit `packages/*/src/Models/**` | `zone-rules-models` |
+| Edit `packages/*/src/Http/**`, `Policies`, `Queries`, `Transformers` | `zone-rules-http` |
+| Edit `packages/*/resources/views/**`, `packages/*/resources/lang/**` | `zone-rules-views` + `ux-design` |
+| Edit `packages/*/tests/**` | `zone-rules-tests` |
 | New CRUD resource | `new-resource` + `laravel-best-practices` |
 | New feature (action, filter, column, email) | `new-feature` + `laravel-best-practices` |
 | SDD: create / apply / archive a proposal | `openspec-workflow` |

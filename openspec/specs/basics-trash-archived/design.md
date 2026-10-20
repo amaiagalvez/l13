@@ -6,7 +6,7 @@ Estas specs describen lo que hace el código. Donde la documentación de `.githu
 `ARCHITECTURE.md` dice otra cosa, se anota aquí. **Ninguna de las dos versiones se corrige desde
 una spec**: corregirlas es un proposal.
 
-### 1. `active` (columna) frente a `archived`/`archive` (vocabulario)
+### 1. `active` (columna) frente a `archived`/`archive` (vocabulario) — **RESUELTO**
 
 | Fuente | Vocabulario |
 |--------|-------------|
@@ -16,13 +16,9 @@ una spec**: corregirlas es un proposal.
 | Verbos del controller | `archiveRecord()`, `activateRecord()` |
 | Rutas | `{plural}.archived.index`, `{singular}.archive`, `{plural}.archived.activate` |
 | Estados del transformer | `'active'`, `'archived'`, `'trash'` |
-| `AGENTS.md` y `zone-rules-http` | «`active` flag», `XInactiveController`, `InactiveController`, `{singular}.deactivate`, `{plural}.archived.reactivate` |
+| `AGENTS.md` y `zone-rules-http` | «`active` flag», `XArchivedController`, `ArchivedController`, `{singular}.archive`, `{plural}.archived.activate` |
 
-El código no tiene ningún `InactiveController`. Las rutas `deactivate`/`reactivate` que describen las
-zone rules no existen; las reales son `archive`/`archived.activate`.
-
-**Pendiente de decidir:** unificar la documentación con el código (lo natural) o renombrar el código
-(lo caro, porque toca rutas, transformers, factories y tests de navegador).
+La documentación ha sido unificada con el código (`archive`/`archived.activate`).
 
 ### 2. Rutas de los ficheros
 

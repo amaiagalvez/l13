@@ -15,7 +15,7 @@ bash testing13/agents/link-opencode-assets.sh
 bash testing13/agents/link-claude-assets.sh
 ```
 
-Ambos localizan la raíz del repositorio automáticamente y son seguros de volver a ejecutar:
+Ambos localizan la raíz del repositorio automáticamente y son seguros de volver a ejecutar. **Después de modificar `.github/agents/` (añadir, borrar o renombrar agentes), ejecuta siempre ambos scripts para mantener los symlinks actualizados en `.opencode/agents/` y `.claude/agents/`.** Los scripts eliminan primero los symlinks previos en sus carpetas de agentes y vuelven a crearlos. Esto asegura que nuevos agentes queden disponibles y los removidos queden ocultos.
 
 * OpenCode descubre agentes en `.opencode/agents/`; son symlinks a `.github/agents/*.agent.md`. El instalador intenta reiniciar automáticamente su servicio en segundo plano con `opencode service restart`.
 * Claude Code descubre agentes en `.claude/agents/`; son symlinks directos a `.github/agents/*.agent.md`, sin copiar ni adaptar el frontmatter. Los permisos de Copilot/OpenCode no se convierten a restricciones de herramientas de Claude.
@@ -43,7 +43,7 @@ skill new-feature — CRUD de facturas: listado con búsqueda, formulario, papel
 2. Déjalo seguir su guion: lee arquitectura/reglas de ruta → decide el paquete dueño → plan corto (aquí corrige el alcance si algo no te cuadra) → tests rojos → implementa siguiendo el patrón de los hermanos (XController + XTrashController + XArchivedController, Form Requests, policy, XListQuery, XListTransformer, `<x-list.*>`, Flux).
 3. Supervisa los puntos de control, no el proceso:
    * El plan inicial: ¿querías eso o algo distinto? ¿Y en qué paquete cae?
-   * Los `resources/lang/*.json` en los 4 locales y los data-test si hay UI.
+   * Los `resources/lang/{es,eu,fr,en}.json` en el paquete dueño y los data-test si hay UI.
 4. Verificación final: el agente ya ha corrido los tests y las guardas de paquete y te ha dado su resultado real. Tú comprueba que cuadra con el diff y, si tocaba UI, que el build se hizo (auto-aprobado) o levanta dev (-p 5173:5173 ... run dev).
 5. Revisa el diff y commitea tú.
 
@@ -61,6 +61,7 @@ Cuatro niveles, de menos a más:
 ### Puntual
 * Selecciona un agente concreto del selector del chat (#security-reviewer, #database-reviewer…)	
 * Auditoría de un área, READ-ONLY
+* Consulte las guardas automatizadas: **ResourceUniformityTest**, **ModelSchemaParityTest**, **PackageIsolationTest** — estos tests vigilan la coherencia de recursos, paridad de fillables y aislamiento de paquetes respectivamente.
 
 ### Completa
 * skill `full-review`
@@ -112,8 +113,16 @@ Las guardas que vigilan la coherencia de los recursos están ahí, no en la app:
 * **entity-projects13/tests/Feature/ResourceUniformityTest** — los recursos no se desvían entre sí: mismo orden de reglas y mismo `reuse_deleted_name` en los `XRequest`, mismas reglas de búsqueda en los `XListRequest`, mismas habilidades de policy con su call-site HTTP, factories con los mismos estados, mismo estado `archived` en todo modelo con flag `active`, mismo page size y desempate en las list queries, y el mismo sobre de acciones y `editPayload` allowlisted en los transformers. Un recurso nuevo que se desvíe se pone rojo aquí.
 * **entities13|projects13/tests/Unit/PackageIsolationTest** — un dominio no depende del otro ni del bridge.
 
+## Guardas automáticas
+* **ResourceUniformityTest** — vigila la coherencia entre recursos: mismo orden de reglas, mismos `reuse_deleted_name` en `XRequest`, mismas reglas de búsqueda en `XListRequest`, mismas habilidades de policy con su call-site HTTP, factories con los mismos estados, mismo estado `archived` en todo modelo con flag `active`, mismo page size y desempate en las list queries, y el mismo sobre de acciones y `editPayload` allowlisted en los transformers.
+* **ModelSchemaParityTest** — asegura la paridad `#[Fillable]` ↔ esquema de base de datos: una columna nueva sin `#[Fillable]` falla hasta que se declara (o se marca como columna de servidor).
+* **PackageIsolationTest** — garantiza que un dominio no depende del otro ni del bridge: las fronteras de paquetes se respetan y los tests fallingan si hay fugas de dependencia.
+* **PHPStan baseline consistency check** — revisa que las baselines por paquete sean consistentes y que los errores nuevos sean genuinos antes de añadirlos (no workarounds de versión). `basics13` tiene 11 entradas preexistentes; `entities13` y `projects13` generan baselines vacías; `entity-projects13` requiere atención especial (actualmente 4 errores no resueltos en `PackageSeederTest.php`).
+
 El resto del automatismo:
 * `composer ci:check` (en `projects/demo13`) = `config:clear` + pint --test + PHPStan (nivel 9) + suite de la app con cobertura mínima del 80% y Clover en `storage/logs/coverage.xml`. Cubre **solo la app**: ni este script ni el workflow de CI ejecutan un solo test de paquete. Cada paquete se cubre con su propio `composer ci:check`, desde su repo.
+
+**Mantenimiento de baselines PHPStan**: las baselines (`phpstan-baseline.neon`) son específicas por paquete y no deben copiarse entre proyectos. `basics13` tiene 11 entradas preexistentes como trabajo alrededor de versiones de Fortify; `entities13` y `projects13` generan baselines vacías en primer análisis. `entity-projects13` requiere atención especial (actualmente 4 errores no resueltos en `PackageSeederTest.php`). **Política**: revisar cada error nuevo antes de añadirlo a la baseline — las entradas deben reflejar errores genuinos de análisis estático, no workarounds de versión. Al añadir un paquete nuevo, generar baseline fresh y revisar cada entrada antes de aceptarla.
 * Tests en paralelo en local: `DX php artisan test --parallel --compact <ruta>` — los flags van **antes** de la ruta. Nunca en CI: los jobs comparten una BD. Requiere el grant `laravel\_test\_%` (ya aplicado, y en `packages/basics13/tooling/mysql/init/02-parallel-test-databases.sql` para volúmenes nuevos).
 * Restaurar desde la papelera ya pide `XRestoreRequest` (policy + `resolve_name_conflict` validado). Si añades un endpoint con input, la validación va en su FormRequest, nunca en el controller.
 * CI (master y PRs): cache de Composer y npm, un job Dusk, y se salta entera si el diff solo toca `.md`. Dependabot cubre composer, npm, docker y github-actions.

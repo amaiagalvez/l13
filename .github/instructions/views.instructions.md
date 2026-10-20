@@ -1,5 +1,5 @@
 ---
-applyTo: "**/resources/views/**,**/lang/**,**/resources/lang/**,**/resources/js/**"
+applyTo: "**/resources/views/**,**/lang/**,**/resources/lang/**,**/resources/js/**,packages/*/resources/views/**,packages/*/resources/lang/**,packages/*/lang/**"
 ---
 
 # View / i18n / UX rules
@@ -12,7 +12,7 @@ applyTo: "**/resources/views/**,**/lang/**,**/resources/lang/**,**/resources/js/
 - After changing a view, Blade component, UI script or style, open each affected screen in the browser and inspect the console for errors and warnings, including Alpine expression errors and uncaught page errors. Exercise the changed interaction/state as well as initial rendering; fix regressions caused by the change before finishing, and report any unrelated existing messages separately. If a screen redirects to login, use the development account from `packages/basics13/database/seeders/UserSeeder.php` (called by `BasicsDevelopSeeder`) as described in the `docker-commands` skill.
 - One primary action with text, the H1 and the search field live in the header.
 - Nothing destructive without an undo or a proper confirmation.
-- Any new user-facing string goes in the owning package's `resources/lang/*.json` for all 4 locales (en/es/eu/fr, same key and `:placeholders`), in sentence case; a test checks parity. Default locale is `eu`.
-- A `maxlength` attribute never carries a literal number either: it renders `config('validation.max_length.string')` or `config('validation.max_length.longtext')`, the same value the FormRequest validates, so the browser cannot stop the input the server would accept.
+- Any new user-facing string goes in the owning package's `resources/lang/{es,eu,fr,en}.json` for all 4 locales (same key and `:placeholders`), in sentence case; a test checks parity. Default locale is `eu`. Translation keys are namespaced as `basics13::messages.*`, `entities13::messages.*`, `projects13::messages.*`, `entity-projects13::messages.*`.
+- A `maxlength` attribute never carries a literal number either: it renders `config('basics13.validation.max_length.string')` or `config('basics13.validation.max_length.longtext')`, the same value the FormRequest validates, so the browser cannot stop the input the server would accept.
 
 > Invariantes de esta zona: `openspec/specs/basics-shared-views/spec.md`, `openspec/specs/entities-domain/spec.md`, `openspec/specs/projects-domain/spec.md`, `openspec/specs/entity-projects-bridge/spec.md`.

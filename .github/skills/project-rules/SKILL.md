@@ -51,7 +51,7 @@ Per resource, inside its owning package (`X` = resource name):
   `database/factories/XFactory.php`, `database/migrations/`, `database/seeders/`
 - Views: `resources/views/xs/{list,form}.blade.php`; shared parts come from `<x-list.*>` / `<x-forms.*>` in `basics13`
 - Duplicate-name races: `Basics13\Support\Database\UniqueConstraintViolation`
-- i18n: `resources/lang/*.json`, 4 locales (en/es/eu/fr), parity checked by a test
+- i18n: `resources/lang/{es,eu,fr,en}.json` per package, 4 locales, parity checked by a test; translation keys namespaced as `basics13::messages.*`, `entities13::messages.*`, `projects13::messages.*`, `entity-projects13::messages.*`
 - Tests live in the owning package's `tests/{Feature,Unit}`; Dusk in `tests/Browser`
 - Structural changes: read `.github/docs/architecture/ARCHITECTURE.md` first
 
