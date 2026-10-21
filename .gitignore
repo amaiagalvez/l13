@@ -1,7 +1,8 @@
-/.claude
-/.opencode
 /dc-data
 /documentation13
 /packages
 /projects
 /testing13
+/.claude/*
+!/.claude/settings.json
+/.opencode

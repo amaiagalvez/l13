@@ -101,27 +101,22 @@ Validation safety rules:
 Read and apply the following specialist files:
 
 .github/agents/laravel-reviewer.agent.md
-.github/agents/clean-code-reviewer.agent.md
 .github/agents/security-reviewer.agent.md
-.github/agents/architecture-reviewer.agent.md
-.github/agents/database-reviewer.agent.md
+.github/agents/database-reviewer.agent.md (includes concurrency)
 .github/agents/performance-reviewer.agent.md
+.github/agents/business-reviewer.agent.md
+.github/agents/architecture-reviewer.agent.md
 .github/agents/testing-reviewer.agent.md
 .github/agents/api-reviewer.agent.md
 .github/agents/frontend-reviewer.agent.md
-.github/agents/concurrency-reviewer.agent.md
-.github/agents/dependencies-reviewer.agent.md
-.github/agents/devops-reviewer.agent.md
-.github/agents/observability-reviewer.agent.md
-.github/agents/business-reviewer.agent.md
-.github/agents/maintainability-reviewer.agent.md
+.github/agents/maintainability-reviewer.agent.md (includes clean code)
+.github/agents/devops-reviewer.agent.md (includes observability and dependencies)
 
-Skip irrelevant specialists.
+Skip irrelevant specialists (for example API when the project exposes no API).
 
 Run them in risk order when delegating is not available: Laravel, Security,
-Database, Performance, Concurrency, Business Logic first; then Clean Code,
-Architecture, Testing, API, Frontend, Dependencies, Maintainability; then
-DevOps and Observability; Devil's Advocate last.
+Database, Performance, Business Logic first; then Architecture, Testing, API,
+Frontend, Maintainability; then DevOps; Devil's Advocate last.
 
 ---
 

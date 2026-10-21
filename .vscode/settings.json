@@ -2,6 +2,7 @@
     "files.readonlyInclude": {
         "**/.claude/agents/**": true,
         "**/.claude/skills/**": true,
+        "**/.claude/rules/**": true,
         "**/.opencode/agents/**": true,
         "**/.opencode/skills/**": true
     },
@@ -42,6 +43,14 @@
         },
         "/composer (ci:check|test|lint:check|types:check)$/": {
             "approve": true,
+            "matchCommandLine": true
+        },
+        "/^openspec /": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^git push/": {
+            "approve": false,
             "matchCommandLine": true
         }
     },

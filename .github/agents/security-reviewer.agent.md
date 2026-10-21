@@ -3,6 +3,7 @@ name: Security Reviewer
 description: OWASP-oriented Laravel and PHP security specialist
 argument-hint: Review the repository without modifying application code.
 mode: subagent
+disallowedTools: Edit, Write, NotebookEdit, Bash
 permissions:
   - action: edit
     resource: "*"

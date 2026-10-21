@@ -1,5 +1,14 @@
 ---
 applyTo: "**/app/Http/**,**/app/Policies/**,**/app/Queries/**,**/app/Transformers/**,packages/*/src/Http/**,packages/*/src/Policies/**,packages/*/src/Queries/**,packages/*/src/Transformers/**"
+paths:
+  - "**/app/Http/**"
+  - "**/app/Policies/**"
+  - "**/app/Queries/**"
+  - "**/app/Transformers/**"
+  - "packages/*/src/Http/**"
+  - "packages/*/src/Policies/**"
+  - "packages/*/src/Queries/**"
+  - "packages/*/src/Transformers/**"
 ---
 
 # HTTP / domain rules

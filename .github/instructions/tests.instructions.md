@@ -1,5 +1,7 @@
 ---
 applyTo: "**/tests/**"
+paths:
+  - "**/tests/**"
 ---
 
 # Test rules

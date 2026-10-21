@@ -3,6 +3,7 @@ name: Devil's Advocate
 description: Final independent Principal Engineer review
 argument-hint: Review the repository without modifying application code.
 mode: subagent
+disallowedTools: Edit, Write, NotebookEdit, Bash
 permissions:
   - action: edit
     resource: "*"

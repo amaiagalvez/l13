@@ -1,9 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  // Core skill loaded by default; others loaded on demand via skill tool.
-  "skills": [
-    ".github/skills/project-rules"
-  ],
   "mcp": {
     "servers": {
       "laravel-boost": {
@@ -12,9 +8,10 @@
           "/usr/bin/docker",
           "compose",
           "-f",
-          "docker-compose.yml",
+          "projects/demo13/docker-compose.yml",
           "run",
           "--rm",
+          "-T",
           "-e",
           "XDEBUG_MODE=off",
           "--entrypoint",
@@ -67,6 +64,11 @@
     {
       "action": "shell",
       "resource": "docker compose * composer*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "openspec *",
       "effect": "allow"
     },
     {

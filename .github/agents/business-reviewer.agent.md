@@ -3,6 +3,7 @@ name: Business Logic Reviewer
 description: Business rules and domain correctness specialist
 argument-hint: Review the repository without modifying application code.
 mode: subagent
+disallowedTools: Edit, Write, NotebookEdit, Bash
 permissions:
   - action: edit
     resource: "*"

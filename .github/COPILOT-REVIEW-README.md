@@ -1,4 +1,4 @@
-# Laravel + GitHub Copilot Code Review
+# Laravel Code Review (Copilot, Claude, OpenCode)
 
 ## Components
 
@@ -6,7 +6,7 @@
 
 .github/docs/review-rules.md
 
-Common rules for Copilot.
+Common rules for every reviewer agent.
 
 ### Specialist agents
 
@@ -15,21 +15,18 @@ Common rules for Copilot.
 Contains specialized reviewers:
 
 - Laravel
-- Clean Code
 - Security
 - Architecture
-- Database
+- Database (with concurrency)
 - Performance
 - Testing
 - API
 - Frontend
-- Concurrency
-- Dependencies
-- DevOps
-- Observability
+- DevOps (with observability and dependencies)
 - Business Logic
-- Maintainability
+- Maintainability (with clean code)
 - Devil's Advocate
+- UX Designer (on demand, not part of the full review)
 
 ### Orchestrator
 
@@ -57,7 +54,7 @@ They are skills: activate them by name, there is no `/command` for them.
 4. Run Review Orchestrator.
 5. Inspect `.github/reviews/YYYY-MM-DD/CODE-REVIEW.md`.
 6. Select findings.
-7. Start a new Copilot Agent session.
+7. Start a new agent session (any client).
 8. Activate the fix-review skill.
 9. Specify finding IDs.
 10. Run tests again.

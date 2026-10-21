@@ -2,103 +2,42 @@
 
 Laravel 13 · PHP 8.4 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · Dusk · Pint.
 Be concise. Create docs only if explicitly asked. Follow sibling files' structure, naming and conventions; reuse existing components. Do not add base folders or change dependencies without approval. Use descriptive names.
-No speculative architecture: no repository, DTO, interface, service or domain layer, no new abstraction and no extra indirection without a concrete need; reuse what the resources already have. Ask before any of those. Full list in `.github/docs/review-rules.md` and `ARCHITECTURE.md`.
+No speculative architecture: no repository, DTO, interface, service or domain layer, no new abstraction and no extra indirection without a concrete need; ask first. Full list in `.github/docs/review-rules.md` and `.github/docs/architecture/ARCHITECTURE.md` (read it before structural changes).
+
+## Workspace
+- `l13/` holds only the AI setup (`AGENTS.md`, `.github/`, `openspec/`, client folders). The app `projects/demo13/` (auth, `User`, settings) and each `packages/{basics13,entities13,projects13,entity-projects13}` are separate git repos, gitignored here: commit a change in the repo that owns it.
+- Application paths are relative to `projects/demo13/`, package paths to the owning package, customization paths to `l13/`.
 
 ## Package boundaries (mandatory)
-- Domain packages must work independently. `entities13` and `projects13` must not depend on each other or on `entity-projects13`.
-- Entity/project coupling belongs in the existing bridge `entity-projects13`, which may reference both domain packages. Dependency direction: bridge -> domains, never domains -> bridge or domain -> domain.
-- Existing shared infrastructure in `basics13` is allowed; do not move cross-domain business logic there to bypass the bridge.
-- Dependencies include Composer entries, imports/FQCNs, container lookups, relationships, foreign keys, table queries, routes, views, assets, translations, factories, seeders and tests. Domain-specific field names, payload keys and UI conditions also create coupling, even without an import.
-- Base packages expose domain-neutral extension points and standalone defaults. Reuse their existing contracts and configuration; the bridge supplies concrete integrations, relationships, schema additions and UI. Follow `EntityProjectsIntegration`.
-- Before changing a package, identify the owner: behavior needing both domains goes in the bridge. Preserve behavior with and without the bridge installed. Test standalone behavior in the base package and cross-domain behavior in the bridge or host integration tests.
-- Do not add another abstraction, bridge or package dependency without approval. Existing coupling is not permission to extend it; if the boundaries cannot be respected, stop and ask.
-- Before editing `packages/**`, read `.github/instructions/packages.instructions.md` and `.github/docs/architecture/ARCHITECTURE.md`.
+- `entities13` and `projects13` are independent: never depend on each other or on `entity-projects13`.
+- Entity/project coupling lives only in the bridge `entity-projects13`: bridge -> domains, never the reverse.
+- `basics13` is domain-neutral shared infrastructure; never move cross-domain business logic there.
+- Coupling includes non-import forms (schema, payload keys, UI conditions, tests…). Before editing `packages/**`, read `.github/instructions/packages.instructions.md`. If the boundaries cannot be respected, stop and ask.
 
 ## Commands
-The workspace root is `l13`; the Laravel application is in `projects/demo13/`, and shared packages are in `packages/`. Application paths below and in skills are relative to `projects/demo13/`; customization paths (`.github/`, `.opencode/`, `.vscode/`) are relative to the workspace root.
-Everything runs in Docker. Run the application commands below and in skills from `projects/demo13/` (`cd projects/demo13` from the workspace root). From `l13/`, use `docker compose -f projects/demo13/docker-compose.yml ...` instead. `DX` = `docker compose exec -e XDEBUG_MODE=off laravel13`.
-`testing13/mount.sh` maintains `projects/packages -> ../packages` so Composer's relative symlinks created under `/app-docker` also resolve on the host. Keep the Docker paths `/app-docker` and `/packages`.
-- Start: `docker compose up -d laravel13`. If `docker compose exec laravel13 ...` fails because the container will not stay up (a cron in the base image cannot drop privileges), run the command in a throwaway container instead: `docker compose run --rm --no-deps -e XDEBUG_MODE=off --entrypoint ./vendor/bin/phpunit laravel13 --testsuite Unit`.
-- Artisan/Composer/PHPUnit: `DX php artisan ...`, `DX composer ...`. Always pass `--no-interaction`; create files with `DX php artisan make:*`.
-- Package versions: `DX composer show --direct`, or package.json. Use APIs of the installed major version.
+Everything runs in Docker from `projects/demo13/` (from `l13/`: `docker compose -f projects/demo13/docker-compose.yml ...`). `DX` = `docker compose exec -e XDEBUG_MODE=off laravel13`. Always pass `--no-interaction`; create files with `DX php artisan make:*`. Details, test runs and guard rails: skill `docker-commands`.
 
 ## Project map
-Entities → Projects → Epics (+ epic comments). Soft deletes, trash list, restore, force delete. `active` flag with its own list plus archive/activate. Names unique among active records (DB-enforced).
-- Per resource: `XController` + `XTrashController` + `XArchivedController` (extends the shared `ArchivedController`), `packages/*/src/Http/Requests`, `packages/*/src/Policies`, `packages/*/src/Queries/*/XListQuery`, `packages/*/src/Transformers`.
-- Package database assets: `packages/*/database/factories`, `packages/*/database/migrations`, and `packages/*/database/seeders`.
-- Views: `packages/*/resources/views/{entities,projects,epics}/{list,form}.blade.php`; shared parts in `packages/basics13/resources/views/components/list/`.
-- Duplicate-name races: `Basics13\Support\Database\UniqueConstraintViolation`.
-- i18n: `packages/*/resources/lang/*.json`, 4 locales, parity checked by a unit test.
-- Tests: `packages/*/tests/Feature`, `packages/*/tests/Unit`, Dusk in `packages/*/tests/Browser`.
-- Structural changes: read `.github/docs/architecture/ARCHITECTURE.md` first.
+Entities → Projects → Epics (+ epic comments). Soft deletes with trash, restore and force delete; `active` flag with archived list; names unique among active records (DB-enforced).
+Per resource, in its owning package: `XController` + `XTrashController` + `XArchivedController`, `src/Http/Requests`, `src/Policies`, `src/Queries/*/XListQuery`, `src/Transformers`, `database/{factories,migrations,seeders}`, `resources/views/xs/{list,form}.blade.php`, `resources/lang/{es,eu,fr,en}.json`, `tests/{Feature,Unit,Browser}`.
 
-## Skills (source of truth for detailed rules)
-Rules are organized as skills in `.github/skills/`. OpenCode loads them on demand; Copilot/Claude read this file and the zone rules below.
-
-| Domain | Skill | Zone rules (applyTo) |
-|--------|-------|----------------------|
-| Core conventions | `project-rules` | — |
-| PHP style, Chisel, Pint | `php-conventions` | — |
-| Docker, DX, MCP Boost | `docker-commands` | — |
-| Test location, traits, checklist | `test-rules` | `tests.instructions.md` |
-| Models, relationships, soft deletes | `zone-rules-models` | `models.instructions.md` |
-| HTTP, controllers, policies, queries | `zone-rules-http` | `http.instructions.md` |
-| Views, forms, lists, Flux, i18n, UX | `zone-rules-views` | `views.instructions.md` |
-| Test types, Dusk, races | `zone-rules-tests` | `tests.instructions.md` |
-| Laravel best practices | `laravel-best-practices` | — |
-| Testing best practices | `testing-best-practices` | — |
-| Livewire, Flux UI, Tailwind, UX | `livewire-development`, `fluxui-development`, `tailwindcss-development`, `ux-design` | — |
-| Guided flows | `new-feature`, `new-resource`, `full-review`, `fix-review`, `fix-tests`, `consistency-review`, `ux-implement` | — |
-| SDD workflow | `openspec-explore`, `openspec-propose`, `openspec-update-change`, `openspec-apply-change`, `openspec-sync-specs`, `openspec-archive-change` | — |
-
-## When to Load Each Skill (OpenCode)
-
-| Task | Skills to Load |
-|------|----------------|
-| **Any conversation** | `project-rules` (auto-loaded via `opencode.jsonc`) |
-| Edit PHP files (models, controllers, etc.) | `php-conventions` |
-| Run Docker commands, tests, builds, MCP | `docker-commands` |
-| Write or modify tests | `test-rules` + `testing-best-practices` |
-| Edit `packages/*/src/Models/**` | `zone-rules-models` |
-| Edit `packages/*/src/Http/**`, `Policies`, `Queries`, `Transformers` | `zone-rules-http` |
-| Edit `packages/*/resources/views/**`, `packages/*/resources/lang/**` | `zone-rules-views` + `ux-design` |
-| Edit `packages/*/tests/**` | `zone-rules-tests` |
-| New CRUD resource | `new-resource` + `laravel-best-practices` |
-| New feature (action, filter, column, email) | `new-feature` + `laravel-best-practices` |
-| SDD: propose / apply / archive a change | `openspec-propose`, `openspec-apply-change`, `openspec-archive-change` |
-| Full code review | `full-review` |
-| Fix review findings | `fix-review` |
-| Fix failing tests | `fix-tests` |
-| Check cross-resource consistency | `consistency-review` |
-| Implement UX improvements | `ux-implement` + `ux-design` |
-| Livewire component work | `livewire-development` + `fluxui-development` |
-| Tailwind styling | `tailwindcss-development` |
-| Fortify auth changes | `fortify-development` |
-
-**Usage:** `skill("skill-name")` loads the skill for the current conversation. Multiple skills can be loaded.
-
-## Boost / docs
-- Prefer Boost MCP tools over shell: `database-query` (read-only), `database-schema`, `get-absolute-url`, `browser-logs`, `search-docs`.
-- `search-docs` before version-specific Laravel-ecosystem APIs (skip for copy/styling). Broad topic queries, no package names in the query, scope with `packages`. Reuse earlier results.
-- Zone rules live in `.github/instructions/*.instructions.md` (`models`, `http`, `views`, `tests`) at the workspace root and cover the nested application and packages: Copilot injects them automatically by `applyTo`; any other agent reads the one matching the paths it edits before touching them.
-- Reviewer agent sources live in `.github/agents/`. OpenCode and Claude read direct symlinks in `.opencode/agents/` and `.claude/agents/`. Skills are symlinked from `.github/skills/` to each client's native skills directory. The linked paths are read-only in VS Code; edit only the originals in `.github/`. Content changes are visible through the links immediately. Run `bash testing13/agents/link-opencode-assets.sh` and `bash testing13/agents/link-claude-assets.sh` to rebuild links after adding, deleting or renaming assets; both scripts locate the repository when run from another directory. The scripts do not adapt agent metadata or permissions between clients.
-- Guided flows (new-feature, new-resource, full-review, fix-review, fix-tests, consistency-review, ux-implement) are skills in `.github/skills/<name>/SKILL.md`, not `/commands`: activate them by skill, not with a slash command.
-- Activate the matching skill in `.github/skills` for its domain. No verification scripts/tinker when tests cover it.
+## Where the rules live
+- Zone rules: `.github/instructions/*.instructions.md`, the single source. Copilot applies them by `applyTo`, Claude by `paths` (`.claude/rules`), OpenCode through the `zone-rules-*` skills. Read the matching one before editing a path.
+- Skills: `.github/skills/`; agents: `.github/agents/`. Client folders only link to them: edit only `.github/`.
+- Prefer Boost MCP tools over shell (`database-query`, `database-schema`, `search-docs`, `browser-logs`). Use `search-docs` before version-specific Laravel-ecosystem APIs. No verification scripts or tinker when tests cover it.
 
 ## Spec-Driven Development (OpenSpec)
+Specs are invariants the code, tests and skills do not already express. Changes go in `openspec/changes/<id>/`; never edit `openspec/specs/` by hand. Project context and rules: `openspec/config.yaml`. Workflow: `openspec-*` skills. Manual: `.github/docs/spec_sdd.md`.
 
-Specs = invariantes que el código, los tests y las skills ya no expresan. Cambios = proposals en
-`openspec/changes/<id>/`; `openspec/specs/` no se edita a mano. Contexto y reglas del proyecto:
-`openspec/config.yaml`. Flujo: skills `openspec-*` (los tres clientes). Manual: `.github/docs/spec_sdd.md`.
+Read only the row you touch:
 
-Mapa (lee solo la fila que toque, no el fichero entero):
-
-| Toca | Lee |
-|------|------|
-| Modelos, casts, columnas, relaciones | `specs/basics-trash-archived`, `specs/<dominio>-domain` |
-| Controllers, requests, policies, queries | `specs/basics-crud-base`, `specs/basics-trash-archived`, `specs/<dominio>-domain` |
-| Papelera, restore, archivado, force delete | `specs/basics-trash-archived` |
-| Vistas Flux, componentes compartidos | `specs/basics-shared-views` |
-| Epics y comentarios | `specs/epics-comments` |
-| Planning y timeline (solo lectura) | `specs/planning-timeline` |
-| Relations entity↔project, imports entre paquetes | `specs/entity-projects-bridge`, `specs/package-boundaries` |
+| Touching | Read |
+|----------|------|
+| Models, casts, columns, relationships | `specs/basics-trash-archived`, `specs/<domain>-domain` |
+| Controllers, requests, policies, queries | `specs/basics-crud-base`, `specs/basics-trash-archived`, `specs/<domain>-domain` |
+| Trash, restore, archive, force delete | `specs/basics-trash-archived` |
+| Auth, users, account settings | `specs/basics-auth` |
+| Flux views, shared components | `specs/basics-shared-views` |
+| Epics and comments | `specs/epics-comments` |
+| Planning and timeline (read-only) | `specs/planning-timeline` |
+| Entity↔project relations, cross-package imports | `specs/entity-projects-bridge`, `specs/package-boundaries` |

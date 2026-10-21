@@ -3,6 +3,7 @@ name: Laravel Reviewer
 description: Laravel 13 and modern PHP specialist
 argument-hint: Review the repository without modifying application code.
 mode: subagent
+disallowedTools: Edit, Write, NotebookEdit, Bash
 permissions:
   - action: edit
     resource: "*"

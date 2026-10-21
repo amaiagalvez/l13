@@ -8,25 +8,46 @@ Encima de esas tres hay una cuarta capa, **OpenSpec / Spec-Driven Development** 
 
 ## Reutilización en OpenCode y Claude Code
 
-Los originales siguen en `.github/agents/` y `.github/skills/`. Ejecuta los dos scripts desde la raíz del repositorio después de clonar o al añadir o renombrar un agente o una skill:
+Los originales viven solo en `.github/` y los tres clientes los leen desde ahí:
+
+| Qué | Original | Copilot | Claude | OpenCode |
+|-----|----------|---------|--------|----------|
+| Instrucciones generales | `AGENTS.md` | nativo | `CLAUDE.md` → `@AGENTS.md` | nativo |
+| Reglas de zona | `.github/instructions/` | `applyTo` | `paths` vía `.claude/rules` | skills `zone-rules-*` |
+| Skills | `.github/skills/` | nativo | `.claude/skills` | `.opencode/skills` |
+| Agentes | `.github/agents/` | nativo | `.claude/agents/*.md` | `.opencode/agents/*.md` |
+| MCP Boost | — | `.vscode/mcp.json` | `.mcp.json` | `opencode.jsonc` |
+| Permisos | — | `.vscode/settings.json` | `.claude/settings.json` | `opencode.jsonc` |
+
+En `.claude/` y `.opencode/` solo hay **symlinks locales**, ignorados por git, que crean los scripts de `testing13/agents/` (repo `testing13`, clonado en `l13/testing13`). Lo único versionado ahí es `.claude/settings.json`. Skills y reglas se enlazan como carpeta completa; los agentes, uno a uno. Los cambios de contenido en `.github/` se ven al momento. En VS Code esas rutas son de solo lectura: edita siempre en `.github/`. Las tres configuraciones de MCP y de permisos deben decir lo mismo: si cambias una, cambia las otras.
+
+### Cuándo ejecutar los scripts
+
+Cada persona, en su máquina:
+
+* después de clonar `l13`;
+* después de un `pull` que **añada, borre o renombre un agente** en `.github/agents/` (las skills y las reglas no lo necesitan).
 
 ```
 bash testing13/agents/link-opencode-assets.sh
 bash testing13/agents/link-claude-assets.sh
 ```
 
-Ambos localizan la raíz del repositorio automáticamente y son seguros de volver a ejecutar. **Después de modificar `.github/agents/` (añadir, borrar o renombrar agentes), ejecuta siempre ambos scripts para mantener los symlinks actualizados en `.opencode/agents/` y `.claude/agents/`.** Los scripts eliminan primero los symlinks previos en sus carpetas de agentes y vuelven a crearlos. Esto asegura que nuevos agentes queden disponibles y los removidos queden ocultos.
+Localizan la raíz solos, son seguros de repetir y recrean los enlaces de agentes, skills y (en Claude) reglas. El de OpenCode intenta `opencode service restart`; si falla, ejecútalo a mano.
 
-* OpenCode descubre agentes en `.opencode/agents/`; son symlinks a `.github/agents/*.agent.md`. El instalador intenta reiniciar automáticamente su servicio en segundo plano con `opencode service restart`.
-* Claude Code descubre agentes en `.claude/agents/`; son symlinks directos a `.github/agents/*.agent.md`, sin copiar ni adaptar el frontmatter. Los permisos de Copilot/OpenCode no se convierten a restricciones de herramientas de Claude.
-* Las skills no se enlizan una a una: `.opencode/skills/` y `.claude/skills/` son un **symlink de carpeta completa** a `.github/skills/`. Añadir, borrar o renombrar una skill no necesita nada más; el script borra y recrea ese symlink.
-* Los archivos `.github/instructions/*.instructions.md` siguen siendo instrucciones de Copilot. OpenCode y Claude necesitan seguir las indicaciones de zona de `AGENTS.md` o de las propias skills; el `applyTo` de Copilot no se aplica en esos clientes.
+Los revisores son de solo lectura en los tres clientes: `permission` en OpenCode y `disallowedTools` en Claude, en el mismo frontmatter.
 
-Los scripts eliminan primero los symlinks previos en sus carpetas de agentes y vuelven a crearlos. Claude retira también las copias generadas por la versión anterior del script; otros archivos normales se conservan. Los enlaces están en `.gitignore`.
+### Tras la migración a las skills de OpenSpec (una sola vez)
 
-Las rutas `.claude/{agents,skills}/` y `.opencode/{agents,skills}/` son de solo lectura en VS Code, tanto al abrir la carpeta como el workspace. Edita agentes y skills desde `.github/`; los cambios de contenido se reflejan inmediatamente en los enlaces. Ejecuta los scripts para reconstruirlos tras añadir, borrar o renombrar archivos. Este bloqueo es del editor: los symlinks no impiden escribir en los originales desde un terminal u otro editor.
+Los comandos antiguos de OpenSpec siguen en local porque nunca se versionaron; bórralos, ejecuta los scripts y reinicia el cliente:
 
-Si el script no encuentra el CLI o falla el reinicio, informa del problema; en ese caso ejecuta `opencode service restart` manualmente.
+```
+rm -rf .claude/commands/openspec .opencode/command
+bash testing13/agents/link-opencode-assets.sh
+bash testing13/agents/link-claude-assets.sh
+```
+
+Instala también el CLI de OpenSpec como indica `spec_sdd.md`.
 
 # Punto de partida común (los flujos)
 
@@ -120,7 +141,7 @@ Las guardas que vigilan la coherencia de los recursos están ahí, no en la app:
 * **PHPStan baseline consistency check** — revisa que las baselines por paquete sean consistentes y que los errores nuevos sean genuinos antes de añadirlos (no workarounds de versión). `basics13` tiene 11 entradas preexistentes; `entities13` y `projects13` generan baselines vacías; `entity-projects13` requiere atención especial (actualmente 4 errores no resueltos en `PackageSeederTest.php`).
 
 El resto del automatismo:
-* `composer ci:check` (en `projects/demo13`) = `config:clear` + pint --test + PHPStan (nivel 9) + suite de la app con cobertura mínima del 80% y Clover en `storage/logs/coverage.xml`. Cubre **solo la app**: ni este script ni el workflow de CI ejecutan un solo test de paquete. Cada paquete se cubre con su propio `composer ci:check`, desde su repo.
+* `composer ci:check` (en `projects/demo13`) = `config:clear` + pint --test + PHPStan (nivel 7) + suite de la app con cobertura mínima del 80% y Clover en `storage/logs/coverage.xml`. Cubre **solo la app**: ni este script ni el workflow de CI ejecutan un solo test de paquete. Cada paquete se cubre con su propio `composer ci:check`, desde su repo.
 
 **Mantenimiento de baselines PHPStan**: las baselines (`phpstan-baseline.neon`) son específicas por paquete y no deben copiarse entre proyectos. `basics13` tiene 11 entradas preexistentes como trabajo alrededor de versiones de Fortify; `entities13` y `projects13` generan baselines vacías en primer análisis. `entity-projects13` requiere atención especial (actualmente 4 errores no resueltos en `PackageSeederTest.php`). **Política**: revisar cada error nuevo antes de añadirlo a la baseline — las entradas deben reflejar errores genuinos de análisis estático, no workarounds de versión. Al añadir un paquete nuevo, generar baseline fresh y revisar cada entrada antes de aceptarla.
 * Tests en paralelo en local: `DX php artisan test --parallel --compact <ruta>` — los flags van **antes** de la ruta. Nunca en CI: los jobs comparten una BD. Requiere el grant `laravel\_test\_%` (ya aplicado, y en `packages/basics13/tooling/mysql/init/02-parallel-test-databases.sql` para volúmenes nuevos).

@@ -3,6 +3,7 @@ name: UX Designer
 description: Tailwind and UX design reviewer for Blade, Livewire and Flux views
 argument-hint: Review the given screen or view against the ux-design skill without modifying code.
 mode: subagent
+disallowedTools: Edit, Write, NotebookEdit, Bash
 permissions:
   - action: edit
     resource: "*"

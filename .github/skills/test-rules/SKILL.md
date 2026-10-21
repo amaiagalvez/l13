@@ -46,8 +46,5 @@ description: "Test location rules, PHPUnit conventions, test types, database tra
 
 - Add/update tests for behavior changes (not for copy/styling). Cover the change and its key failures only.
 - Create: `DX php artisan make:test --phpunit Name` (feature; `--unit` for unit; no suite dir in name).
-- Run the narrowest: `DX php artisan test --compact <path|--filter=name>`; add `--parallel` for local speed (never in CI — shared DB) with flags before the path: `DX php artisan test --parallel --compact <path>`. Rerun after each fix.
-- Dusk (`tests/Browser`) only for JS behavior.
-- Duplicate-insert races tested per resource for store, update and restore by simulating a duplicate-key `QueryException`.
-- Dusk runs against `laravel_dusk` with a non-English default locale, so assert on translated text.
-- Run Dusk as: `docker compose exec -e XDEBUG_MODE=off laravel13-dusk php artisan dusk [tests/Browser/...php]`, never in the default service.
+- Running tests (narrowest first, package suites, guard rails): `docker-commands` skill.
+- Dusk, duplicate-insert races and test ownership: `.github/instructions/tests.instructions.md`.

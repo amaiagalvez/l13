@@ -3,6 +3,7 @@ name: Testing Reviewer
 description: Pest and PHPUnit testing specialist
 argument-hint: Review the repository without modifying application code.
 mode: subagent
+disallowedTools: Edit, Write, NotebookEdit, Bash
 permissions:
   - action: edit
     resource: "*"

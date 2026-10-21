@@ -1,5 +1,8 @@
 ---
 applyTo: "**/app/Models/**,packages/*/src/Models/**"
+paths:
+  - "**/app/Models/**"
+  - "packages/*/src/Models/**"
 ---
 
 # Model rules

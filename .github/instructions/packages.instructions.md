@@ -1,6 +1,8 @@
 ---
 description: "Use when changing packages, dependencies or cross-domain integrations. Keep domain packages independent and put entity/project coupling in the existing bridge."
 applyTo: "packages/**"
+paths:
+  - "packages/**"
 ---
 
 # Package boundaries

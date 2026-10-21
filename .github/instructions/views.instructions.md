@@ -1,5 +1,13 @@
 ---
 applyTo: "**/resources/views/**,**/lang/**,**/resources/lang/**,**/resources/js/**,packages/*/resources/views/**,packages/*/resources/lang/**,packages/*/lang/**"
+paths:
+  - "**/resources/views/**"
+  - "**/lang/**"
+  - "**/resources/lang/**"
+  - "**/resources/js/**"
+  - "packages/*/resources/views/**"
+  - "packages/*/resources/lang/**"
+  - "packages/*/lang/**"
 ---
 
 # View / i18n / UX rules
