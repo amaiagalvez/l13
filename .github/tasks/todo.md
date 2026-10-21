@@ -6,6 +6,7 @@
 [] cachear listados select public function selectOptions y Observer para limpiar la cache ante cualquier modificación en el original
 [] composer.json require y require-dev pasar a basics los que se pueda (debugbar no)
 [] automatizar sentry <== claude begiratu, hor daude config file batzuk
+[] quitar doble click en los botones
 
 # NEW TASK
 [ ] Haz un plan para desarrollar el CRUD de usuarios. Cualquier duda pregunta, no inventes nada

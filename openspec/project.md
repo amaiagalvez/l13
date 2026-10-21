@@ -34,6 +34,13 @@ estrictas entre paquetes.
 - Una sesión = una tarea. Specs antes que código; proposals antes que implementar
 - Comandos y clientes (Copilot/Claude/OpenCode) → `AGENTS.md`
 
+## Quality Gates (apply to EVERY change/spec)
+- **All tests MUST pass**: PHPUnit (Unit + Feature) AND Dusk (Browser) — no exceptions
+- **Static analysis MUST pass**: Larastan/PHPStan level 7 with zero errors
+- **Test coverage MUST be maintained**: If coverage drops, add meaningful tests (not trivial getters/setters) to restore it — focus on business logic, edge cases, and integration paths
+- **Cross-package verification**: If `basics13` is modified, ALL domain packages (`entities13`, `projects13`, `entity-projects13`, `demo13`) MUST be tested to ensure nothing breaks
+- **CI gate**: A change is NOT complete until the above checks pass in Docker (`DX` environment)
+
 ## External Dependencies
 - Boost MCP (laravel-boost): queries, schema, docs
 - Reglas: `.github/instructions/*.instructions.md` · skills: `.github/skills/`
