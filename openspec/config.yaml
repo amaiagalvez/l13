@@ -1,0 +1,40 @@
+schema: spec-driven
+githubCopilot:
+  cloudAgent: false
+
+# Solo lo que un agente no deduce del código. Reglas de código: AGENTS.md, .github/instructions y skills.
+context: |
+  Monorepo Laravel 13: app en projects/demo13 (auth, User, settings); dominios en packages/
+  (basics13 infra neutral, entities13 y projects13 independientes, entity-projects13 bridge).
+  Dependencias: bridge -> dominios, nunca al revés ni dominio -> dominio (spec package-boundaries).
+  Cada paquete es su propio repo git; el código del cambio se commitea en el paquete, el change en l13.
+  Las specs son invariantes que el código, los tests y las skills ya no expresan; no repetir esas reglas.
+  Escribe los artefactos en castellano; MUST/SHALL en inglés como en las specs existentes.
+  PRO_projects.entity_id es nullable en la base de datos (limitación de SQLite) pero obligatorio en la aplicación.
+
+rules:
+  proposal:
+    - Sin proposal para un bug que restaura lo ya especificado, typos, formato o tests de comportamiento existente; si el bug no estaba especificado, ese hueco es el proposal.
+    - Un change = un cambio atómico = un PR. Id kebab-case con verbo (add-, update-, remove-, refactor-).
+    - Antes de proponer, revisa openspec/changes/ por si otro change cubre lo mismo.
+  specs:
+    - Reutiliza una de las capabilities existentes; crear una nueva requiere justificarlo en el proposal.
+    - MODIFIED copia el requirement completo de openspec/specs/<capability>/spec.md y lo edita; si no, se pierden los escenarios omitidos.
+    - Presupuesto por spec ~60 líneas / ~500 palabras tras archivar; si se supera, algo se está duplicando.
+  design:
+    - Solo si una decisión necesita justificarse (transversal, patrón nuevo, migración o concurrencia).
+    - Sin arquitectura especulativa (repository, DTO, service layer, nuevas abstracciones) salvo aprobación explícita.
+  tasks:
+    - Incluye tests en el paquete dueño, i18n en los 4 locales (es, eu, fr, en) y la verificación final.
+
+operations:
+  apply:
+    guidance:
+      - Sigue AGENTS.md y la regla de zona de cada ruta que toques.
+      - Durante el desarrollo ejecuta el test más acotado; antes de cerrar, la suite del paquete afectado, Dusk si hay JS y PHPStan nivel 7, todo en Docker. La cobertura no puede bajar (CI exige ≥80 %).
+      - Si cambias basics13, prueba todos los paquetes (entities13, projects13, entity-projects13, demo13).
+      - Si el plan resulta erróneo, para y actualiza el change en vez de desviarte en el código.
+  archive:
+    guidance:
+      - Archiva después del merge, en su propio PR, y comprueba el presupuesto de las specs afectadas.
+      - Si el archivado crea, renombra o elimina una capability, actualiza el mapa de specs de AGENTS.md y las líneas "Invariantes" de .github/instructions/*.instructions.md y zone-rules-*.

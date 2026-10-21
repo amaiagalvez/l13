@@ -12,7 +12,7 @@ El componente de cabecera de listado (`page-header`) MUST incluir un botón "Bú
 - **THEN** el botón de búsqueda avanzada NO se renderiza
 
 ### Requirement: Modal de búsqueda avanzada reutilizable con grupos, orden y select type
-El componente `advanced-search-modal` MUST ser un modal Flux que reciba la configuración de campos (`searchableFields`) y emita eventos `filters-applied` con los filtros seleccionados. Debe soportar tipos de campo: `text`, `date`, `boolean`, `number`, `select`; cada uno con sus operadores. **Los campos se agrupan por `group`, se ordenan por `order` dentro del grupo, y se filtran por `visible` y `condition($scope)` antes de renderizar. Incluye toggle "Mostrar campos avanzados" para revelar campos con `visible=false`.**
+El componente `advanced-search-modal` MUST ser un modal Flux que recibe `searchableFields` y emite `filters-applied` con los filtros elegidos. MUST soportar los tipos `text`, `date`, `boolean`, `number` y `select` con sus operadores, agrupar los campos por `group`, ordenarlos por `order` y mostrar solo los que cumplen `visible` y `condition($scope)`; el toggle "Mostrar campos avanzados" revela los `visible=false`.
 
 #### Scenario: Se abre el modal y se muestran los campos configurados agrupados
 - **WHEN** el usuario clica "Búsqueda avanzada"
@@ -77,6 +77,10 @@ Los filtros activos MUST serializarse en parámetros de query string (`filters[f
 
 ### Requirement: El esqueleto de página y de tabla no se duplica
 Todo el esqueleto de un listado MUST venir de los componentes compartidos: encabezado, búsqueda, pestañas, tabla, paginación, mensajes de vacío y acciones de fila. **El encabezado ahora incluye opcionalmente el botón de búsqueda avanzada y badges de filtros activos.**
+
+#### Scenario: Se añade un recurso nuevo
+- **WHEN** un dominio incorpora un listado más
+- **THEN** reutiliza los componentes y solo declara columnas y payload
 
 #### Scenario: Se añade un recurso nuevo con búsqueda avanzada
 - **WHEN** un dominio incorpora un listado más con `searchableFields`

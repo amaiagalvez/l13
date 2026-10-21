@@ -77,6 +77,7 @@ Add an advanced search/filter modal to all resource list views (entities, entity
 ```
 
 **Configuration keys**:
+- `column` (required): database column name
 - `label` (required): i18n key for field label
 - `type` (required): `text`, `date`, `boolean`, `number`, `select` (for foreign keys with options)
 - `operators` (required): array of operator keys available for this field

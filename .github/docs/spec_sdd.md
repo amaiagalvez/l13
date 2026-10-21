@@ -1,7 +1,7 @@
 # Spec-Driven Development (OpenSpec)
 
-Manual corto de uso. Para el formato exacto y el guion completo, `openspec/AGENTS.md` es la
-referencia; este fichero explica **qué es esto, para qué sirve y qué comando se toca en cada momento**.
+Manual corto de uso. El guion completo lo llevan las skills `openspec-*` y las reglas del proyecto
+están en `openspec/config.yaml`; este fichero explica **qué es esto, para qué sirve y qué comando se toca en cada momento**.
 
 ---
 
@@ -25,7 +25,7 @@ Las specs solo guardan lo que **ninguna de las tres cosas de arriba ya dice**.
 
 ```
 openspec/
-├── project.md      Contexto del proyecto. Punteros a skills, no copias. Se edita a mano.
+├── config.yaml     Contexto y reglas por artefacto/operación. Punteros a skills, no copias. Se edita a mano.
 ├── specs/          LO QUE ESTÁ CONSTRUIDO. Verdad actual. No se edita a mano.
 │   └── <capability>/
 │       ├── spec.md     Invariantes (≤ ~500 palabras)
@@ -44,9 +44,9 @@ Regla mental: **`specs/` es el presente, `changes/` es el futuro, `archive/` es 
 | Capability | De qué va |
 |-----------|-----------|
 | `package-boundaries` | Dirección de dependencias y qué cuenta como acoplamiento |
+| `basics-auth` | Stack de autenticación reutilizable (Fortify + Livewire) |
 | `basics-crud-base` | Controller delgado, Form Request, list queries |
-| `basics-trash-archived` | Papelera, restore con conflicto, borrado definitivo |
-| `basics-support` | Transacciones, auditoría, carreras de nombre único |
+| `basics-trash-archived` | Papelera, restore con conflicto, borrado definitivo, transacciones, carreras de nombre único |
 | `basics-shared-views` | Componentes de lista y formulario, estado vacío |
 | `entities-domain` | Invariantes de cliente |
 | `projects-domain` | Invariantes de proyecto |
@@ -61,7 +61,14 @@ deduce el agente leyendo el código, una skill o un test?"*, la respuesta es sí
 
 ## Comandos
 
-No está instalado globalmente: siempre con `npx -y @forztf/openspec@latest`.
+CLI oficial con versión fijada (las skills llaman a `openspec`, así que tiene que estar en el PATH):
+
+```bash
+npm i -g @fission-ai/openspec@1.14.1
+openspec config set delivery skills   # solo skills, sin comandos duplicados por cliente
+```
+
+No uses `@forztf/openspec`: es una copia no oficial y abandonada.
 
 | Comando | Para qué |
 |---------|----------|
@@ -74,8 +81,8 @@ No está instalado globalmente: siempre con `npx -y @forztf/openspec@latest`.
 | `validate --all --strict` | Validar todo |
 | `archive <change-id> --yes` | Archivar un change ya mergeado y volcarlo a `specs/` |
 | `view` | Dashboard interactivo |
-| `update` | Refresca el bloque `OPENSPEC:` de `AGENTS.md`/`CLAUDE.md` |
-| `init` | Solo para repos nuevos |
+| `update` | Regenera las skills `openspec-*` tras subir de versión el CLI |
+| `init --tools claude,github-copilot,opencode` | Solo para repos nuevos o para migrar |
 
 > **Deprecados, no usar:** `openspec spec list` y `openspec change list` (avisan por pantalla).
 > Equivalentes vigentes: `openspec list --specs` y `openspec list`.
@@ -88,16 +95,21 @@ openspec list --specs              # ¿ya existe la capability?
 openspec show <capability> --type spec   # leer solo esa spec, no las diez
 ```
 
-### Comandos por cliente
+### Skills (los tres clientes)
 
-| Cliente | Invocación | Ficheros |
-|---------|-----------|----------|
-| OpenCode | `/openspec-proposal`, `/openspec-apply`, `/openspec-archive` | `.opencode/command/` |
-| Claude Code | `/openspec:proposal`, `/openspec:archive` | `.claude/commands/openspec/` |
-| Copilot | `/openspec-proposal`, `/openspec-apply`, `/openspec-archive` | `.github/prompts/` |
+Una sola copia en `.github/skills/openspec-*`, que Copilot lee directamente y Claude/OpenCode a
+través de sus enlaces. Se activan por nombre o pidiéndolo ("openspec propose …"):
 
-Los tres leen **el mismo** `openspec/`. En OpenCode/Claude la skill `openspec-workflow` ejecuta el
-guion; en Copilot no llega (no lee skills), así que ahí hay que pedirlo explícitamente.
+| Skill | Para qué |
+|-------|----------|
+| `openspec-explore` | Pensar el cambio antes de proponerlo |
+| `openspec-propose` | Crear el change con proposal, specs, design y tasks |
+| `openspec-update-change` | Revisar un change ya creado |
+| `openspec-apply-change` | Implementar sus tasks |
+| `openspec-sync-specs` | Volcar deltas a `specs/` sin archivar |
+| `openspec-archive-change` | Archivar tras el merge |
+
+Son generadas: no se editan a mano; las reglas del proyecto van en `openspec/config.yaml`.
 
 ---
 
@@ -242,6 +254,6 @@ no se edita a mano.
 - Si `openspec/specs/` pasa de 10 capabilities, o una spec se acerca a 60 líneas, **algo se está
   duplicando**. Revisar en vez de crecer.
 - Una sesión normal carga **1-4 specs** (la fila que toca del mapa de `AGENTS.md`), no las 10.
-- `openspec/AGENTS.md` lo regenera `openspec update`: **no editarlo a mano**.
-- La sección OpenSpec de `AGENTS.md` vive una sola vez; los ficheros por cliente los genera la
-  herramienta y se sobrescriben con `update`.
+- Las skills `openspec-*` las regenera `openspec update`: **no editarlas a mano**.
+- La sección OpenSpec de `AGENTS.md` vive una sola vez; el contexto y las reglas, solo en
+  `openspec/config.yaml`.

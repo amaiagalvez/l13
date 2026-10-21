@@ -88,11 +88,11 @@ Esa skill reverifica que el hallazgo sigue existiendo, hace el cambio mínimo y 
 
 Antes de los flujos, una decisión de encuadre: **si el cambio es un bug que restaura lo ya especificado, se arregla directo**. Si introduce capacidades, rompe algo o mueve arquitectura, primero se escribe el *why* en `openspec/changes/<id>/` y luego se implementa.
 
-* `/openspec-proposal` — redacta el proposal (`.github/prompts/` en Copilot, `.opencode/command/` en OpenCode, `.claude/commands/openspec/` en Claude).
-* `/openspec-apply` — implementa la proposal activa.
-* `/openspec-archive` — al mergear, mueve la proposal a `changes/archive/` y actualiza `specs/`. Equivale a `openspec archive <id> --yes`.
+* `openspec-propose` — redacta el change (proposal, specs, design, tasks).
+* `openspec-apply-change` — implementa sus tasks.
+* `openspec-archive-change` — al mergear, mueve el change a `changes/archive/` y actualiza `specs/`.
 
-El formato exacto y el guion completo están en `openspec/AGENTS.md`; el "para qué sirve" en `.github/docs/spec_sdd.md`. Un proposal = un cambio atómico = un PR, con `## ADDED|MODIFIED|REMOVED Requirements` y un `#### Scenario:` por requirement. `openspec/specs/` no se edita a mano. Para saber qué spec leer antes de tocar algo, AGENTS.md tiene el mapa.
+Son skills, iguales en los tres clientes (`.github/skills/openspec-*`). Las reglas del proyecto están en `openspec/config.yaml`; el "para qué sirve" en `.github/docs/spec_sdd.md`. Un proposal = un cambio atómico = un PR, con `## ADDED|MODIFIED|REMOVED Requirements` y un `#### Scenario:` por requirement. `openspec/specs/` no se edita a mano. Para saber qué spec leer antes de tocar algo, AGENTS.md tiene el mapa.
 
 ## Comprobaciones automáticas (no hace falta pedirlas)
 Dos suites distintas, y conviene no confundirlas:

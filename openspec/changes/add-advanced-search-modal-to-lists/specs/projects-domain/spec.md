@@ -11,6 +11,10 @@ El listado de proyectos (`ProjectListQuery`) MUST exponer campos filtrables: `na
 - **WHEN** en el modal se selecciona "Entidad", operador "está vacío"
 - **THEN** la lista muestra proyectos con `entity_id IS NULL`
 
+#### Scenario: Se filtra por entidad asociada
+- **WHEN** en búsqueda avanzada se usa campo "Entidad", operador "es igual a", valor "7"
+- **THEN** se encuentran proyectos con `entity_id = 7`
+
 #### Scenario: Campo entidad oculto cuando lista está scopeada por entidad
 - **WHEN** se accede a lista de proyectos desde una entidad (route tiene parámetro entity)
 - **THEN** el campo "Entidad" no aparece en el modal (condition retorna false)
@@ -37,19 +41,3 @@ El listado de épicas (`EpicListQuery`) MUST exponer campos filtrables: `name` (
 #### Scenario: Usuario filtra épicas por rango de fechas de inicio
 - **WHEN** en el modal se selecciona "Fecha inicio", operador "después de", valor "2024-07-01"
 - **THEN** la lista muestra épicas con `start_date > '2024-07-01'`
-
-## MODIFIED Requirements
-
-### Requirement: El proyecto tiene fechas y entidad opcional
-Un proyecto MUST tener `name`, `start_date`, `end_date` (nullable), `notes` (nullable), `active` (default true), `entity_id` (nullable FK). **Todos estos campos son filtrables en la búsqueda avanzada del listado. El campo `entity_id` usa type=select **con multiple=true por defecto**, con options scope-aware y se oculta automáticamente cuando la lista ya está filtrada por entidad.**
-
-#### Scenario: Se filtra por entidad asociada
-- **WHEN** en búsqueda avanzada se usa campo "Entidad", operador "es igual a", valor "7"
-- **THEN** se encuentran proyectos con `entity_id = 7`
-
-### Requirement: La épica hereda proyecto y tiene fechas opcionales
-Una épica MUST pertenecer a un proyecto (`project_id` FK), tener `name`, `notes` (nullable), `start_date` (nullable), `end_date` (nullable), `active` (default true). **Todos estos campos son filtrables en la búsqueda avanzada del listado. El campo `project_id` usa type=select **con multiple=true por defecto**, con options scope-aware y se oculta automáticamente cuando la lista ya está filtrada por proyecto.**
-
-#### Scenario: Se filtra épicas por rango de fechas de inicio
-- **WHEN** en búsqueda avanzada se usa campo "Fecha inicio", operador "después de", valor "2024-07-01"
-- **THEN** se encuentran épicas con `start_date > '2024-07-01'`

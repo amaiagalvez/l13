@@ -19,6 +19,10 @@ El listado de entidades (`EntityListQuery`) MUST exponer campos filtrables: `nam
 - **WHEN** búsqueda simple = "Tech" Y filtro avanzado = active=false
 - **THEN** la lista muestra entidades con nombre que contiene "Tech" Y active=false
 
+#### Scenario: Las opciones de tipos respetan el scope del listado
+- **WHEN** se abre el modal desde el listado de activos, archivados o papelera
+- **THEN** el select "Tipos" ofrece solo los tipos de entidad activos de ese scope
+
 ### Requirement: Listado de tipos de entidad soporta búsqueda avanzada multilingüe
 El listado de tipos de entidad (`EntityTypeListQuery`) MUST exponer campos filtrables: `name_eu` (text), `name_es` (text), `name_fr` (text), `name_en` (text) agrupados en group=`names`, `notes` (text, visible=false), `active` (boolean), `created_at` (date). La vista `entity-types/list.blade.php` MUST incluir el modal.
 
@@ -33,15 +37,3 @@ El listado de tipos de entidad (`EntityTypeListQuery`) MUST exponer campos filtr
 #### Scenario: Usuario filtra tipos por nombre en cualquier idioma
 - **WHEN** en el modal se usa grupo "Nombres" con campo "Nombre (fr)", operador "contiene", valor "Entre"
 - **THEN** se encuentran tipos con `name_fr LIKE '%Entre%'`
-
-## MODIFIED Requirements
-
-### Requirement: El tipo de cliente tiene nombre en 4 idiomas
-El tipo de cliente MUST almacenar su nombre en euskera (`name_eu`), español (`name_es`), francés (`name_fr`) e inglés (`name_en`). El euskera es obligatorio; los demás son opcionales pero se validan igual si se envían. **Cada campo de nombre es filtrable independientemente en la búsqueda avanzada, agrupados bajo grupo "Nombres".**
-
-#### Scenario: Se filtra por nombre en francés
-- **WHEN** en búsqueda avanzada se usa campo "Nombre (fr)", operador "contiene", valor "Entre"
-- **THEN** se encuentran tipos con `name_fr LIKE '%Entre%'`
-
-### Requirement: CRUD canónico con papelera, archivado y selectores
-El tipo de cliente sigue el patrón canónico: Controller + TrashController + ArchivedController + ListQuery + SelectOptionsQuery + Transformer + FormRequest + Policy + Factory + Vistas Flux + Tests. Los selectores solo devuelven activos. **El listado (activos, archivados, papelera) soporta búsqueda avanzada además de la simple, y las opciones del select `entity_type_ids` en entidades respetan el scope (active/archived/trashed).**

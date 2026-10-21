@@ -93,7 +93,7 @@ What each guard rail enforces:
 DX ./vendor/bin/phpstan analyse
 ```
 
-Level 9.
+Level 7 (`phpstan.neon`).
 
 ## Build Commands
 

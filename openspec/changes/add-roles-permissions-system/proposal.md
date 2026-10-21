@@ -38,7 +38,11 @@ Currently the system only has basic authentication via `basics13` with a simple 
 
 ## Affected Capabilities
 - **Modified:** `basics-auth` - extends user model with roles relationship
-- **New:** `basics-roles-permissions` - new capability for the RBAC system
+- **New:** `basics-roles-permissions` - role and permission model
+- **New:** `basics-permission-checks` - permission resolution (wildcard, per-request cache, configurable user model)
+- **New:** `basics-roles-admin` - role/permission CRUD, user assignment and permissions summary
+- **New:** `basics-super-admin` - fixed, hidden and immutable user ID=1
+- **Modified:** `entity-projects-bridge` - cross-domain selectors without explicit permission
 
 ## Package Boundaries
 - `basics13` owns: Role, Permission models, their CRUD, user-role assignment API

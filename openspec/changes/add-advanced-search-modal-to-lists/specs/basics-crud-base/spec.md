@@ -1,21 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: ListQueryBase define campos filtrables con metadatos completos y scope-aware
-Cada `ListQueryBase` concreto MUST implementar el método abstracto `searchableFields(string $scope): array` que devuelve la configuración de campos filtrables. El parámetro `$scope` (`active`|`archived`|`trashed`) se pasa a los callables de `condition` y `options` para que la visibilidad y las opciones respeten el estado de la lista. Cada campo define:
-- `column` (string, required): nombre de la columna en BD
-- `label` (string, required): clave i18n para la etiqueta
-- `type` (string, required): `text` | `date` | `boolean` | `number` | `select`
-- `operators` (array<string>, required): lista de claves de operador disponibles
-- `default_operator` (string, optional): operador preseleccionado
-- `visible` (bool, optional, default `true`): si se muestra en modal
-- `order` (int, optional, default `999`): orden dentro del grupo
-- `group` (string, optional, default `'general'`): agrupación visual (`basic`, `dates`, `status`, `relations`, `names`, `custom`)
-- `nullable` (bool, optional, default `false`): si acepta nulos (habilita `is_empty`)
-- `placeholder` (string, optional): clave i18n para placeholder
-- `help` (string, optional): clave i18n para tooltip
-- `condition` (callable, optional): `fn(string $scope): bool` para mostrar condicionalmente
-- `options` (callable, optional, para `select`): `fn(string $scope): array<int,string>` retorna `[value => label]`
-- `multiple` (bool, optional, para `select`, **default `true`**): si permite selección múltiple. **Por defecto `true` para todos los campos select.**
+Cada `ListQueryBase` concreto MUST implementar `searchableFields(string $scope): array`, que devuelve los campos filtrables con su columna, etiqueta, tipo, operadores, visibilidad, orden, grupo y nulabilidad. El `$scope` (`active`|`archived`|`trashed`) MUST llegar a los callables `condition` y `options`, para que visibilidad y opciones respeten el estado de la lista. Un campo `select` MUST ser de selección múltiple salvo que declare `multiple=false`.
 
 #### Scenario: EntityListQuery define sus campos filtrables con configuración completa
 - **WHEN** se llama `searchableFields('active')` en `EntityListQuery`
@@ -69,7 +55,7 @@ El método `paginate()` MUST aceptar un parámetro opcional `array $filters = []
 - **THEN** todas las condiciones se unen con `AND` en el query
 
 ### Requirement: Búsqueda simple y filtros avanzados coexisten
-Cuando tanto `$search` como `$filters` tienen valores, AMBOS se aplican: la búsqueda simple sobre sus columnas (`searchColumns`) y los filtros avanzados sobre sus campos respectivos, todo combinado con AND.
+Cuando tanto `$search` como `$filters` tienen valores, AMBOS MUST aplicarse: la búsqueda simple sobre sus columnas (`searchColumns`) y los filtros avanzados sobre sus campos respectivos, todo combinado con AND.
 
 #### Scenario: Búsqueda simple "Acme" + filtro avanzado active=false
 - **WHEN** `$search = 'Acme'` y `$filters = ['active' => ['operator' => 'is_false', 'value' => true]]`

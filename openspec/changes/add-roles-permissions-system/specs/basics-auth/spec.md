@@ -1,8 +1,3 @@
-# Delta Spec: basics-auth
-
-## Change ID
-`add-roles-permissions-system`
-
 ## MODIFIED Requirements
 
 ### Requirement: El modelo de usuario predeterminado puede reemplazarse
@@ -12,12 +7,13 @@ el modelo configurado MUST extender `Illuminate\Foundation\Auth\User`, como requ
 creación de usuarios de Fortify. **El modelo de usuario MUST implementar la concern `HasRoles` para
 soportar asignación dinámica de roles y verificación de permisos (usa `MorphToMany` con pivote polimórfico).**
 
-#### Scenario: El host usa el modelo predeterminado con roles
+#### Scenario: El host usa el modelo predeterminado
 - **WHEN** el proveedor de usuarios no configura un modelo específico
 - **THEN** el stack usa el modelo `User` provisto por `basics13` que incluye la concern `HasRoles`
 
-#### Scenario: El host configura un modelo propio con roles
+#### Scenario: El host configura un modelo propio
 - **WHEN** el host configura otro modelo compatible con Fortify en `auth.providers.users.model`
+- **THEN** las acciones y los flujos de autenticación usan ese modelo sin requerir `App\Models\User`
 - **THEN** el modelo configurado MUST usar la concern `HasRoles` (o implementar su interfaz) para
   mantener la funcionalidad de roles y permisos
 
@@ -29,6 +25,10 @@ archivar y papelera) y MUST operar sobre el modelo de `auth.providers.users.mode
 si la capability `basics-roles-permissions` está instalada.**
 **El modelo de usuario MUST incluir un campo `lang` para almacenar el idioma preferido del usuario (eu, es, fr, en).**
 **El sistema MUST incluir un usuario super-admin fijo con `id = 1` que tiene acceso total implícito, está oculto en listados, y es inmutable.**
+
+#### Scenario: El host administra cuentas con su propio modelo
+- **WHEN** el host configura `auth.providers.users.model` y gestiona usuarios
+- **THEN** el listado, las altas y las bajas operan sobre ese modelo sin requerir el del paquete
 
 #### Scenario: El host administra cuentas y asigna roles (con roles instalado)
 - **WHEN** el host edita una cuenta de usuario y `basics-roles-permissions` está instalado
@@ -61,21 +61,11 @@ si la capability `basics-roles-permissions` está instalada.**
 ## ADDED Requirements
 
 ### Requirement: El modelo de usuario expone API de roles y permisos
-El modelo de usuario (ya sea el predeterminado o el configurado por el host) MUST exponer los
-siguientes métodos a través de la concern `HasRoles`:
-- `roles()` - relación MorphToMany con Role (pivote polimórfico)
-- `hasRole(string|array $roles): bool` - verifica si tiene alguno de los roles **activos**
-- `hasAllRoles(array $roles): bool` - verifica si tiene todos los roles **activos**
-- `hasPermission(string|array $permissions): bool` - verifica permiso vía roles y permisos **activos**
-- `hasPermissionTo(string $permission): bool` - alias; implementa wildcard (exact → module.manage → *.manage)
-- `hasModuleAccess(string $module): bool` - alias de `hasPermissionTo("{$module}.manage")`
-- `assignRole($role)` - asigna rol(es)
-- `removeRole($role)` - remueve rol(es)
-- `syncRoles(array $roles)` - sincroniza roles; empty array permitido (acción explícita)
-- `getAllPermissions()` - retorna colección de todos los permisos efectivos (unión, activos)
-- `loadPermissions()` - eager-loads permissions para request actual (usa `once()`)
-- `refreshPermissions()` - limpia cache de request (llamar tras cambios en mismo request)
-- `getRoleAssignments()` - retorna datos de pivote para auditoría
+El modelo de usuario, el predeterminado o el del host, MUST exponer mediante la concern `HasRoles` la
+relación polimórfica `roles()`, la consulta de roles y permisos (`hasRole`, `hasAllRoles`,
+`hasPermission`, `hasPermissionTo`, `hasModuleAccess`, `getAllPermissions`) y la asignación de roles
+(`assignRole`, `removeRole`, `syncRoles`, que admite un array vacío). Solo cuentan los roles y
+permisos activos.
 
 #### Scenario: Verificación de permiso en policy de dominio
 - **WHEN** una policy de `entities13` verifica `$user->hasPermissionTo('entities.edit')`

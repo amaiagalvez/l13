@@ -246,9 +246,10 @@
 ## Phase 7: Spec Updates
 
 - [ ] Update `specs/basics-auth/spec.md` - add requirement for roles relationship on User
-- [ ] Create new `specs/basics-roles-permissions/spec.md` with full requirements
+- [ ] Create new specs `basics-roles-permissions`, `basics-permission-checks`, `basics-roles-admin` and `basics-super-admin`, and add the cross-domain selector requirement to `entity-projects-bridge`
 - [ ] Create `specs/basics-roles-permissions/design.md` with technical design
 - [ ] Validate specs with `openspec validate --strict`
+- [ ] After archiving, add a "Roles y permisos" row to the specs map in `AGENTS.md` (`basics-roles-permissions`, `basics-permission-checks`, `basics-roles-admin`, `basics-super-admin`)
 
 ## Phase 8: Domain Package Integration (Future - Separate PRs)
 
