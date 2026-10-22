@@ -42,7 +42,7 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 - Fechas legibles y localizadas con el formato normativo de cada idioma: euskera `2026-10-02` (año-mes-día, Euskaltzaindia), castellano `02-10-2026`, francés `02/10/2026`, inglés `Oct 2, 2026`. Fuente única: `x-list.local-time` y `formatLocalDateTime`.
 - Cabeceras de tabla en sentence case, 12–13px, `text-zinc-600` (contraste AA).
 - Paginación 15 por defecto, con "n–m / total".
-- Vacío: mensaje + botón de crear. Carga: skeleton. Móvil: filas → tarjetas.
+- Vacío: `x-list.empty-state` (un icono, una frase y, por el slot, el botón de crear; sin botón si la búsqueda acotó la lista). Carga: la búsqueda marca `aria-busy` y atenúa las filas. Móvil: filas → tarjetas (CSS de `.resource-list-table` + `data-label` desde la cabecera; no hace falta marcado por listado).
 
 ## Formularios y drawers
 
