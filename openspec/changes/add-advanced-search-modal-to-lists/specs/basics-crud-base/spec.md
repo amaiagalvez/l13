@@ -3,12 +3,15 @@
 ### Requirement: ListQueryBase define campos filtrables con metadatos completos y scope-aware
 Cada `ListQueryBase` concreto MUST implementar `searchableFields(string $scope): array`, que devuelve los campos filtrables con su columna, etiqueta, tipo, operadores, visibilidad, orden, grupo y nulabilidad. El `$scope` (`active`|`archived`|`trashed`) MUST llegar a los callables `condition` y `options`, para que visibilidad y opciones respeten el estado de la lista. Un campo `select` MUST ser de selección múltiple salvo que declare `multiple=false`.
 
+#### Scenario: El campo de estado solo se ofrece en la papelera
+- **WHEN** se llama `searchableFields('trashed')` en un listado con flag `active`
+- **THEN** incluye `active`: type=`boolean`, operators=[is_true, is_false], group=`status`, order=10; con `active` o `archived` no lo incluye
+
 #### Scenario: EntityListQuery define sus campos filtrables con configuración completa
 - **WHEN** se llama `searchableFields('active')` en `EntityListQuery`
 - **THEN** devuelve array con:
   - `name`: column=`ENT_entities.name`, type=`text`, operators=[contains, equals, not_equals, starts_with, ends_with], default_operator=`contains`, group=`basic`, order=10
   - `notes`: column=`ENT_entities.notes`, type=`text`, operators=[contains, equals, not_equals], default_operator=`contains`, group=`basic`, order=20, visible=`false`
-  - `active`: column=`ENT_entities.active`, type=`boolean`, operators=[is_true, is_false], default_operator=`is_true`, group=`status`, order=10
   - `created_at`: column=`ENT_entities.created_at`, type=`date`, operators=[equals, before, after, between], default_operator=`between`, group=`dates`, order=10
   - `entity_type_ids`: column=`ENT_entity_entity_type.entity_type_id`, type=`select`, operators=[equals, not_equals], default_operator=`equals`, group=`relations`, order=10, options=callable returning active entity types for scope, multiple=`true`
 
@@ -19,7 +22,6 @@ Cada `ListQueryBase` concreto MUST implementar `searchableFields(string $scope):
   - `notes`: column=`PRO_projects.notes`, type=`text`, operators=[contains, equals, not_equals], default_operator=`contains`, group=`basic`, order=20, visible=`false`
   - `start_date`: column=`PRO_projects.start_date`, type=`date`, operators=[equals, before, after, between], default_operator=`between`, group=`dates`, order=10, nullable=`false`
   - `end_date`: column=`PRO_projects.end_date`, type=`date`, operators=[equals, before, after, between, is_empty], default_operator=`between`, group=`dates`, order=20, nullable=`true`
-  - `active`: column=`PRO_projects.active`, type=`boolean`, operators=[is_true, is_false], default_operator=`is_true`, group=`status`, order=10
   - `created_at`: column=`PRO_projects.created_at`, type=`date`, operators=[equals, before, after, between], default_operator=`between`, group=`dates`, order=30
   - `entity_id`: column=`PRO_projects.entity_id`, type=`select`, operators=[equals, not_equals, is_empty], default_operator=`equals`, group=`relations`, order=10, nullable=`true`, options=callable returning active entities for scope, condition=fn($scope) => !request()->route('entity'), **multiple=`true`**
 

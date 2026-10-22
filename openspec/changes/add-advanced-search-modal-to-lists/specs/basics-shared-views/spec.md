@@ -12,11 +12,11 @@ El componente de cabecera de listado (`page-header`) MUST incluir un botón "Bú
 - **THEN** el botón de búsqueda avanzada NO se renderiza
 
 ### Requirement: Modal de búsqueda avanzada reutilizable con grupos, orden y select type
-El componente `advanced-search-modal` MUST ser un modal Flux que recibe `searchableFields` y emite `filters-applied` con los filtros elegidos. MUST soportar los tipos `text`, `date`, `boolean`, `number` y `select` con sus operadores, agrupar los campos por `group`, ordenarlos por `order` y mostrar solo los que cumplen `visible` y `condition($scope)`; el toggle "Mostrar campos avanzados" revela los `visible=false`.
+El componente `advanced-search-modal` MUST ser un modal Flux que recibe `searchableFields` y emite `filters-applied` con los filtros elegidos. MUST soportar los tipos `text`, `date`, `boolean`, `number` y `select` con sus operadores, mostrarlos en una sola lista ordenada por `group` y por `order`, sin secciones plegables, y descartar en el servidor los que no cumplen `condition($scope)`; el toggle "Mostrar campos avanzados" (estado del componente Livewire, no de la URL) revela los `visible=false`.
 
-#### Scenario: Se abre el modal y se muestran los campos configurados agrupados
+#### Scenario: Se abre el modal y se muestran los campos configurados en orden
 - **WHEN** el usuario clica "Búsqueda avanzada"
-- **THEN** se abre un modal con secciones por grupo (`basic`, `dates`, `status`, `relations`, etc.), cada una con sus campos ordenados por `order`
+- **THEN** se abre un modal con los campos en una sola lista, ordenados por grupo (`basic`, `dates`, `status`, `relations`) y por `order`
 
 #### Scenario: Operadores por tipo de campo
 - **WHEN** el campo es de tipo `text`
@@ -32,7 +32,7 @@ El componente `advanced-search-modal` MUST ser un modal Flux que recibe `searcha
 
 #### Scenario: Campo condicional no se muestra cuando condition retorna false
 - **WHEN** un campo tiene `condition($scope)` que retorna false (ej. `entity_id` cuando la lista ya está filtrada por entidad)
-- **THEN** el campo no aparece en el modal
+- **THEN** el campo no aparece en el modal, tampoco al mostrar los campos avanzados
 
 #### Scenario: Campo con visible=false no se muestra por defecto
 - **WHEN** un campo tiene `visible=false` (ej. `notes`)
@@ -55,7 +55,7 @@ El componente `advanced-search-modal` MUST ser un modal Flux que recibe `searcha
 - **THEN** se resetean todos los campos y se emite `filters-applied` con array vacío
 
 ### Requirement: Los filtros avanzados persisten en la URL y badges en cabecera
-Los filtros activos MUST serializarse en parámetros de query string (`filters[field][operator]=value`) para que el estado sea compartible y persistente al recargar. La búsqueda simple (`search`) y los filtros avanzados (`filters`) deben coexistir. **La cabecera muestra badges de filtros activos con botón de eliminación (x) que dispara `filter-removed` para actualizar URL y recargar lista.**
+Los filtros activos MUST serializarse en parámetros de query string (`filters[field][operator]=value`) para que el estado sea compartible y persistente al recargar. La búsqueda simple (`search`) y los filtros avanzados (`filters`) deben coexistir. **La cabecera muestra badges de filtros activos; el botón de eliminación (x) de cada uno es un enlace a la lista sin ese filtro, de vuelta a la primera página.**
 
 #### Scenario: Se aplican filtros y la URL se actualiza
 - **WHEN** se emite `filters-applied` con filtros
@@ -67,7 +67,7 @@ Los filtros activos MUST serializarse en parámetros de query string (`filters[f
 
 #### Scenario: Badge de filtro activo aparece en cabecera con botón eliminar
 - **WHEN** hay filtros activos en la URL
-- **THEN** la cabecera muestra badges tipo "Nombre: contiene Acme" con botón (x) que al clicar remueve ese filtro y recarga
+- **THEN** la cabecera muestra badges tipo "Nombre: contiene Acme" con botón (x) que enlaza a la lista sin ese filtro
 
 #### Scenario: Toggle "Mostrar campos avanzados" es estado local, no URL
 - **WHEN** el usuario activa "Mostrar campos avanzados" y recarga la página

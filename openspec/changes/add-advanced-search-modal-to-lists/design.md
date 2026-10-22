@@ -124,7 +124,7 @@ Add an advanced search/filter modal to all resource list views (entities, entity
 - Select type supports single/multi-value with same operators as number
 
 ### URL State
-**Decision**: Advanced filters serialize to URL query parameters (`filters[field][operator]=value`). Simple search remains `search=term`. Both can coexist. The "Show advanced fields" toggle is **local Alpine state** in the modal (not persisted to URL). Active filter badges in the page header have remove buttons that dispatch `filter-removed` event to parent, which updates URL and reloads list.
+**Decision**: Advanced filters serialize to URL query parameters (`filters[field][operator]=value`). Simple search remains `search=term`. Both can coexist. The "Show advanced fields" toggle is **component state (Livewire), not in the URL** — originally planned as local Alpine state** in the modal (not persisted to URL). Active filter badges in the page header have remove buttons that dispatch `filter-removed` event to parent, which updates URL and reloads list.
 
 **Rationale**:
 - Shareable, bookmarkable filter state
@@ -137,7 +137,7 @@ Add an advanced search/filter modal to all resource list views (entities, entity
 
 | Risk | Mitigation |
 |------|------------|
-| Complex modal with many fields | Group fields by type; collapsible sections; search within fields |
+| Complex modal with many fields | Order fields by group and order; advanced fields behind a toggle |
 | Performance with many filters | Indexes on commonly filtered columns; limit filter count per request |
 | i18n for operator labels | Add to existing language files; parity test |
 | Mobile usability | Modal is full-screen on mobile (Flux default) |

@@ -148,7 +148,7 @@ segundos, sobra.
 | Listas de campos, `#[Fillable]`, casts | el modelo (y `ModelSchemaParityTest`) |
 | Árboles de ficheros, listas de clases | `ls` / `rg` |
 | Extractos de código | el fichero, o `design.md` |
-| Estilo, Pint, PHPStan, Chisel | skill `php-conventions` |
+| Estilo, Pint, PHPStan | skill `php-conventions` |
 | Dónde van los tests, traits, Dusk | skill `test-rules` |
 
 ### Plantilla

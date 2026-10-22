@@ -85,7 +85,7 @@ What each guard rail enforces:
 ### CI Coverage
 
 - CI enforces ≥80% total code coverage, uploads Clover report
-- Local check: `docker compose run --rm laravel13 php artisan test --coverage` (the `laravel13-phpunit` profile points to a missing script)
+- Local check: `docker compose --profile phpunit run --rm laravel13-phpunit`
 
 ### Static Analysis
 
@@ -114,8 +114,9 @@ What each profile runs, as `projects/demo13/docker-compose.yml` defines it. PHP 
   — `composer install`, `migrate:fresh` (drops every table) and `db:seed`.
 - Migrate + seed: `docker compose --profile migrate run --rm laravel13-migrate` — `composer install`, `migrate` and `db:seed`.
 - PHPUnit with coverage: `docker compose --profile phpunit run --rm laravel13-phpunit`
-  — runs `/packages/basics13/tooling/run-phpunit-with-coverage.sh`, which does not exist in
-  `basics13/tooling` today, so this profile fails; use the one-off coverage command below.
+  — runs `basics13/tooling/run-phpunit-with-coverage.sh`: `composer test:coverage` (Pint check,
+  PHPStan, then the host tests with coverage `--min=80` and a Clover report), and appends the
+  summary to `storage/logs/test-coverage-summary.txt`.
 
 The `npm` profiles publish port 3000. None of these profiles is safe in a read-only review: they
 rewrite files, lock files or the database.

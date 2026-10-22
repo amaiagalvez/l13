@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Listado de proyectos soporta búsqueda avanzada con select condicional multiple
-El listado de proyectos (`ProjectListQuery`) MUST exponer campos filtrables: `name` (text), `notes` (text, visible=false), `start_date` (date), `end_date` (date, nullable), `active` (boolean), `created_at` (date), `entity_id` (select, nullable, **multiple=true**, options=callable returning active entities per scope, condition=hide when scoped to entity). La vista `projects/list.blade.php` MUST incluir el modal de búsqueda avanzada y pasar la configuración desde el query.
+El listado de proyectos (`ProjectListQuery`) MUST exponer campos filtrables: `name` (text), `notes` (text, visible=false), `start_date` (date), `end_date` (date, nullable), `active` (boolean, solo en el scope `trashed`), `created_at` (date), `entity_id` (select, nullable, **multiple=true**, options=callable returning active entities per scope, condition=hide when scoped to entity). La vista `projects/list.blade.php` MUST incluir el modal de búsqueda avanzada y pasar la configuración desde el query.
 
 #### Scenario: Usuario filtra proyectos por rango de fechas
 - **WHEN** en el modal se selecciona "Fecha inicio", operador "entre", valores "2024-01-01" y "2024-06-30"
@@ -19,16 +19,20 @@ El listado de proyectos (`ProjectListQuery`) MUST exponer campos filtrables: `na
 - **WHEN** se accede a lista de proyectos desde una entidad (route tiene parámetro entity)
 - **THEN** el campo "Entidad" no aparece en el modal (condition retorna false)
 
-#### Scenario: Usuario filtra proyectos por nombre y estado
-- **WHEN** búsqueda simple = "Alpha" Y filtro avanzado = active=true
-- **THEN** la lista muestra proyectos activos con nombre que contiene "Alpha"
+#### Scenario: Usuario filtra la papelera de proyectos por nombre y estado
+- **WHEN** en la papelera, búsqueda simple = "Alpha" Y filtro avanzado = active=true
+- **THEN** la lista muestra los proyectos eliminados que estaban activos con nombre que contiene "Alpha"
 
-### Requirement: Listado de épicas soporta búsqueda avanzada con select condicional multiple
-El listado de épicas (`EpicListQuery`) MUST exponer campos filtrables: `name` (text), `notes` (text, visible=false), `start_date` (date, nullable), `end_date` (date, nullable), `active` (boolean), `created_at` (date), `project_id` (select, **multiple=true**, options=callable returning active projects for current entity/scope, condition=hide when scoped to project). La vista `epics/list.blade.php` MUST incluir el modal.
+#### Scenario: El filtro de estado solo existe en la papelera
+- **WHEN** se abre la búsqueda avanzada en la lista de activos o de archivados
+- **THEN** no se ofrece el campo `active`, porque cada una de esas listas ya contiene un único estado
 
-#### Scenario: Usuario filtra épicas por proyecto específico
-- **WHEN** en el modal se selecciona "Proyecto", operador "es igual a", valor "3"
-- **THEN** la lista muestra solo épicas del proyecto con ID 3
+### Requirement: Listado de épicas soporta búsqueda avanzada
+El listado de épicas (`EpicListQuery`) MUST exponer campos filtrables: `name` (text), `notes` (text, visible=false), `start_date` (date, nullable), `end_date` (date, nullable), `active` (boolean, solo en el scope `trashed`), `created_at` (date), `project_name` (text, filtra por el nombre del proyecto, condition=hide when scoped to project). La vista `epics/list.blade.php` MUST incluir el modal.
+
+#### Scenario: Usuario filtra épicas por el nombre del proyecto
+- **WHEN** en el modal se selecciona "Proyecto", operador "contiene", valor "Checkout"
+- **THEN** la lista muestra solo épicas cuyo proyecto tiene un nombre que contiene "Checkout"
 
 #### Scenario: Campo proyecto oculto cuando lista está scopeada por proyecto
 - **WHEN** se accede a lista de épicas desde un proyecto (route tiene parámetro project)

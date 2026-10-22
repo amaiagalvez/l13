@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Listado de entidades soporta búsqueda avanzada con select multiple
-El listado de entidades (`EntityListQuery`) MUST exponer campos filtrables: `name` (text), `notes` (text, visible=false), `active` (boolean), `created_at` (date), `entity_type_ids` (select, multiple=true, options=callable returning active entity types per scope). La vista `entities/list.blade.php` MUST incluir el modal de búsqueda avanzada y pasar la configuración desde el query.
+El listado de entidades (`EntityListQuery`) MUST exponer campos filtrables: `name` (text), `notes` (text, visible=false), `active` (boolean, solo en el scope `trashed`), `created_at` (date), `entity_type_ids` (select, multiple=true, options=callable returning active entity types per scope). La vista `entities/list.blade.php` MUST incluir el modal de búsqueda avanzada y pasar la configuración desde el query.
 
 #### Scenario: Usuario filtra entidades por nombre que contiene "Acme"
 - **WHEN** en el modal de búsqueda avanzada se selecciona campo "Nombre", operador "contiene", valor "Acme"
@@ -23,17 +23,10 @@ El listado de entidades (`EntityListQuery`) MUST exponer campos filtrables: `nam
 - **WHEN** se abre el modal desde el listado de activos, archivados o papelera
 - **THEN** el select "Tipos" ofrece solo los tipos de entidad activos de ese scope
 
-### Requirement: Listado de tipos de entidad soporta búsqueda avanzada multilingüe
-El listado de tipos de entidad (`EntityTypeListQuery`) MUST exponer campos filtrables: `name_eu` (text), `name_es` (text), `name_fr` (text), `name_en` (text) agrupados en group=`names`, `notes` (text, visible=false), `active` (boolean), `created_at` (date). La vista `entity-types/list.blade.php` MUST incluir el modal.
+### Requirement: Listado de tipos de entidad mantiene solo la búsqueda simple
+El listado de tipos de entidad MUST NOT ofrecer búsqueda avanzada: es una tabla corta de consulta y
+la búsqueda simple sobre sus nombres basta.
 
-#### Scenario: Usuario filtra tipos por nombre en euskera
-- **WHEN** en el modal se selecciona "Nombre (eu)", operador "empieza por", valor "Enpr"
-- **THEN** la lista muestra tipos con `name_eu LIKE 'Enpr%'`
-
-#### Scenario: Usuario filtra tipos por estado archivado
-- **WHEN** en el modal se selecciona "Activo", operador "es falso"
-- **THEN** la lista muestra solo tipos archivados (active=false)
-
-#### Scenario: Usuario filtra tipos por nombre en cualquier idioma
-- **WHEN** en el modal se usa grupo "Nombres" con campo "Nombre (fr)", operador "contiene", valor "Entre"
-- **THEN** se encuentran tipos con `name_fr LIKE '%Entre%'`
+#### Scenario: El listado de tipos de entidad no muestra la búsqueda avanzada
+- **WHEN** se abre el listado de tipos de entidad
+- **THEN** no aparece el botón "Búsqueda avanzada" y la búsqueda simple sigue funcionando
