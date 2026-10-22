@@ -49,7 +49,7 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 - Uno o dos campos → modal pequeño. Drawer solo para entidades con relaciones o comentarios (épicas).
 - Foco automático en el primer campo. Enter guarda, Esc cierra, aviso si hay cambios sin guardar.
 - Pie fijo: Utzi / Gorde. Un botón desactivado debe explicar por qué o quedar activo y avisar.
-- Validación al salir del campo, con mensaje específico y cómo arreglarlo.
+- Validación al salir del campo, con mensaje específico y cómo arreglarlo: automática en los formularios `data-track-changes` (vacío obligatorio → `validation.required`; otra regla → el texto del icono de info). Si la regla ya está escrita bajo el control (`x-forms.field-hint`), esa línea se pone en rojo; no se repite.
 - Foco visible: anillo de 2px color de marca (`focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2`). Nunca quitarlo.
 - Fechas: selector nativo bien estilado. Explicar la regla "fin posterior al inicio", no solo bloquearla.
 - Comentarios: iniciales, fecha relativa, campo de texto siempre visible al final.
