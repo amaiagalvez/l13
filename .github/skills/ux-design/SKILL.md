@@ -69,7 +69,8 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 
 ## Accesibilidad y movimiento
 
-- Contraste AA, `focus-visible`, iconos solos con `aria-label`, no depender solo del color.
+- Contraste AA, `focus-visible`, iconos solos con `aria-label`, no depender solo del color. Compruébalo con axe-core (Playwright) en claro y oscuro, escritorio y móvil, también con drawer y modal abiertos; no a ojo.
+- `prefers-reduced-motion` ya está cubierto globalmente en `basics13/resources/css/app.css` y en `x-basics13::chart`.
 - Movimiento solo como respuesta a una acción (abrir drawer, confirmar), 150–200 ms, respetando `prefers-reduced-motion`. Sin animaciones decorativas de entrada.
 
 ## Límites del proyecto
