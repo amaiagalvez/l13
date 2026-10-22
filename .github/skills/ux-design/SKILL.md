@@ -30,7 +30,7 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 
 ## Gráficas
 
-- ApexCharts aprobado (2026-10-22) para el panel de inicio y la planificación, instalado en `basics13` y expuesto como componente compartido. Úsalo solo cuando una tendencia o comparación diga más que un número.
+- ApexCharts aprobado (2026-10-22) para el panel de inicio y la planificación: componente `x-basics13::chart` (Alpine `chart` en basics13); el host declara la dependencia npm y la expone como `window.loadApexCharts` (import diferido, chunk propio). Úsalo solo cuando una tendencia o comparación diga más que un número.
 - Colores de la serie desde los tokens (`brand-*`, `success`, `danger`), con modo oscuro.
 - Cada gráfica con alternativa textual (`aria-label` con la conclusión o tabla `sr-only`) y sin animación con `prefers-reduced-motion`.
 
