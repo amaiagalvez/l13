@@ -7,16 +7,28 @@
                 "compose",
                 "-f",
                 "projects/demo13/docker-compose.yml",
-                "run",
-                "--rm",
+                "exec",
                 "-T",
                 "-e",
                 "XDEBUG_MODE=off",
-                "--entrypoint",
-                "php",
                 "laravel13",
+                "php",
                 "artisan",
                 "boost:mcp"
+            ]
+        },
+        "playwright": {
+            "type": "stdio",
+            "command": "npx",
+            "args": [
+                "-y",
+                "@playwright/mcp@0.0.83",
+                "--browser",
+                "chromium",
+                "--headless",
+                "--isolated",
+                "--output-dir",
+                "/tmp/playwright-mcp"
             ]
         }
     }

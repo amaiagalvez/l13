@@ -10,13 +10,15 @@
             "Bash(docker compose up -d laravel13)",
             "Bash(docker compose * composer *)",
             "Bash(openspec *)",
-            "mcp__laravel-boost"
+            "mcp__laravel-boost",
+            "mcp__playwright"
         ],
         "deny": [
             "Bash(git push *)"
         ]
     },
     "enabledMcpjsonServers": [
-        "laravel-boost"
+        "laravel-boost",
+        "playwright"
     ]
 }

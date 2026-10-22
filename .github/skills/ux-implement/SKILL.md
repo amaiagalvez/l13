@@ -37,7 +37,7 @@ Implementa UX-002 y UX-005.
 
 ## Tanda 2 — Feedback y formularios
 
-Toasts con "Desegin", estados vacíos, vista de tarjetas en móvil, modal pequeño para formularios de un campo, foco y validación en línea.
+Toasts de éxito (las acciones destructivas mantienen el modal de confirmación), estados vacíos, vista de tarjetas en móvil, modal pequeño para formularios de un campo, foco y validación en línea.
 
 ## Tanda 3 — Jerarquía y pulido
 
@@ -52,7 +52,7 @@ Aplica la misma tanda a clientes, proyectos y épicas reutilizando los component
 1. Inspecciona las vistas y componentes afectados y sus tests.
 2. Aplica el cambio más pequeño y seguro. Sin refactors no relacionados.
 3. Conserva todos los `data-test`. Si hay que cambiar uno, actualiza el test Dusk correspondiente y dilo.
-4. No añadas ni cambies dependencias, ni crees carpetas base, sin aprobación.
+4. No añadas ni cambies dependencias, ni crees carpetas base, sin aprobación (aprobadas: las que lista el skill `ux-design`).
 5. Añade o actualiza los textos en los 4 locales.
 6. Añade o ajusta tests cuando aporten cobertura real (PHPUnit y Dusk). Sigue `testing-best-practices`.
 

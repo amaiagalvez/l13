@@ -132,12 +132,14 @@ rewrite files, lock files or the database.
 - Tests with coverage: `docker compose run --rm laravel13 php artisan test --coverage`
 - If UI doesn't refresh, ask user to start dev: `-p 5173:5173 ... run dev -- --host 0.0.0.0`
 
-## MCP Boost (Laravel Boost)
+## MCP servers (`.mcp.json`)
 
-The MCP server runs via `docker compose run --rm` (throwaway container) for reliability:
+Laravel Boost runs inside the already running `laravel13` container, so it starts in about a second:
 
 ```bash
-docker compose -f projects/demo13/docker-compose.yml run --rm -e XDEBUG_MODE=off --entrypoint php laravel13 artisan boost:mcp
+docker compose -f projects/demo13/docker-compose.yml exec -T -e XDEBUG_MODE=off laravel13 php artisan boost:mcp
 ```
 
-This avoids the "container not staying up" issue with `docker compose exec`.
+Start the stack (`docker compose up -d laravel13`) before opening the session; if the server shows as failed, reconnect it with `/mcp`. If the container will not stay up, fall back to `run --rm -T ... --entrypoint php laravel13 artisan boost:mcp` (slower: it creates a container and waits for `db`).
+
+Playwright MCP (`@playwright/mcp`, headless Chromium in `~/.cache/ms-playwright`) is the browser for checking views at `http://localhost`: log in with the `UserSeeder` account, exercise the screen, take screenshots (light/dark, mobile viewport) and read the console. If Chromium is missing: `npx -y playwright@<version used by @playwright/mcp> install chromium`.

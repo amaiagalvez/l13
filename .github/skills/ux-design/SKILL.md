@@ -12,10 +12,11 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 ## Reglas de oro
 
 1. Una pantalla, una tarea principal. Una sola acción primaria visible, con texto.
-2. Nada destructivo sin salida. Mover a papelera = toast con "Desegin". Modal de confirmación solo para borrado definitivo.
+2. Nada destructivo sin confirmación. Mover a papelera, archivar y borrar definitivamente piden confirmación en modal (`x-list.confirm-modal`) que explica la consecuencia y cómo recuperarlo; el éxito se anuncia con toast.
 3. Un solo sistema de componentes: Flux + componentes Blade. No mezclar estilos nuevos.
 4. Móvil y teclado primero.
-5. Menos ruido: sin bordes dobles, sin sombras decorativas, sin mayúsculas en etiquetas ni cabeceras.
+5. Menos ruido: sin bordes dobles ni mayúsculas en etiquetas y cabeceras. La profundidad se expresa con las sombras de elevación de `tokens.md` (tarjeta, elevada, superpuesta), no con sombras sueltas.
+6. Estilo visual de referencia: [Vireo · Sales](https://vireo.jawad.work/src/html/dashboards/sales.html), solo como inspiración de jerarquía y aspecto (radios amplios, sombras suaves, tarjetas de métricas). Plantilla con copyright: no copies su HTML, CSS ni clases `ax-*`; se reconstruye con Flux + Tailwind.
 
 ## Estructura de página
 
@@ -23,14 +24,22 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 - Migas de pan con la jerarquía real (Bezeroak › Proiektua › Epika). Sin "Dashboard" en listados raíz.
 - Barra de herramientas: búsqueda a la izquierda (atajo `/`), filtros a la derecha.
 - Pestañas Activos | Papelera (n) dentro de cada recurso, en lugar de iconos sueltos arriba a la derecha.
-- Sidebar: marca del producto, textos en euskera, sin enlaces del starter kit (Repository, Documentation). Iconos distintos por sección.
+- Sidebar: marca del producto, textos en euskera, sin enlaces del starter kit (Repository, Documentation). Iconos distintos por sección. Enlaces agrupados por tarea con encabezado, contador opcional y activo con fondo tenue de acento.
+- Topbar de 60 px: búsqueda global y menú de usuario.
+- Panel de inicio: banda de bienvenida con 2–3 cifras y dos acciones, una métrica destacada, una sola tarjeta con 4 métricas en celdas (icono, etiqueta, valor, variación) y tablas de "recientes". Cada cifra enlaza a su listado filtrado.
+
+## Gráficas
+
+- ApexCharts aprobado (2026-10-22) para el panel de inicio y la planificación, instalado en `basics13` y expuesto como componente compartido. Úsalo solo cuando una tendencia o comparación diga más que un número.
+- Colores de la serie desde los tokens (`brand-*`, `success`, `danger`), con modo oscuro.
+- Cada gráfica con alternativa textual (`aria-label` con la conclusión o tabla `sr-only`) y sin animación con `prefers-reduced-motion`.
 
 ## Listados
 
 - Columnas: nombre (clic abre edición), dato útil (nº de hijos, fechas), acciones a la derecha. No poner editar/borrar pegados a la izquierda.
 - Acciones: objetivo ≥32px (44px en táctil), tooltip y `aria-label`. Más de dos acciones → menú "⋯".
 - Acción bloqueada (candado): tooltip con el motivo y enlace a los hijos.
-- Fechas legibles y localizadas. Nunca ISO (`2026-10-02`).
+- Fechas legibles y localizadas con el formato normativo de cada idioma: euskera `2026-10-02` (año-mes-día, Euskaltzaindia), castellano `02-10-2026`, francés `02/10/2026`, inglés `Oct 2, 2026`. Fuente única: `x-list.local-time` y `formatLocalDateTime`.
 - Cabeceras de tabla en sentence case, 12–13px, `text-zinc-600` (contraste AA).
 - Paginación 15 por defecto, con "n–m / total".
 - Vacío: mensaje + botón de crear. Carga: skeleton. Móvil: filas → tarjetas.
@@ -67,7 +76,7 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 
 - Conserva todos los `data-test` (los tests Dusk dependen de ellos).
 - Flux gratuito: no uses componentes Pro. Lo que falte se resuelve con Alpine + Tailwind.
-- No cambies dependencias ni crees carpetas base sin aprobación. Sustituir select2/jQuery requiere aprobación explícita.
+- No cambies dependencias ni crees carpetas base sin aprobación; aprobadas: ApexCharts. Sustituir select2/jQuery requiere aprobación explícita.
 - Blaze: no pliegues (`fold`) componentes con estado global (`$errors`, auth, sesión).
 - Tailwind v4: tokens en `@theme` (`resources/css/app.css`), `gap-*` en vez de márgenes entre hermanos, y soporte de modo oscuro si la pantalla ya lo tiene.
 - Tras cambiar vistas: build de Vite, Pint, tests y Dusk afectados.
@@ -75,7 +84,7 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 ## Antes de terminar
 
 - [ ] Una acción primaria con texto, y H1 presente.
-- [ ] Ninguna acción destructiva sin deshacer o confirmación adecuada.
+- [ ] Ninguna acción destructiva sin modal de confirmación.
 - [ ] Todo operable con teclado, foco visible.
 - [ ] Textos en los 4 locales, sentence case.
 - [ ] Probado en móvil y modo oscuro.

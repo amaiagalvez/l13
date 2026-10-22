@@ -41,7 +41,7 @@ y, si hace falta, .github/skills/ux-design/reference/tokens.md.
 
 - Distingue defecto de usabilidad real de preferencia de estilo. No presentes preferencias como defectos.
 - Si hay capturas, úsalas como evidencia. Si no, cita archivo y línea.
-- No propongas dependencias nuevas ni librerías de UI. Sustituir select2/jQuery solo se menciona como opción que requiere aprobación.
+- No propongas dependencias nuevas ni librerías de UI, salvo las aprobadas en el skill `ux-design` (ApexCharts). Sustituir select2/jQuery solo se menciona como opción que requiere aprobación.
 - No rompas `data-test`: avisa si una recomendación los afecta.
 - Cada recomendación debe ser pequeña, aplicable y proporcional.
 
