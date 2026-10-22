@@ -1,8 +1,7 @@
 [] command bat eguneratzeko laravel13-tik basics13-ra
 [] crear un nuevo archivo de configuracion y configurar la ruta register, por defecto sera false y entonces no se podran registrar nuevos usuarios desde fuera
-[] gestion de roles y permisos
-[] crear estructura de la base de datos y en full-review añadir que se mantenga actualizada
-[] añadir datatables
+[] crear estructura de la base de datos con mermaid y en full-review añadir que se mantenga actualizada
+[] añadir datatables???
 [] cachear listados select public function selectOptions y Observer para limpiar la cache ante cualquier modificación en el original
 [] composer.json require y require-dev pasar a basics los que se pueda (debugbar no)
 [] automatizar sentry <== claude begiratu, hor daude config file batzuk
