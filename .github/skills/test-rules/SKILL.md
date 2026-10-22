@@ -11,12 +11,21 @@ description: "Test location rules, PHPUnit conventions, test types, database tra
 
 | Test Type                                                                               | Location                                 | DB?           | Trait                   |
 | --------------------------------------------------------------------------------------- | ---------------------------------------- | ------------- | ----------------------- |
-| Pure logic (rules, policies, helpers, middleware config, query structure, translations) | `tests/Unit/...`                         | ❌ No         | none                    |
+| Pure logic (rules, policies, helpers, middleware config, query structure, transformers, container/config, translations) | `tests/Unit/...` | ❌ No | none |
 | Validation rules (FormRequest `rules()`, `authorize()`, `prepareForValidation()`)       | `tests/Unit/Validation/*RequestTest.php` | ❌ No         | none                    |
 | Policy methods (`viewAny`, `create`, `update`, etc.)                                    | `tests/Unit/Policies/*PolicyTest.php`    | ❌ No         | none                    |
 | Query builders (`ListQueryBase`, search patterns, state counts)                         | `tests/Unit/Queries/*ListQueryTest.php`  | ❌ No         | none                    |
 | HTTP integration (full request/response, view rendering)                                | `tests/Feature/...`                      | ✅ Yes        | `RefreshDatabase`       |
 | Read-light Feature tests (auth pages, query tests with 1 create, middleware)            | `tests/Feature/...`                      | ✅ Yes (lazy) | `LazilyRefreshDatabase` |
+
+## Unit Tests Never Touch the Database
+
+- Priority: as many tests as possible in `tests/Unit` without database. Build models with `new Model`/`factory()->make()`, users with `new User`, and override `findTrashed()`-style lookups instead of persisting rows.
+- `Basics13\Tests\TestCase` and `Basics13\Tests\Feature\FeatureTestCase` enforce it (`ForbidsDatabaseInUnitTests`): a class under `Tests\Unit\` with a database trait, or any query, fails. Fixture migrations only load for tests with a database trait.
+- A test that needs rows, migrations, transactions or real SQL goes to `tests/Feature` (mirror the Unit path, e.g. `Feature/Queries/...`). Split mixed classes instead of keeping them in Unit.
+- A Feature test that neither queries nor goes through HTTP belongs in `tests/Unit`. HTTP tests (routes, middleware, redirects, rendered pages) stay in Feature even without rows; drop their database trait if they do not need it.
+- Never put a database trait in a package's base `TestCase`; each Feature test declares its own.
+- Helper classes shared by Unit and Feature tests live in `tests/Fixtures/` (autoloaded), not at the bottom of a test file.
 
 ## Database Trait Guidance
 
@@ -39,7 +48,8 @@ description: "Test location rules, PHPUnit conventions, test types, database tra
 
 ## Refactoring Existing Tests
 
-- When touching a Feature test that only does pure logic, move it to Unit.
+- When touching a Feature test that only does pure logic (no queries, no HTTP), move it to Unit.
+- When a Unit test needs the database, move it (or the methods that need it) to Feature.
 - When touching a Feature test with few creates, consider `LazilyRefreshDatabase`.
 
 ## General Testing Conventions

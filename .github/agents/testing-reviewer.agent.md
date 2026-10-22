@@ -36,6 +36,13 @@ Review:
 
 Look for missing high-value tests.
 
+Check test placement (`.github/skills/test-rules/SKILL.md`):
+
+- Unit tests (`tests/Unit`) must not use the database: no database trait, no factory `create()`, no queries. Report each one as a finding to move to Feature or rewrite without the database.
+- Feature tests that neither query nor go through HTTP should be Unit tests; report them.
+- A database trait in a package's base `TestCase` (it makes every Unit test migrate) is a finding.
+- Confirm the `ForbidsDatabaseInUnitTests` guard is still wired into the base test cases.
+
 Do not recommend tests simply to increase a coverage percentage.
 
 ---

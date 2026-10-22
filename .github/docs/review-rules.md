@@ -223,6 +223,8 @@ Use the project's existing testing style.
 
 Do not rewrite tests simply for stylistic reasons.
 
+Test placement is not stylistic: Unit tests must run without database and every Feature test without queries or HTTP should be a Unit test (see `.github/skills/test-rules/SKILL.md`). Report misplaced tests with their suite cost.
+
 Prefer tests that verify:
 
 - behavior

@@ -81,6 +81,7 @@ What each guard rail enforces:
 - `entity-projects13/tests/Feature/ModelSchemaParityTest` — model and schema do not drift.
 - `entity-projects13/tests/Feature/ResourceUniformityTest` — entities/projects/epics do not drift from each other.
 - `entities13|projects13/tests/Unit/PackageIsolationTest` — no dependency on the other domain package.
+- `basics13/tests/ForbidsDatabaseInUnitTests` (wired into the base test cases) — every `tests/Unit` suite runs without database.
 
 ### CI Coverage
 
