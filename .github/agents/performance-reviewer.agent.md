@@ -35,6 +35,29 @@ Review:
 - exports
 - frontend performance
 
+Selected columns:
+
+- Find every query that loads all columns (`SELECT *`: `Model::query()`, `get()`, `all()`,
+  `paginate()`, `with()` without `:id,...` or a `select()`, `DB::table()` without `select()`).
+- Trace what the caller really uses (views, transformers, policies, accessors, appends, casts,
+  serialization) and propose the exact column list, including primary and foreign keys needed by
+  relationships and eager loading.
+- Do not propose it where the full model is needed (forms, updates, model events, `toArray()`
+  of the whole record) or when the column list would be fragile with no measurable gain.
+
+Repeated queries per request:
+
+- For each page (list, form, trash, archived, epics and comments), trace one full request:
+  middleware, controller, `XListQuery`, policies, transformers, layout, Blade/Flux views and
+  components.
+- Report the same query executed more than once (lookups repeated between policy and controller,
+  `auth()->user()` relationships reloaded, counts repeated in layout or menus), lazy loading in
+  loops (N+1), `count()` on relationships instead of `withCount()`, and queries inside views,
+  accessors or components.
+- Propose eager loading, `withCount()`, reusing the value already loaded or `once()`, and a
+  Feature test that asserts the query count of the page (`DB::enableQueryLog()`) to keep it from
+  regressing.
+
 Do not report speculative performance problems.
 
 Explain evidence and likely impact.
