@@ -1,47 +1,43 @@
-# Super-admin del sistema
-
 ## Purpose
-Usuario fijo con `id = 1`, con acceso total, oculto e inmutable.
+
+La cuenta con acceso total que instala el host: cómo se crea, qué puede hacer y por qué otros usuarios
+no pueden verla ni modificarla.
 
 ## ADDED Requirements
 
-### Requirement: Usuario super-admin fijo (ID=1) oculto e inmutable
-El sistema MUST incluir un usuario con `id = 1` que tiene todos los permisos sin roles asignados.
-MUST NOT aparecer en ningún listado ni en el resumen de permisos, MUST NOT modificarse, archivarse,
-desactivarse ni eliminarse (tampoco por sí mismo), MUST NOT recibir ni perder roles, y es el único
-que MAY gestionar los roles y permisos del sistema (`is_system = true`).
+### Requirement: La cuenta super-admin solo se crea por comando y tiene todos los permisos
+Ser super-admin MUST depender de un flag que no se puede asignar en masa ni fijar desde ningún
+formulario, y MUST NOT depender del identificador de la cuenta. Solo un comando de consola MUST poder
+crearla, y MUST fallar sin cambios si ya existe un super-admin, si el correo está en uso o si la
+contraseña está vacía. El super-admin MUST tener todos los permisos sin roles asignados y MUST NOT
+recibir roles.
 
-#### Scenario: Usuario ID=1 tiene acceso total implícito
-- **WHEN** `auth()->user()->id === 1`
-- **THEN** `$user->hasPermissionTo('cualquier.cosa')` retorna true siempre
-- **THEN** `$user->hasRole('cualquier-rol')` retorna true siempre (virtual)
-- **THEN** no consulta BD para permisos/roles (short-circuit en `HasRoles`)
+#### Scenario: El primer registro no es super-admin
+- **WHEN** el primer usuario se registra en una instalación nueva
+- **THEN** no es super-admin y solo tiene el rol de registro configurado
 
-#### Scenario: Usuario ID=1 oculto en listados
-- **WHEN** admin accede a `/admin/users` (listado, archivados, papelera)
-- **THEN** usuario ID=1 NO aparece en resultados
-- **WHEN** admin accede a `/admin/users/permissions-summary`
-- **THEN** usuario ID=1 NO aparece en matriz
+#### Scenario: Alta por comando
+- **WHEN** se ejecuta el comando con un correo libre y una contraseña válida
+- **THEN** crea una cuenta activa, verificada y super-admin
 
-#### Scenario: Usuario ID=1 inmutable
-- **WHEN** se intenta editar/borrar/archivar usuario ID=1
-- **THEN** operación rechazada: "Usuario del sistema protegido"
-- **WHEN** se intenta `syncRoles()` en usuario ID=1
-- **THEN** operación rechazada: "Usuario del sistema no usa roles"
+#### Scenario: Ya existe un super-admin
+- **WHEN** se ejecuta el comando y ya hay un super-admin
+- **THEN** falla y no crea ni modifica ninguna cuenta
 
-#### Scenario: Solo ID=1 puede tocar roles/permisos del sistema
-- **WHEN** usuario NO es ID=1 intenta crear/editar/borrar rol con `is_system = true`
-- **THEN** `RolePolicy` rechaza: "Solo super-admin del sistema puede modificar roles del sistema"
-- **WHEN** usuario NO es ID=1 intenta crear/editar/borrar permiso de módulos core
-- **THEN** `PermissionPolicy` rechaza
+### Requirement: Otros usuarios no ven ni modifican la cuenta super-admin
+La cuenta super-admin MUST NOT aparecer en los listados de usuarios (activos, archivados y papelera),
+en los selectores de usuarios ni en el resumen de permisos. Otros usuarios MUST NOT editarla,
+archivarla, moverla a la papelera, borrarla ni cambiar sus roles. El super-admin MUST poder iniciar
+sesión y gestionar su propia cuenta desde los ajustes como cualquier usuario.
 
-#### Scenario: Instalación fresh incluye usuario super-admin + roles y permisos base
-- **WHEN** se ejecuta `php artisan db:seed --class=RolePermissionSeeder` en basics13
-- **THEN** existe usuario con `id = 1`, `email = env('SUPER_ADMIN_EMAIL', 'superadmin@example.com')`
-- **THEN** usuario ID=1 tiene `active = true`, `email_verified_at = now()`, password hasheado desde env
-- **THEN** existen 4 roles (2 system, 2 custom)
-- **THEN** existen permisos para 3 módulos base × 8 acciones = 24 permisos (users, roles, permissions) + 1 wildcard `*.manage`
-- **THEN** superadmin tiene todos + `*.manage`, admin tiene todos menos roles/permissions, manager/users.view, viewer solo users.view
-- **WHEN** se instalan `entities13`/`projects13` y ejecutan sus seeders
-- **THEN** se añaden permisos para módulos `clients`, `projects`, `entities`, `entity_types`
-- **THEN** roles existentes pueden actualizarse con nuevos permisos vía seeders de dominio
+#### Scenario: Oculta en los listados
+- **WHEN** un usuario con `users.view` abre el listado de usuarios, los archivados o la papelera
+- **THEN** la cuenta super-admin no aparece
+
+#### Scenario: Acceso directo denegado
+- **WHEN** otro usuario envía una edición, un archivado o un borrado de la cuenta super-admin
+- **THEN** recibe 403 y la cuenta no cambia
+
+#### Scenario: Gestión de la propia cuenta
+- **WHEN** el super-admin inicia sesión con "recordarme", cambia su contraseña y activa 2FA
+- **THEN** todas las operaciones se completan

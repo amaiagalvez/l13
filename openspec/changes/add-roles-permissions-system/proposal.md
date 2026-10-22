@@ -1,70 +1,56 @@
-# Proposal: Add Dynamic Roles and Permissions System
+## Why
 
-## Change ID
-`add-roles-permissions-system`
+Hoy cualquier usuario verificado puede hacerlo todo: `UserPolicy` concede todas las habilidades y las
+policies de dominio también. Hace falta limitar lo que hace cada cuenta mediante roles definidos
+desde la interfaz, sin acoplar `basics13` a los dominios. Revisado según el code review del
+2026-10-22 (`.github/reviews/2026-10-22/CODE-REVIEW.md`).
 
-## Summary
-Add a dynamic roles and permissions system where:
-- Roles can be created dynamically (not hardcoded)
-- Users can have multiple roles assigned
-- Roles grant specific permissions (view users, manage roles, superadmin, etc.)
-- Role/permission management lives in `basics13` package (core modules: users, roles, permissions)
-- Domain packages (`entities13`, `projects13`) define their own permission modules (clients, projects, entities)
-- Permission enforcement/control happens in each domain package
+## What Changes
 
-## Motivation
-Currently the system only has basic authentication via `basics13` with a simple User model. There's no authorization layer. We need a flexible RBAC system that:
-- Allows admins to create custom roles via UI
-- Supports multiple roles per user
-- Keeps permission definitions in the base package (core modules) but allows domain packages to extend
-- Follows package boundaries (bridge → domains, never domain → domain)
+- Roles dinámicos en `basics13` como recurso canónico (listado, alta, edición, archivados y papelera),
+  cada uno con su conjunto de permisos. Un usuario puede tener varios roles.
+- Permisos sembrados y de solo lectura con slug `{módulo}.{acción}`. Cada paquete declara los de los
+  módulos que comprueban sus policies; `basics13` solo declara `users` y `roles`. La interfaz los
+  lista y los asigna desde el formulario del rol.
+- Asignar roles exige `roles.manage`. Nadie cambia sus propios roles y los roles de sistema solo los
+  asigna el super-admin.
+- Cuenta super-admin identificada por un flag que no se puede asignar y que solo pone un comando de
+  consola. Tiene todos los permisos, no aparece en listados ni en selectores, y otros usuarios no
+  pueden modificarla.
+- Resumen de los permisos efectivos de cada usuario, con exportación CSV de lo filtrado.
+- **BREAKING:** la gestión de usuarios pasa a exigir permisos `users.*`. Una migración da el rol de
+  sistema `admin` a los usuarios existentes, y los nuevos registros reciben el rol configurado
+  (ninguno por defecto).
+- **BREAKING:** el modelo de usuario configurado por un host MUST usar la concern de roles.
 
-## Scope
-**In scope (basics13):**
-- New `Role` and `Permission` models in `basics13`
-- Many-to-many: User ↔ Role, Role ↔ Permission
-- CRUD for roles and permissions in `basics13` (list, create, update, archive, trash)
-- Policy gates / helper methods for permission checks (`hasPermissionTo`, `hasModuleAccess`)
-- Integration with existing `basics-auth` capability (optional role selector in user form)
-- Core permissions for modules: users, roles, permissions
+Fuera de este change, cada uno en su propio change:
 
-**In scope (domain packages - separate PRs):**
-- Domain-specific permission modules (clients, projects, entities)
-- Permission enforcement in domain policies/queries
+- `add-user-language`: idioma preferido del usuario.
+- `add-domain-permission-checks`: permisos de entidades, tipos de entidad, proyectos, epics y
+  comentarios en sus policies.
+- `add-project-members`: miembros de proyecto y selector contextual de entidades en el bridge.
 
-**Out of scope:**
-- UI for assigning roles to users (can be added later)
-- Passport/Socialite integration
+## Capabilities
 
-## Affected Capabilities
-- **Modified:** `basics-auth` - extends user model with roles relationship
-- **New:** `basics-roles-permissions` - role and permission model
-- **New:** `basics-permission-checks` - permission resolution (wildcard, per-request cache, configurable user model)
-- **New:** `basics-roles-admin` - role/permission CRUD, user assignment and permissions summary
-- **New:** `basics-super-admin` - fixed, hidden and immutable user ID=1
-- **Modified:** `entity-projects-bridge` - cross-domain selectors without explicit permission
+### New Capabilities
 
-## Package Boundaries
-- `basics13` owns: Role, Permission models, their CRUD, user-role assignment API
-- Domain packages (`entities13`, `projects13`) own: permission enforcement via policies/gates
-- `entity-projects13` bridge: may need cross-domain permission helpers if needed
-- No domain-to-domain dependencies
+- `basics-roles-permissions`: roles, permisos sembrados, cómo se resuelve si un usuario tiene un
+  permiso, quién asigna roles y el resumen de permisos. Ninguna capability existente cubre la
+  autorización.
+- `basics-super-admin`: la cuenta con acceso total, cómo se crea y su protección. Va separada porque
+  afecta a la autenticación y a los listados de usuarios, no solo a los roles.
 
-## Implementation Approach
-1. Create migrations for `roles`, `permissions`, `role_user` (polymorphic), `permission_role` tables
-2. Add `Role` and `Permission` models with Chisel markers
-3. Add `Language` enum (PHP 8.4) for locale management
-4. Add `HasRoles` concern to User model (MorphToMany via polymorphic `role_user`)
-5. Create Form Requests, Policies, Controllers for Role/Permission CRUD
-6. Add Flux views for role/permission management + User Permissions Summary (dynamic modules)
-7. Add translation files (es/eu/fr/en with parity)
-8. Write Feature tests for CRUD, permission checking (wildcard, cache, active filter)
-9. Update `basics-auth` spec to reflect the extension
+### Modified Capabilities
 
-## Breaking Changes
-None - additive only. Existing installations work without roles/permissions until configured.
+- `basics-auth`: el modelo de usuario configurable expone roles, la gestión de cuentas se autoriza con
+  permisos y el registro asigna el rol configurado.
 
-## Rollout Plan
-1. Merge proposal → implement in `basics13`
-2. Each domain package adopts permission checks independently
-3. Bridge package adds any cross-domain helpers if needed
+## Impact
+
+- `basics13`:
+  - Migraciones de `roles`, `permissions`, `permission_role`, `role_user` y `users.is_super_admin`, más la migración de datos inicial.
+  - Modelos, concern, policies, controllers, requests, queries, transformers, vistas, rutas, comando y traducciones es/eu/fr/en.
+- Cambian `UserPolicy`, `UserListQuery`, `UserSelectOptionsQuery`, `CreateNewUser` y los tests de
+  usuarios existentes, porque el actor necesita permisos.
+- Hosts con modelo de usuario propio: añadir la concern (**BREAKING**).
+- Sin dependencias nuevas.

@@ -1,272 +1,130 @@
-# Design: Dynamic Roles and Permissions System
+# Design
 
-## Change ID
-`add-roles-permissions-system`
+## Context
 
-## Database Schema
+Ver `proposal.md` (Why). Restricciones del código actual que condicionan el diseño:
 
-### roles table
-```sql
-CREATE TABLE roles (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) NOT NULL,
-    description TEXT NULL,
-    is_system BOOLEAN NOT NULL DEFAULT FALSE,
-    active BOOLEAN NOT NULL DEFAULT TRUE,
-    deleted_at TIMESTAMP NULL,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL,
-    UNIQUE KEY roles_slug_active_unique (slug, active) WHERE active = TRUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
+- MariaDB 11.7 no tiene índices parciales. La unicidad entre los no eliminados ya se resuelve con una
+  columna generada (`addUniqueActiveColumnIndex`).
+- `addAuditColumns()` ya referencia `users` con FK, así que `basics13` ya asume esa tabla.
+- `EloquentUserProvider` construye sus consultas con `newQuery()`, que aplica los global scopes.
+- `updateRememberToken()` guarda el modelo de usuario, y lo mismo hacen la confirmación de 2FA y el
+  cambio de contraseña.
+- El registro abierto está activo por defecto (`basics13.auth.features.registration`).
 
-### permissions table
-```sql
-CREATE TABLE permissions (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) NOT NULL,
-    description TEXT NULL,
-    module VARCHAR(100) NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT TRUE,
-    deleted_at TIMESTAMP NULL,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL,
-    UNIQUE KEY permissions_slug_active_unique (slug, active) WHERE active = TRUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
+## Goals / Non-Goals
 
-### role_user pivot table
-```sql
-CREATE TABLE role_user (
-    role_id BIGINT UNSIGNED NOT NULL,
-    user_id BIGINT UNSIGNED NOT NULL,
-    assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    assigned_by BIGINT UNSIGNED NULL,
-    PRIMARY KEY (role_id, user_id),
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
+**Goals:**
 
-### permission_role pivot table
-```sql
-CREATE TABLE permission_role (
-    permission_id BIGINT UNSIGNED NOT NULL,
-    role_id BIGINT UNSIGNED NOT NULL,
-    PRIMARY KEY (permission_id, role_id),
-    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
+- Un esquema construido con los helpers existentes y válido en MariaDB.
+- Que ninguna cuenta gane privilegios por su id ni pierda acceso al desplegar.
 
-## Models
+**Non-Goals:**
 
-### Role Model
-```php
-namespace Basics13\Models;
+- Permisos de los dominios, miembros de proyecto e idioma del usuario (ver los changes enlazados en
+  la propuesta).
+- Permisos por registro (ownership). Aquí solo hay permisos por módulo.
 
-use Basics13\Concerns\TracksAuditColumns;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+## Decisions
 
-#[Fillable(['name', 'slug', 'description', 'is_system', 'active'])]
-#[UsePolicy(RolePolicy::class)]
-#[UseFactory(RoleFactory::class)]
-class Role extends Model
-{
-    use SoftDeletes, TracksAuditColumns;
+### D1. Esquema
 
-    protected $casts = [
-        'is_system' => 'boolean',
-        'active' => 'boolean',
-    ];
+- `roles`: `name`, `slug`, `description`, `is_system`, más `addCommonColumns()` y
+  `addAuditColumns()`. `addUniqueActiveNameIndex('roles')` y
+  `addUniqueActiveColumnIndex('roles', 'slug')`.
+- `permissions`: `slug` (único global), `module`, timestamps. Sin soft deletes ni `active`: son de solo
+  lectura y los mantiene el paquete que los declara. La etiqueta visible sale de las traducciones por
+  slug.
+- `permission_role`: PK (`permission_id`, `role_id`), con las dos FK en cascada.
+- `role_user`: PK (`role_id`, `user_id`). `role_id` con FK restrict, porque un rol con usuarios no se
+  borra. `user_id` con FK a `users` en cascada. `assigned_by` es una FK nullable a `users` con
+  `nullOnDelete`, y `created_at` guarda la fecha de asignación.
+- `users.is_super_admin`: boolean, por defecto false.
 
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            config('auth.providers.users.model'),
-            'role_user',
-            'role_id',
-            'user_id'
-        )->withTimestamps()->withPivot('assigned_by');
-    }
+Alternativas descartadas:
 
-    public function permissions(): BelongsToMany
-    {
-        return $this->belongsToMany(Permission::class, 'permission_role');
-    }
+- **Pivote polimórfico:** no evita depender de `users`, porque ya hay FK de auditoría, y deja huérfanos
+  sin FK.
+- **Índice parcial:** MariaDB no lo soporta.
+- **CHECK sobre `module`:** impide a los dominios añadir los suyos.
+- **Triggers:** un soft delete es un `UPDATE`, y crear triggers exige privilegios con binlog.
 
-    // Scopes
-    public function scopeActive($query) { return $query->where('active', true); }
-    public function scopeSystem($query) { return $query->where('is_system', true); }
-    public function scopeCustom($query) { return $query->where('is_system', false); }
-}
-```
+### D2. Super-admin
 
-### Permission Model
-```php
-namespace Basics13\Models;
+- **Identificación:** el flag `is_super_admin` no es fillable. Lo pone solo un comando interactivo,
+  `basics13:make-super-admin`, que pide nombre, correo y contraseña y no lee `env()`.
+- **Ocultación:** se filtra con una condición explícita en `UserListQuery` (los tres scopes),
+  `UserSelectOptionsQuery` y la query del resumen. No se usa un global scope, porque impediría el login.
+- **Protección:** `UserPolicy` deniega a otros usuarios cualquier acción sobre la cuenta y cualquier
+  cambio de sus roles. No se usan model events, porque bloquearían recordarme, 2FA y el cambio de
+  contraseña.
 
-use Basics13\Concerns\TracksAuditColumns;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+Alternativas descartadas:
 
-#[Fillable(['name', 'slug', 'description', 'module', 'active'])]
-#[UsePolicy(PermissionPolicy::class)]
-#[UseFactory(PermissionFactory::class)]
-class Permission extends Model
-{
-    use SoftDeletes, TracksAuditColumns;
+- **`id = 1`:** el primer usuario que se registre sería super-admin.
+- **Un rol `superadmin`:** sería visible para sus iguales, y además quedaría un segundo concepto de
+  acceso total.
 
-    protected $casts = ['active' => 'boolean'];
+### D3. Resolución de permisos
 
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'permission_role');
-    }
+- La concern carga en una propiedad de la instancia los slugs de los permisos de sus roles activos y no
+  eliminados, con una sola consulta. Las comprobaciones posteriores se hacen en memoria: el slug exacto
+  o `{módulo}.manage`.
+- El super-admin devuelve true sin consultar.
+- `forgetPermissions()` vacía la propiedad, para tests y para cambios dentro de la misma petición.
+- Las policies llaman a `hasPermissionTo()`. Las reglas sobre el registro objetivo (super-admin, uno
+  mismo, rol de sistema) se comprueban antes del permiso. No hay `Gate::before`, porque el super-admin
+  tampoco puede recibir roles.
 
-    public function scopeActive($query) { return $query->where('active', true); }
-    public function scopeByModule($query, string $module) { return $query->where('module', $module); }
-}
-```
+Alternativa descartada: `once()` keyed por instancia. Funciona, pero la única forma de invalidarlo es
+`Once::flush()`, que vacía todo el proceso.
 
-### HasRoles Concern
-```php
-namespace Basics13\Concerns;
+### D4. Transición y datos iniciales
 
-use Basics13\Models\Role;
-use Basics13\Models\Permission;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Support\Collection;
+- Una migración de datos de `basics13` crea:
+  - los permisos `users.*` y `roles.*`;
+  - el rol de sistema `admin` (`users.manage`, `roles.manage`);
+  - los roles `manager` (`users.view`, `users.create`, `users.edit`, `roles.view`) y `viewer`
+    (`users.view`, `roles.view`).
+- La misma migración asigna `admin` a cada usuario no eliminado. Es una migración y no un seeder porque
+  así se ejecuta en cada despliegue y en los tests con `RefreshDatabase`.
+- `CreateNewUser` asigna el rol `config('basics13.roles.registration_role')`, que por defecto es `null`.
+- Los dominios añaden sus permisos, y los suman a `admin`, con su propia migración de datos en sus
+  changes.
 
-trait HasRoles
-{
-    public function roles(): MorphToMany
-    {
-        return $this->morphToMany(
-            Role::class,
-            'model',
-            'role_user',
-            'user_id',
-            'role_id'
-        )->withTimestamps()->withPivot('assigned_by');
-    }
+### D5. Permisos de solo lectura
 
-    public function hasRole(string|array $roles): bool
-    {
-        $roles = is_array($roles) ? $roles : func_get_args();
-        return $this->roles()->whereIn('slug', $roles)->exists();
-    }
+Las policies comprueban slugs fijos en el código, así que crear, renombrar o borrar un permiso desde la
+interfaz o no tendría efecto o rompería esas comprobaciones. La pantalla de permisos solo lista. El
+formulario del rol los muestra como casillas agrupadas por módulo.
 
-    public function hasAllRoles(array $roles): bool
-    {
-        return $this->roles()->whereIn('slug', $roles)->count() === count($roles);
-    }
+### D6. Concern obligatoria en el modelo del host
 
-    public function hasPermission(string|array $permissions): bool
-    {
-        $permissions = is_array($permissions) ? $permissions : func_get_args();
-        return $this->roles()
-            ->whereHas('permissions', fn ($q) => $q->whereIn('slug', $permissions))
-            ->exists();
-    }
+Alternativa considerada: un `Gate` que resuelva los permisos para cualquier modelo. Se descarta porque
+añade una indirección sin necesidad. Hosts afectados: los que configuran su propio modelo. Se documenta
+en el README como **BREAKING**.
 
-    public function hasPermissionTo(string $permission): bool
-    {
-        return $this->hasPermission($permission);
-    }
+### Rutas
 
-    public function assignRole(string|Role|array $roles): void
-    {
-        $roles = is_array($roles) ? $roles : func_get_args();
-        $roleModels = Role::whereIn('slug', $roles)->get();
-        $this->roles()->syncWithoutDetaching($roleModels->pluck('id')->toArray());
-    }
+Sin prefijo, igual que `users/...`, bajo `web`, `auth` y `verified`:
 
-    public function removeRole(string|Role|array $roles): void
-    {
-        $roles = is_array($roles) ? $roles : func_get_args();
-        $roleModels = Role::whereIn('slug', $roles)->get();
-        $this->roles()->detach($roleModels->pluck('id')->toArray());
-    }
+- `roles`, `roles/archived`, `roles/trash`
+- `permissions` (solo `index`)
+- `users/permissions-summary`
 
-    public function syncRoles(array $roles): void
-    {
-        $roleModels = Role::whereIn('slug', $roles)->get();
-        $this->roles()->sync($roleModels->pluck('id')->toArray());
-    }
+## Risks / Trade-offs
 
-    public function getAllPermissions(): Collection
-    {
-        return $this->roles()->with('permissions')->get()->flatMap->permissions->unique('id');
-    }
-}
-```
+- [Instalación nueva sin super-admin: nadie puede asignar roles de sistema] → El README y el seeder de
+  desarrollo de `demo13` ejecutan el comando. En una instalación existente los usuarios conservan
+  `admin`.
+- [Los tests actuales de usuarios crean actores sin roles] → Un estado de factory que da `admin`, y se
+  actualizan esos tests en la misma tarea.
+- [Un rol de sistema se queda sin permisos por error] → Solo el super-admin puede editarlo.
 
-## Permission Slug Convention
-Format: `{module}.{action}`
-- Modules: `clients`, `projects`, `entities`, `users`, `roles`, `permissions`
-- Actions: `view`, `create`, `edit`, `delete`, `archive`, `restore`, `force-delete`, `manage` (all)
+## Migration Plan
 
-Examples:
-- `clients.view` - view clients list
-- `projects.edit` - create/edit projects
-- `projects.manage` - full projects access
-- `users.manage` - full user management
-- `roles.manage` - role management (superadmin only)
-- `permissions.manage` - permission management (superadmin only)
-
-## Default System Roles & Permissions
-
-### Superadmin (slug: `superadmin`, is_system: true)
-- All permissions (`*.manage`)
-
-### Admin (slug: `admin`, is_system: true)
-- All except: `roles.manage`, `permissions.manage`
-
-### Manager (slug: `manager`, is_system: false)
-- `clients.view`, `clients.create`, `clients.edit`
-- `projects.view`, `projects.create`, `projects.edit`
-- `entities.view`, `entities.create`, `entities.edit`
-- `users.view`
-
-### Viewer (slug: `viewer`, is_system: false)
-- `clients.view`, `projects.view`, `entities.view`, `users.view`
-
-## Integration with Domain Packages
-
-Each domain package (`entities13`, `projects13`) will:
-1. Define its own permission slugs in its seeders
-2. Use `Gate::define()` or Policy methods to check permissions
-3. Use `auth()->user()->hasPermissionTo('module.action')` in policies/queries
-
-Example in `entities13` Policy:
-```php
-public function viewAny(User $user): bool
-{
-    return $user->hasPermissionTo('entities.view');
-}
-
-public function update(User $user, Entity $entity): bool
-{
-    return $user->hasPermissionTo('entities.edit');
-}
-```
-
-## Package Boundaries Compliance
-
-- `basics13` owns: Role, Permission models, CRUD, user-role assignment
-- Domain packages own: permission enforcement (policies, gates, query scopes)
-- Bridge package: only adds cross-domain helpers if needed
-- No domain → domain dependencies
-
-## Migration Strategy for Existing Installations
-
-1. Migrations are additive (new tables only)
-2. No changes to existing `users` table
-3. Default seeders run on fresh install
-4. Existing users get no roles by default (opt-in)
-5. Host can run seeders manually after upgrade
+1. Desplegar y ejecutar `php artisan migrate`. Esto crea las tablas, siembra los datos iniciales y
+   asigna `admin` a los usuarios existentes.
+2. Ejecutar una vez `php artisan basics13:make-super-admin`.
+3. Rollback: los `down()` borran las tablas nuevas y la columna `is_super_admin`, y al revertir el
+   código las policies vuelven a permitirlo todo.
