@@ -30,6 +30,39 @@ The change is **not ready to implement**. `openspec validate --strict` passes, b
 
 **Recommendation:** shrink the change to RBAC in `basics13` only (models, assignment, permission checks, role CRUD, seeded read-only permissions). Keep one design document. Reuse the existing helpers (`addCommonColumns`, `addAuditColumns`, `addUniqueActiveColumnIndex`). Replace "ID = 1" with an explicit, non-registrable bootstrap. Move language, project members and the bridge selector into their own changes.
 
+## Fix Status
+
+The change was rewritten after this review and then implemented as three changes: `add-user-language`, `add-roles-permissions-system` and `add-domain-permission-checks`.
+
+| ID | Status |
+|---|---|
+| SEC-001 | ✅ FIXED 2026-10-22 — non-fillable `users.is_super_admin` set only by the interactive `basics13:make-super-admin` command; first registrant is not super-admin (RegistrationRoleTest) |
+| SEC-002 | ✅ FIXED 2026-10-22 — no global scope; explicit `is_super_admin = false` in UserListQuery (3 lists + tab counts), UserSelectOptionsQuery and the summary |
+| BUG-001 | ✅ FIXED 2026-10-22 — UserPolicy only blocks *other* users; SuperAdminAccountTest covers remember-me, logout, password change and 2FA |
+| SEC-003 | ✅ FIXED 2026-10-22 — assigning needs `roles.manage`, never on one's own account, system roles only by the super-admin; UserRoleAssignmentTest |
+| DB-001 | ✅ FIXED 2026-10-22 — `role_user` is a plain belongsToMany pivot with FKs (role restrict, user cascade) and `assigned_by` |
+| DB-002 | ✅ FIXED 2026-10-22 — `addUniqueActiveNameIndex` + `addUniqueActiveColumnIndex('roles','slug')`; RoleSchemaTest also runs on MariaDB |
+| DB-003 | ✅ FIXED 2026-10-22 — no CHECK constraint, no wildcard permission |
+| DB-004 | ✅ FIXED 2026-10-22 — `roles` uses addCommonColumns + addAuditColumns; `permissions` is read-only without audit trait |
+| BL-001 | ✅ FIXED 2026-10-22 — data migration gives `admin` to existing users; `basics13.roles.registration_role` (null by default) |
+| ARCH-001 | ✅ FIXED 2026-10-22 — basics13 seeds only `users`/`roles`; entities13 and projects13 seed their own modules (`entities`, not `clients`) |
+| ARCH-002 | ✅ FIXED 2026-10-22 — split into add-user-language, add-domain-permission-checks and add-project-members |
+| ARCH-003 | ✅ FIXED 2026-10-22 — permissions seeded and read-only; list only, no write routes (PermissionListTest) |
+| ARCH-004 | ✅ FIXED 2026-10-22 — host model must use `HasRoles`, marked BREAKING in the proposal and the basics13 README |
+| BL-002 | ✅ FIXED 2026-10-22 — one matrix (design D4), asserted by RolePermissionSeedTest |
+| BL-003 | ✅ FIXED 2026-10-22 — single super-admin concept (the flag); no `superadmin` role |
+| BUG-002 | ✅ FIXED 2026-10-22 — slugs cached on the user instance, visible on the next request; `forgetPermissions()`; one query for N checks (HasRolesTest) |
+| SEC-004 | ✅ FIXED 2026-10-22 — `active`/`is_system` not fillable, no form field; payload flags ignored (RoleTest, RoleCrudTest) |
+| BUG-003 | ✅ FIXED 2026-10-22 — system roles protected in RolePolicy; no model events or triggers |
+| OPS-001 | ✅ FIXED 2026-10-22 — command asks for the data, reads no `env()`, fails on empty password, used email or existing super-admin |
+| TEST-001 | ✅ FIXED 2026-10-22 — security invariants covered by Feature tests; DB tests live in tests/Feature |
+| MAINT-001 | ✅ RESOLVED 2026-10-22 — artifacts rewritten: one design, Spanish, shorter specs |
+| BUG-004 | ✅ RESOLVED 2026-10-22 — in add-user-language: `Language` enum shows native names, no flags |
+| FE-001 | ✅ FIXED 2026-10-22 — summary uses Flux badges with text and the card layout on mobile |
+| PERF-001 | ✅ FIXED 2026-10-22 — one query per user instance, none for the super-admin |
+| OPS-002 | ⏳ OPEN — removing a role deletes its pivot row; no removal audit trail |
+| CSV formula injection (rejected) | ✅ Re-checked during implementation — cells starting with `=+-@` are exported as text (PermissionSummaryTest) |
+
 ## Detected Stack
 
 Verified in the repository:
