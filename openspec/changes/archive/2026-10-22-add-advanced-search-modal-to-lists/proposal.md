@@ -12,7 +12,7 @@ The current search in list views is limited to a simple text search across a few
 - Write Feature tests for advanced search in each resource
 
 ## Impact
-- Affected specs: `basics-shared-views` (new modal component, enhanced page header), `basics-crud-base` (ListQueryBase advanced filtering), `entities-domain` (entity/entity-type list integration), `projects-domain` (project/epic list integration)
+- Affected specs: `basics-shared-views` (new modal component, enhanced page header), `basics-crud-base` (ListQueryBase advanced filtering), `entities-domain` (entity/entity-type list integration), `projects-domain` (project/epic list integration), `entity-projects-bridge` (entity filter on the project list)
 - Affected code: `packages/basics13/` (Livewire component, shared views, ListQueryBase), `packages/entities13/` (queries, views), `packages/projects13/` (queries, views)
 - No breaking changes - simple search remains the default; advanced search is additive
 - Follows existing package boundaries: shared logic in `basics13`, domain-specific field definitions in each domain
