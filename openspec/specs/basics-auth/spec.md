@@ -57,3 +57,17 @@ El correo MUST ser único entre todas las cuentas, incluidas las de la papelera,
 - **WHEN** se crea una cuenta con el correo de otra que está en la papelera
 - **THEN** se rechaza por conflicto de unicidad y no se crea la nueva
 
+
+### Requirement: La interfaz usa el idioma preferido del usuario
+Cada usuario MAY guardar un idioma preferido entre `eu`, `es`, `fr` y `en`. Cualquier otro valor MUST
+rechazarse al guardar. En cada petición autenticada, la interfaz MUST mostrarse en el idioma del usuario
+y, si no tiene ninguno o el guardado ya no es válido, en `config('app.locale')`. Los selectores MUST
+mostrar cada idioma por su nombre nativo, no por una bandera.
+
+#### Scenario: Idioma aplicado o por defecto
+- **WHEN** un usuario con idioma `eu` abre cualquier página
+- **THEN** la interfaz se muestra en euskera; sin idioma, o con uno no válido, en `config('app.locale')`
+
+#### Scenario: El usuario elige su idioma
+- **WHEN** un usuario sin permisos de gestión de cuentas cambia su idioma desde los ajustes de perfil
+- **THEN** se guarda, y la siguiente página se muestra en ese idioma
