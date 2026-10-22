@@ -10,7 +10,7 @@
 
 # NEW TASK
 [ ] Haz un plan para desarrollar el CRUD de usuarios. Cualquier duda pregunta, no inventes nada
-[ ] antes de proceder con el plan, usa el  @consistency-review   para comprobar que lo que han en el plan no descuadra con lo que ya tenemos
+[ ] antes de proceder con el plan, usa el  @full-review   para comprobar que lo que han en el plan no descuadra con lo que ya tenemos
 
 # REVIEWS
 @full-review analiza demo13 basics13 entity13 projects13 entity-projects13 y testing13 busca incongruencias entre los modelos, que tienen de diferente, que se gestiona de forma diferente en un modelo que en otro, que está testeado en uno si y en otro no, que código tienen repetido, donde hay sobreingenieria. repasa la apliación en busca de fallos y propon todas las mejoras que se te ocurran. Repasar los errores que da el phpstan y SonarQube y buscar una posible solucion.  busca incongruencias entre lo que hay en el código y lo que hay dentro de las carpetas .github y openspec y las configuraciones de los Agentes. Analiza tambien el fichero how.md busca incongurencias. Repasa la configuración de los AGENTES y analiza si hay alguna manera de ahorrar tokens y de mejorar la forma de trabajar

@@ -100,7 +100,7 @@ Level 7 (`phpstan.neon`).
 ### Profile-based services (original, run from VS Code tasks)
 
 What each profile runs, as `projects/demo13/docker-compose.yml` defines it. PHP services use
-`webdevops/php-apache-dev:${DC_PHP:-8.5}`, Node services `node:${DC_NODE:-24-bullseye}`.
+`webdevops/php-apache-dev:${DC_PHP:-8.5}`, Node services `node:${DC_NODE:-26-trixie}`.
 
 - Composer clean install: `docker compose --profile composer run --rm laravel13-composer`
   — deletes `vendor` **and `composer.lock`**, then `composer install` (the lock is regenerated, so
