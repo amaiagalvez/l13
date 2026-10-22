@@ -36,8 +36,8 @@ Tokens y detalles: [reference/tokens.md](reference/tokens.md).
 
 ## Listados
 
-- Columnas: nombre (clic abre edición), dato útil (nº de hijos, fechas), acciones a la derecha. No poner editar/borrar pegados a la izquierda.
-- Acciones: objetivo ≥32px (44px en táctil), tooltip y `aria-label`. Más de dos acciones → menú "⋯".
+- Columnas: nombre (texto, no interactivo: se edita con el lápiz de la fila), dato útil (nº de hijos, fechas), acciones a la derecha. No poner editar/borrar pegados a la izquierda.
+- Acciones: objetivo ≥32px (`size="sm"`, 44px en táctil), tooltip y `aria-label`. Hoy cada fila tiene como mucho dos (editar + archivar o mover a la papelera); si alguna llega a tres o más, agruparlas en un menú "⋯".
 - Acción bloqueada (candado): tooltip con el motivo y enlace a los hijos.
 - Fechas legibles y localizadas con el formato normativo de cada idioma: euskera `2026-10-02` (año-mes-día, Euskaltzaindia), castellano `02-10-2026`, francés `02/10/2026`, inglés `Oct 2, 2026`. Fuente única: `x-list.local-time` y `formatLocalDateTime`.
 - Cabeceras de tabla en sentence case, 12–13px, `text-zinc-600` (contraste AA).
