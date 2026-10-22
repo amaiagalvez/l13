@@ -3,7 +3,7 @@
 ## Project
 
 This repository is a Laravel application. The stack, commands and project map
-are defined in `AGENTS.md` (Laravel 13, PHP 8.4, Livewire 4, Flux free,
+are defined in `AGENTS.md` (Laravel 13, PHP 8.5, Livewire 4, Flux free,
 Tailwind 4, PHPUnit, Dusk, Pint, MariaDB, Vite).
 
 Verify versions against composer.json, package.json, lockfiles, Docker and CI

@@ -1,6 +1,6 @@
 # Project guidelines
 
-Laravel 13 · PHP 8.4 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · Dusk · Pint.
+Laravel 13 · PHP 8.5 · Livewire 4 · Flux (free) · Tailwind 4 · PHPUnit · Dusk · Pint.
 Be concise. Create docs only if explicitly asked. Follow sibling files' structure, naming and conventions; reuse existing components. Do not add base folders or change dependencies without approval. Use descriptive names.
 No speculative architecture: no repository, DTO, interface, service or domain layer, no new abstraction and no extra indirection without a concrete need; ask first. Full list in `.github/docs/review-rules.md` and `.github/docs/architecture/ARCHITECTURE.md` (read it before structural changes).
 

@@ -70,7 +70,7 @@ Narrow run inside a package (mount the packages dir at `/packages`, the package 
 ```bash
 docker run --rm --entrypoint "" -u "$(id -u):$(id -g)" -e XDEBUG_MODE=off -e HOME=/tmp \
   -v "$PWD/../../packages":/packages -v "$PWD":/app-docker -w /app-docker \
-  "webdevops/php-apache-dev:8.4" \
+  "webdevops/php-apache-dev:8.5" \
   bash -c "XDEBUG_MODE=off vendor/bin/phpunit --testsuite Unit --filter ValidationCoverageTest"
 ```
 
@@ -85,7 +85,7 @@ What each guard rail enforces:
 ### CI Coverage
 
 - CI enforces ≥80% total code coverage, uploads Clover report
-- Local check: `docker compose run --rm laravel13-phpunit`
+- Local check: `docker compose run --rm laravel13 php artisan test --coverage` (the `laravel13-phpunit` profile points to a missing script)
 
 ### Static Analysis
 
@@ -99,14 +99,26 @@ Level 7 (`phpstan.neon`).
 
 ### Profile-based services (original, run from VS Code tasks)
 
+What each profile runs, as `projects/demo13/docker-compose.yml` defines it. PHP services use
+`webdevops/php-apache-dev:${DC_PHP:-8.5}`, Node services `node:${DC_NODE:-24-bullseye}`.
+
 - Composer clean install: `docker compose --profile composer run --rm laravel13-composer`
-- Pint reformat: `docker compose --profile reformat run --rm laravel13-reformat`
-- PHPStan review: `docker compose --profile review run --rm laravel13-review`
+  — deletes `vendor` **and `composer.lock`**, then `composer install` (the lock is regenerated, so
+  dependencies can move) and lists the `amaia/*` packages.
+- Pint reformat: `docker compose --profile reformat run --rm laravel13-reformat` — `./vendor/bin/pint` (rewrites files).
+- PHPStan review: `docker compose --profile review run --rm laravel13-review` — `phpstan analyse --memory-limit=1G`.
 - NPM clean build: `docker compose --profile npm-all run --rm laravel13-npm-all`
-- NPM incremental build: `docker compose --profile npm run --rm laravel13-npm`
+  — deletes `node_modules` **and `package-lock.json`**, then `npm install` (lock regenerated) and `npm run build`.
+- NPM build: `docker compose --profile npm run --rm laravel13-npm` — `npm install` and `npm run build`.
 - Migrate fresh + seed: `docker compose --profile migrate-all run --rm laravel13-migrate-all`
-- Migrate: `docker compose --profile migrate run --rm laravel13-migrate`
+  — `composer install`, `migrate:fresh` (drops every table) and `db:seed`.
+- Migrate + seed: `docker compose --profile migrate run --rm laravel13-migrate` — `composer install`, `migrate` and `db:seed`.
 - PHPUnit with coverage: `docker compose --profile phpunit run --rm laravel13-phpunit`
+  — runs `/packages/basics13/tooling/run-phpunit-with-coverage.sh`, which does not exist in
+  `basics13/tooling` today, so this profile fails; use the one-off coverage command below.
+
+The `npm` profiles publish port 3000. None of these profiles is safe in a read-only review: they
+rewrite files, lock files or the database.
 
 ### One-off commands via main service (alternative)
 

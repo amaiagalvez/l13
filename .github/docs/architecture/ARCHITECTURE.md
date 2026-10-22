@@ -51,9 +51,12 @@ deleted from a trash view.
 ## Authentication / Authorization
 
 - Fortify provides authentication and account security features.
-- The `active` flag on users is read but never written by the application: nothing in `app/` sets
-  it to false. Deactivating a user is a pending capability (user CRUD, `todo.md`), so the flag can
-  only be set out of band for now. The three resources do have archive/activate endpoints.
+- The `active` flag on users changes only through the users archive/activate actions
+  (`UserArchivedController`), like the resources' own.
+- Every verified user manages accounts, but only the account holder changes an account's email or
+  password (`UserRequest`), so managing accounts cannot take one over. Open self-registration is
+  the `basics13.auth.features.registration` config flag, on by default; a host turns it off in its
+  own config.
 - Inactive users cannot authenticate with passwords, two-factor challenges, passkeys,
   or remember-me cookies. A web middleware checks persisted user activity and logs out
   existing sessions on their next request after deactivation.
@@ -97,11 +100,13 @@ Entities with projects cannot be moved to the trash or permanently deleted.
 Epic names are unique per project among non-deleted epics, including archived ones. Epic start and end dates are
 optional, but an end date requires a start date and must be later than it. Projects
 with epics (including trashed epics) cannot be moved to the trash or permanently
-deleted. Epic comments are removed when their epic is permanently deleted and keep
-a null author when the user is deleted.
+deleted. Epics with comments (trashed comments included) cannot be moved to the trash or
+permanently deleted, so a comment is never orphaned. A comment keeps its author: users are
+soft-deleted and shown as "Deleted user", and a user with comments cannot be permanently deleted.
 
-Important transactions: no multi-step business transaction or queued write flow exists
-currently. The delete guards in `entities13` and `projects13` lock their parent row with
+Important transactions: entity create/update writes the entity and its type pivot in one
+transaction, and adding an epic comment locks the epic and inserts the comment in one transaction.
+No queued write flow exists. The delete guards in `entities13` and `projects13` lock their parent row with
 `lockForUpdate()` inside their own `DB::transaction()`, so a child created between the
 check and the delete makes the delete wait and then fail.
 
@@ -157,6 +162,9 @@ Blade / Livewire / Vue / Inertia:
 - When the bridge is installed, it enforces the project-to-entity relationship with
   a foreign key and dynamically registered Eloquent `belongsTo` / `hasMany` relationships;
   neither base model declares the other domain.
+- Integrations contribute advanced-search fields through their contract
+	(`ProjectQueryIntegration::searchableFields()`), never through configuration: field options and
+	conditions are closures, and a closure in the configuration breaks `config:cache`.
 - Keep browser tests in a separate CI job because they require a browser and a test
 	database.
 
@@ -173,7 +181,7 @@ Record patterns that should not be introduced without a concrete new requirement
 
 ## Production Assumptions
 
-- CI runs PHP 8.3 and Node 22; local Docker currently runs PHP 8.4.
+- CI and local Docker run PHP 8.5, and every `composer.json` requires `^8.5`; CI runs Node 22.
 - Administrative Docker ports and development credentials are for local development
 	only.
 - Production deployments must provide a non-debug environment and isolated database
@@ -183,5 +191,8 @@ Record patterns that should not be introduced without a concrete new requirement
 
 ## Known Technical Debt
 
+- The host CI checks the packages out at their default-branch HEAD and only the host runs the
+	Dusk suites, so a package push that breaks a browser flow passes its own CI and fails on the next
+	host run instead.
 - CI now includes Dusk, but the browser job must be observed once in GitHub Actions to
 	confirm the runner's Chrome/ChromeDriver paths.

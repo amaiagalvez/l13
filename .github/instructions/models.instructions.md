@@ -21,7 +21,7 @@ paths:
   4. Unique active name index `addUniqueActiveNameIndex($table, $scope)` — DB-level unique constraint on `active_name` (scope varies by resource)
   5. Bridge `EntityProjectsIntegration::hasActiveRelatedEntities()` — checks `Model::where('active', true)->exists()` for related entities
   6. Bridge `EntityProjectsIntegration::noRelatedEntitiesBanner()` — renders UI banner when no active records exist
-  7. `TracksAuditColumns::bootTracksAuditColumns()` — manages `active` in soft-delete/restore hooks (`trashed`/`restoring`), sets `deleted_by`/`updated_by`
+  7. `TracksAuditColumns::bootTracksAuditColumns()` — never touches `active` (trash and restore keep it); it only stamps `created_by`/`updated_by`/`deleted_by`
   8. Resource `XArchivedController` (extends `Basics13\Http\Controllers\ArchivedController`) — handles archived state transitions and `active` flag changes
   9. Form UI — displays/hides fields and options based on `active` state
   10. Validation rules — may reference `active` state in form request rules
