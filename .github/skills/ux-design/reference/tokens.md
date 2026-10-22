@@ -25,7 +25,7 @@ Cambia los valores aquí y en `resources/css/app.css` (`@theme`); no añadas col
 
 ## Tipografía
 
-- Cuerpo e interfaz: Inter. Títulos (H1, títulos de tarjeta) y cifras grandes: Space Grotesk. No añadir una tercera familia.
+- Cuerpo e interfaz: Inter (`font-sans`). Títulos (H1, títulos de tarjeta) y cifras grandes: Space Grotesk (`font-display`). Ambas se cargan con `bunny()` en `vite.config.js`. No añadir una tercera familia.
 - Cifras con `tabular-nums`.
 - Escala: 12 / 13 / 15 / 17 / 20 / 30 px. Título de página 30 px (600), título de sección 17–20 px (600), etiquetas y cabeceras de tabla 12–13 px (500), cuerpo y tablas 14–15 px, cifra de métrica 30 px.
 - Líneas de texto de menos de 80 caracteres. Sentence case en todo; sin mayúsculas en etiquetas.
@@ -34,17 +34,7 @@ Cambia los valores aquí y en `resources/css/app.css` (`@theme`); no añadas col
 
 - Escala de 4 px. Separación entre secciones 24–32 px, dentro de tarjetas 20–24 px.
 - Radios por jerarquía: controles y badges `rounded-lg` (8 px), tarjetas y tablas `rounded-2xl` (16 px), drawer y modal `rounded-3xl` (24 px), pastillas `rounded-full`.
-- Sombras de elevación como tokens en `@theme`; ninguna otra:
-
-```css
-@theme {
-    --shadow-card: 0 18px 44px -22px rgb(16 22 40 / 0.2), 0 2px 10px rgb(16 22 40 / 0.06);
-    --shadow-raised: 0 14px 36px -14px rgb(16 22 40 / 0.22), 0 4px 12px -6px rgb(16 22 40 / 0.12);
-    --shadow-overlay: 0 28px 64px -20px rgb(16 22 40 / 0.28), 0 8px 20px -8px rgb(16 22 40 / 0.16);
-}
-/* Oscuro: mismas capas con negro más opaco (≈ rgb(0 0 0 / 0.6)). */
-```
-
+- Sombras de elevación: solo las utilidades `shadow-card`, `shadow-raised` y `shadow-overlay` (`@utility` en `resources/css/app.css`, que leen `--elevation-*` de `:root` y `.dark`). No van en `@theme` porque Tailwind incrusta allí el valor y el modo oscuro no podría cambiarlo. Ninguna otra sombra.
 - `shadow-card`: tarjetas, tablas y sidebar flotante, con borde `zinc-200` tenue (`dark:zinc-800`). `shadow-raised`: tarjeta enlazada al pasar el ratón (sin desplazamiento). `shadow-overlay`: drawer, modal, menús y toasts.
 
 ## Tamaños de control
