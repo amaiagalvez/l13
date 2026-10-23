@@ -68,8 +68,10 @@ descartada: el id de sesión de Laravel, que cambia tras el login.
 **Qué `Login` se registra.** Se ignoran `viaRemember()` (restauración por cookie), la impersonación
 (sesión con `impersonator_id`) y los usuarios inactivos (los expulsa el listener existente; no
 depender del orden de registro). Para que la impersonación sea detectable, `impersonate()` guarda
-`impersonator_id` antes de `Auth::login()` y `leaveImpersonation()` lo borra después. En los casos
-ignorados tampoco se hace `clear()` del contador.
+`impersonator_id` antes de `Auth::login()` y `leaveImpersonation()` lo borra después; la
+regeneración del guard conserva los datos de sesión. Esto modifica `basics-user-impersonation`, que
+pedía guardar la marca después del login. En los casos ignorados tampoco se hace `clear()` del
+contador.
 
 **Motivo del fallo.** El listener de `Failed` lee solo el campo de login (nunca `password`) y busca la
 cuenta: inexistente → `unknown_user`; existe e inactiva → `inactive`; si no → `wrong_password`.
@@ -94,8 +96,7 @@ recuentos en el mensaje y, si `alert_email` no está vacío, `Mail::to()->send(n
 síncrono dentro de `try`/`report()`: es un correo cada 5 minutos como mucho y no hay worker. Ni el
 mensaje ni el correo llevan logins o IPs: número de fallos, de logins y de IPs distintos, ventana y
 enlace a `sessions.index`. Umbrales (10, 5 min) como constantes de `LoginAudit`; el TTL se deriva de
-los minutos. Sin clase de excepción propia; el mailable necesita la carpeta nueva `src/Mail`
-(pendiente de aprobación).
+los minutos. Sin clase de excepción propia; el mailable va en la carpeta nueva `src/Mail` (aprobada).
 
 **Settings sin caché.** Modelo `Setting` sobre `BAS_settings` con `package`, `class` (informativa),
 `variable`, `type` (`string` con cast a enum `integer`, `string`, `email`), `value` (text nullable),
@@ -103,7 +104,8 @@ los minutos. Sin clase de excepción propia; el mailable necesita la carpeta nue
 `(package, variable)`. `type` hace falta para validar y castear. Lectura con
 `Setting::get('basics13', 'max_login_attempts', 3)`: una consulta indexada, despreciable frente al
 hash, sin caché (la caché del host no deserializa modelos y las siembras no la invalidarían). Si el
-valor falta, está vacío o un entero es menor que 1, devuelve el defecto. Siembra por migración con
+valor falta, está vacío o un entero queda fuera de `[MIN_INTEGER, MAX_INTEGER]`, devuelve el
+defecto. Siembra por migración con
 `insertOrIgnore` (no pisa valores cambiados). Las etiquetas usan `name_{locale}` y, si está vacío,
 `name_en`.
 
@@ -111,15 +113,19 @@ valor falta, está vacío o un entero es menor que 1, devuelve el defecto. Siemb
 `SettingController@index` con `SettingIndexRequest` (`package` válido; uno desconocido da 404) y
 pestañas `x-list.tabs` con el paquete traducido; `@update` por paquete con `UpdateSettingsRequest`,
 que construye las reglas según `type`: entero `between` con las constantes `Setting::MIN_INTEGER` (1)
-y `MAX_INTEGER` (1440), correo `nullable|email` con el `max` de configuración. Guarda modelo a modelo.
+y `MAX_INTEGER` (1440), correo `nullable|email` y texto `nullable|string`, ambos con el `max` de
+configuración. Guarda modelo a modelo.
 Formulario con `data-track-changes`; sin `settings.edit`, campos deshabilitados y sin botón de
 guardar. Ruta `/configuration` (`configuration.*`), porque `settings/*` ya son los ajustes de cuenta.
 
 **Listado de sesiones.** `SessionLogController@index` con `SessionLogListRequest`, `ListQueryBase`,
 transformer y la lista compartida, sin columna de acciones; ruta `/sessions`, `sessions.index`.
 Filtro de fechas sargable en la query (`>= desde` y `< hasta + 1 día`, no `whereDate`), orden
-`created_at desc, id desc`, `login` en la búsqueda, usuario por el selector remoto limitado existente
-y `with('user')` con `withTrashed()`.
+`created_at desc, id desc`, `login` en la búsqueda y `with('user')` con `withTrashed()`. El usuario se
+filtra con un `select` estático de la búsqueda avanzada, como `role_ids` del resumen de permisos:
+todas las cuentas (archivadas, en papelera y el super-admin incluidos), por nombre. Alternativa
+descartada: el selector remoto (`users.options`), que solo existe en el formulario de épicas, excluye
+cuentas inactivas y el super-admin, y el modal de búsqueda avanzada no admite opciones remotas.
 
 **Permisos.** Migración nueva que siembra `sessions.view`, `sessions.manage`, `settings.view`,
 `settings.edit` y `settings.manage`, y concede `sessions.manage` y `settings.manage` al rol `admin`.

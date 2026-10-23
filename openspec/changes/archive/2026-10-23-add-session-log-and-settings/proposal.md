@@ -47,6 +47,9 @@ ataque, con los parámetros editables desde la interfaz.
 - `basics-roles-permissions` (de `add-roles-permissions-system`, aún sin archivar): `basics13`
   siembra también los módulos `sessions` y `settings`, y la lista de acciones recoge `impersonate`,
   que la siembra actual ya usa.
+- `basics-user-impersonation`: la marca `impersonator_id` se guarda antes del login del usuario
+  objetivo (y se borra después del login de vuelta), para que el registro de accesos detecte la
+  impersonación en el evento `Login`.
 
 ## Impact
 
@@ -60,7 +63,6 @@ ataque, con los parámetros editables desde la interfaz.
     del 429 de `tests/Feature/Auth/AuthenticationTest.php`.
 - `projects/demo13`: entradas «Sesiones» y «Configuración de la aplicación» en el grupo
   Administración del sidebar.
-- Sin dependencias nuevas: Sentry no se instala; el aviso usa el `report()` de Laravel. Requiere
-  aprobar la carpeta nueva `src/Mail` en `basics13`.
-- Orden: archivar después de `add-roles-permissions-system`; coordinar con
-  `add-superadmin-user-impersonation`, que edita el mismo requirement de permisos y dispara `Login`.
+- Sin dependencias nuevas: Sentry no se instala; el aviso usa el `report()` de Laravel. Carpeta
+  nueva `src/Mail` en `basics13` (aprobada).
+- Orden: archivar después de `add-roles-permissions-system`.

@@ -39,6 +39,9 @@ Read only the row you touch:
 | Controllers, requests, policies, queries | `specs/basics-crud-base`, `specs/basics-trash-archived`, `specs/<domain>-domain` |
 | Trash, restore, archive, force delete | `specs/basics-trash-archived` |
 | Auth, users, account settings | `specs/basics-auth`, `specs/basics-user-impersonation` |
+| Roles, permissions, super-admin | `specs/basics-roles-permissions`, `specs/basics-super-admin` |
+| Login register, lockout, failure alert | `specs/basics-login-audit` |
+| Application configuration (`BAS_settings`) | `specs/basics-settings` |
 | Flux views, shared components | `specs/basics-shared-views` |
 | Excel export of listings | `specs/excel-export` |
 | Epics and comments | `specs/epics-comments` |

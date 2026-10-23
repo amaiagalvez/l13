@@ -26,4 +26,4 @@ paths:
   9. Form UI — displays/hides fields and options based on `active` state
   10. Validation rules — may reference `active` state in form request rules
 - A parent relation is never optional: `PRO_epics.project_id` is a NOT NULL foreign key; `PRO_projects.entity_id` is nullable in the database (SQLite cannot add a NOT NULL column to a filled table) with `restrictOnDelete`, but the application requires it. Every `name` is NOT NULL. Read those relations directly — no `?->`, no `'—'` fallback — and never write a test that fabricates the missing state with `setRelation()`.
-  > Invariantes de esta zona: `openspec/specs/basics-trash-archived/spec.md`, `openspec/specs/entities-domain/spec.md`, `openspec/specs/projects-domain/spec.md`, `openspec/specs/epics-comments/spec.md`.
+  > Invariantes de esta zona: `openspec/specs/basics-trash-archived/spec.md`, `openspec/specs/entities-domain/spec.md`, `openspec/specs/projects-domain/spec.md`, `openspec/specs/epics-comments/spec.md`, `openspec/specs/basics-super-admin/spec.md`, `openspec/specs/basics-login-audit/spec.md`, `openspec/specs/basics-settings/spec.md`.
