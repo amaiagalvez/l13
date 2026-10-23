@@ -14,8 +14,11 @@ compartir cada proyecto solo con sus miembros. Depende de `add-roles-permissions
   gestiona todo.
 - Gestionan los miembros el `owner` del proyecto o quien tiene `projects.manage`. Un proyecto MUST
   conservar al menos un `owner`.
-- El bridge limita las opciones de cliente de quien no tiene `entities.view` a los clientes de sus
-  proyectos.
+- Sin `projects.manage`, el panel de inicio y los epics siguen la misma pertenencia, y el rol en el
+  proyecto limita también editar, comentar y borrar sus epics.
+- El bridge limita las opciones de cliente de quien no tiene `entities.view`, al editar, a los clientes
+  de sus proyectos; al crear ve todos los activos para poder crear su primer proyecto.
+- El owner busca usuarios para añadirlos sin necesitar `users.view`.
 - Drawer de miembros en el formulario de proyecto.
 
 ## Capabilities
