@@ -7,10 +7,11 @@ resumen da esa foto de un vistazo y hace visible un pico de fallos sin esperar a
 ## What Changes
 
 - Página nueva «Panel de administración» en `basics13`, de solo lectura, con:
-  - número de usuarios (cuentas no borradas);
+  - KPIs de cuentas (no borradas): total, activas, nuevas, inactivas, pendientes de verificar el
+    email y tasa de crecimiento respecto al inicio del periodo;
   - número de intentos de acceso fallidos en el periodo;
   - gráfica por día de los inicios de sesión correctos: total y usuarios únicos.
-- Periodo seleccionable de 7, 30 o 90 días (por defecto 30), hoy incluido; un valor desconocido
+- Periodo seleccionable de 7, 30 o 90 días (por defecto 7), hoy incluido; un valor desconocido
   usa el defecto.
 - Permiso: reutiliza `sessions.view`, sin permisos nuevos.
 - El componente compartido `x-basics13::chart` admite varias series con un color por serie.
