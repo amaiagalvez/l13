@@ -44,6 +44,17 @@ Or check `package.json`. Use APIs of the installed major version.
 
 ## Test Execution
 
+Keep output small (see `AGENTS.md`): narrowest target, compact flags, full output to a log file, read only its tail or the failures. Never run Dusk yourself: give the user the command and wait for the pasted result.
+
+```bash
+DX php artisan test --compact --filter=Name > /tmp/phpunit.log 2>&1; tail -n 40 /tmp/phpunit.log
+DX ./vendor/bin/phpstan analyse --no-progress --error-format=raw > /tmp/phpstan.log 2>&1; tail -n 40 /tmp/phpstan.log
+PHPUNIT_ARGS="--no-progress" bash testing13/phpunit.sh projects13 > /tmp/phpunit-projects13.log 2>&1; tail -n 40 /tmp/phpunit-projects13.log
+PHPSTAN_ARGS="--no-progress --error-format=raw" bash testing13/review.sh projects13 > /tmp/review-projects13.log 2>&1; tail -n 40 /tmp/review-projects13.log
+```
+
+`PHPUNIT_ARGS` / `PHPSTAN_ARGS` are appended to the `vendor/bin/phpunit` / `phpstan analyse` call (package PHPUnit has no `--compact`; use `--no-progress`, `--filter=Name`).
+
 - Narrowest: `DX php artisan test --compact <path|--filter=name>`
 - Parallel locally (never in CI — shared DB): `DX php artisan test --parallel --compact <path>` (flags before path)
 - Rerun after each fix

@@ -24,4 +24,4 @@ These live in the owning package, never in `projects/demo13/app`. Names below ar
 - List querying lives in `src/Queries`, row shaping in `src/Transformers`; keep controllers thin.
 - A `max` rule never carries a literal number: it reads `config('basics13.validation.max_length.string')` for a varchar-backed field or `config('basics13.validation.max_length.longtext')` for a `longText` one. `entity-projects13/tests/Unit/ValidationCoverageTest.php` fails on a literal or on a key that does not resolve.
 
-> Invariantes de esta zona: `openspec/specs/basics-crud-base/spec.md`, `openspec/specs/basics-trash-archived/spec.md`, `openspec/specs/entities-domain/spec.md`, `openspec/specs/projects-domain/spec.md`.
+> Invariantes de esta zona: `openspec/specs/basics-crud-base/spec.md`, `openspec/specs/excel-export/spec.md`, `openspec/specs/basics-user-impersonation/spec.md`, `openspec/specs/basics-trash-archived/spec.md`, `openspec/specs/entities-domain/spec.md`, `openspec/specs/projects-domain/spec.md`.

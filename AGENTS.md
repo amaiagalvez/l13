@@ -16,6 +16,8 @@ No speculative architecture: no repository, DTO, interface, service or domain la
 
 ## Commands
 Everything runs in Docker from `projects/demo13/` (from `l13/`: `docker compose -f projects/demo13/docker-compose.yml ...`). `DX` = `docker compose exec -e XDEBUG_MODE=off laravel13`. Always pass `--no-interaction`; create files with `DX php artisan make:*`. Details, test runs and guard rails: skill `docker-commands`.
+- Test output costs tokens. Run the narrowest target (`--filter`, one path) with `--compact` (PHPUnit) or `--no-progress --error-format=raw` (PHPStan), send the full output to a log file and read only its tail (`tail -n 40`) or the failures. Run full suites (`testing13/phpunit.sh`, `testing13/review.sh`) once, at the end of a change, with `PHPUNIT_ARGS="--no-progress"` / `PHPSTAN_ARGS="--no-progress --error-format=raw"`.
+- **Never run Dusk yourself** (`testing13/dusktest*.sh`, `php artisan dusk`): stop, give the user the exact command and wait for the pasted result.
 
 ## Project map
 Entities → Projects → Epics (+ epic comments). Soft deletes with trash, restore and force delete; `active` flag with archived list; names unique among active records (DB-enforced).
@@ -36,8 +38,9 @@ Read only the row you touch:
 | Models, casts, columns, relationships | `specs/basics-trash-archived`, `specs/<domain>-domain` |
 | Controllers, requests, policies, queries | `specs/basics-crud-base`, `specs/basics-trash-archived`, `specs/<domain>-domain` |
 | Trash, restore, archive, force delete | `specs/basics-trash-archived` |
-| Auth, users, account settings | `specs/basics-auth` |
+| Auth, users, account settings | `specs/basics-auth`, `specs/basics-user-impersonation` |
 | Flux views, shared components | `specs/basics-shared-views` |
+| Excel export of listings | `specs/excel-export` |
 | Epics and comments | `specs/epics-comments` |
 | Planning and timeline (read-only) | `specs/planning-timeline` |
 | Entity↔project relations, cross-package imports | `specs/entity-projects-bridge`, `specs/package-boundaries` |
