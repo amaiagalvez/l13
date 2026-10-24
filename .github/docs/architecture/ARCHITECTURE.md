@@ -136,7 +136,7 @@ Blade / Livewire / Vue / Inertia:
 ## External Services
 
 - No application-specific external service integration was identified.
-- Docker Compose provides MariaDB, phpMyAdmin, and MailHog for local development.
+- Docker Compose provides MariaDB, phpMyAdmin, and Mailpit for local development.
 
 ---
 
