@@ -72,3 +72,10 @@ Mes, semana, día y año MUST dibujar el mismo conjunto de eventos de los calend
 #### Scenario: Un evento que cruza el límite de dos semanas
 - **WHEN** un evento va del fin de una semana al inicio de la siguiente
 - **THEN** aparece en las dos vistas
+
+### Requirement: Una celda muestra un número acotado de eventos
+Cada celda de día (mes y semana) y cada mes (año) MUST dibujar como máximo un número fijo de eventos y MUST indicar cuántos quedan con un enlace "+N más" a la vista que los muestra todos (día para una celda de día, mes para un mes del año). La vista de día MUST mostrar todos sus eventos.
+
+#### Scenario: Un día con más eventos de los que caben
+- **WHEN** un día del mes tiene más eventos que el máximo de la celda
+- **THEN** se ven los primeros, un enlace "+N más" con el número restante lleva a la vista de ese día, y allí aparecen todos
