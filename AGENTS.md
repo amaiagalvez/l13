@@ -47,4 +47,5 @@ Read only the row you touch:
 | Excel export of listings | `specs/excel-export` |
 | Epics and comments | `specs/epics-comments` |
 | Planning and timeline (read-only) | `specs/planning-timeline` |
+| Calendar, personal events | `specs/calendars`, `specs/planning-timeline` |
 | Entity↔project relations, cross-package imports | `specs/entity-projects-bridge`, `specs/package-boundaries` |
