@@ -115,12 +115,12 @@ What each profile runs, as `projects/demo13/docker-compose.yml` defines it. PHP 
 `webdevops/php-apache-dev:${DC_PHP:-8.5}`, Node services `node:${DC_NODE:-26-trixie}`.
 
 - Composer clean install: `docker compose --profile composer run --rm laravel13-composer`
-  — deletes `vendor` **and `composer.lock`**, then `composer install` (the lock is regenerated, so
-  dependencies can move) and lists the `amaia/*` packages.
+  — deletes `vendor`, then `composer install` from the committed `composer.lock` and lists the
+  `amaia/*` packages.
 - Pint reformat: `docker compose --profile reformat run --rm laravel13-reformat` — `./vendor/bin/pint` (rewrites files).
 - PHPStan review: `docker compose --profile review run --rm laravel13-review` — `phpstan analyse --memory-limit=1G`.
 - NPM clean build: `docker compose --profile npm-all run --rm laravel13-npm-all`
-  — deletes `node_modules` **and `package-lock.json`**, then `npm install` (lock regenerated) and `npm run build`.
+  — deletes `node_modules`, then `npm install` (keeps `package-lock.json`) and `npm run build`.
 - NPM build: `docker compose --profile npm run --rm laravel13-npm` — `npm install` and `npm run build`.
 - Migrate fresh + seed: `docker compose --profile migrate-all run --rm laravel13-migrate-all`
   — `composer install`, `migrate:fresh` (drops every table) and `db:seed`.
@@ -131,7 +131,7 @@ What each profile runs, as `projects/demo13/docker-compose.yml` defines it. PHP 
   summary to `storage/logs/test-coverage-summary.txt`.
 
 The `npm` profiles publish port 3000. None of these profiles is safe in a read-only review: they
-rewrite files, lock files or the database.
+rewrite files, dependencies or the database.
 
 ### One-off commands via main service (alternative)
 
