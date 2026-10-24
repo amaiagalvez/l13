@@ -25,7 +25,7 @@ Aplicar siguiendo AGENTS.md y la regla de zona de cada ruta. Commit en el repo d
 
 - [x] 3.1 Suite completa de todos los paquetes (`basics13`, `entities13`, `projects13`, `entity-projects13`) y de `demo13` con `PHPUNIT_ARGS="--no-progress"` en Docker, más Pint y PHPStan nivel 7 (`--no-progress --error-format=raw`); cobertura ≥ 80 % en `basics13` y `projects13`
 - [x] 3.2 Prueba manual en Docker (Playwright) de las cuatro vistas, crear/editar/borrar un evento personal y ocultar cada calendario (pantallazos del resultado)
-- [ ] 3.3 Dar al usuario el comando de Dusk si el modal añade comportamiento JS (no ejecutarlo yo); esperar resultado pasado
+- [x] 3.3 Dar al usuario el comando de Dusk si el modal añade comportamiento JS (no ejecutarlo yo); esperar resultado pasado
 
 ## Workflow follow-up
 
