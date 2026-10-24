@@ -239,3 +239,21 @@ Challenged and dropped (devil's advocate):
 5. **LOW-003 / LOW-005** — Remove unused `laravel/sail`; plan the MailHog → Mailpit swap when convenient.
 6. **LOW-001** — No action now; revisit the session-log account filter when the user count grows.
 7. After `add-database-menus` lands (in-flight OpenSpec change), request a focused follow-up review of it.
+
+## Resolution (closed 2026-10-24)
+
+| ID | Status | Commit |
+|----|--------|--------|
+| MED-001 | Not reproducible: `pint --test` passes on all basics13 files, `LoginAudit.php` unchanged | — |
+| MED-002 | Fixed: `ExcelExportService` uses `FromQuery` + `WithMapping` (chunked read, `maxRows` kept); test for chunking under the cap | basics13 `65ed10b` |
+| LOW-001 | Deferred, as recommended | — |
+| LOW-002 / OPS-001 | Fixed: `composer audit --no-interaction --abort-on-unfixable` in all five CI workflows | host `53d779a`, basics13 `65ed10b`, entities13 `84ad4f9`, projects13 `5788925`, entity-projects13 `0e2857b` |
+| LOW-003 / OPS-003 | Fixed: `laravel/sail` removed | host `53d779a` |
+| LOW-004 / OPS-007 | Fixed: `--sql-mode=""` dropped; local MariaDB runs strict | host `53d779a` |
+| LOW-005 / OPS-004 | Fixed: MailHog replaced by Mailpit (`axllent/mailpit:v1.27`) | host `53d779a`, l13 `ea9c09e` |
+| OPS-005 | Fixed: port 80 bound to `127.0.0.1` | host `d44a844` |
+| OPS-008 | Fixed: clean-install helpers keep `composer.lock` / `package-lock.json` | host `d44a844`, l13 `dd285fc` |
+| OPS-009 | Fixed: `amaia/*` constrained to `^1.0` | host `d44a844` |
+| OPS-002, OPS-006, INFO-* | No action (documented debt / deliberate tradeoffs) | — |
+
+Validation: host `composer ci:check` (21 tests, 100 % coverage); package suites basics13 (859), entities13 (230), projects13 (565), entity-projects13 (432) green; PHPStan basics13 clean. Dusk not run.

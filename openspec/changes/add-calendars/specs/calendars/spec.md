@@ -33,7 +33,7 @@ Crear, editar y eliminar eventos MUST estar disponible solo sobre los eventos pe
 - **THEN** los eventos personales ajenos no aparecen
 
 ### Requirement: Un evento personal es CRUD plano con fechas acotadas
-Un evento personal MUST NOT tener papelera ni archivados, y al eliminar su dueño MUST NOT quedar huérfanos. Debe llevar fecha de inicio obligatoria y fecha de fin opcional; la fecha de fin, si existe, MUST ser ≥ la fecha de inicio, y una fecha con formato inválido o una fin anterior a la inicio MUST producir el error junto a su campo.
+Un evento personal MUST NOT tener papelera ni archivados, y al eliminar su dueño MUST NOT quedar huérfanos. Un evento personal MUST llevar título y fecha de inicio obligatorios, y fecha de fin opcional; la fecha de fin, si existe, MUST ser ≥ la fecha de inicio, y una fecha con formato inválido o una fin anterior a la inicio MUST producir el error junto a su campo.
 
 #### Scenario: Un evento sin fecha de fin
 - **WHEN** se envía el formulario con fecha de inicio y sin fecha de fin

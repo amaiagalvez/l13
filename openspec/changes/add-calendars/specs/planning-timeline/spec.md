@@ -3,7 +3,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Planning y timeline son de solo lectura
-Ninguna pantalla agregada MUST crear, modificar ni eliminar registros de dominio al abrirse; las pantallas agregadas son planning, timeline y el calendario. Su acceso MUST derivarse de la policy del proyecto, sin policy propia. Solo cuentan proyectos y epics activos; la papelera MUST quedar fuera.
+Ninguna pantalla agregada MUST crear, modificar ni eliminar registros de dominio al abrirse; las pantallas agregadas son planning, timeline y el calendario. Lo que cada una dibuja de dominio MUST autorizarse con la policy del proyecto, sin policy propia; la ruta del calendario no exige policy de dominio, porque también dibuja el calendario personal, cuyos eventos son siempre los del usuario de la sesión. Solo cuentan proyectos y epics activos; la papelera MUST quedar fuera.
 
 #### Scenario: Un proyecto archivado con epics activos
 - **WHEN** una pantalla agregada lee el conjunto activo
