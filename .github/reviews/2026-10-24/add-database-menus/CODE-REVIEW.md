@@ -106,3 +106,12 @@ Change the factory to `'name' => fake()->unique()->word()` (as the `dupe-insert 
 1. **MED-R2-002** — Make `AuditedRecordFactory` use `unique()->word()`; rerun the Excel tests a few times to confirm the flake is gone. (One line.)
 2. **MED-R2-001** — Decide on the staged Larastan bump: commit without it (current path) and take the update separately with `SessionLog` cast fix + baseline regeneration, or fix the cast + annotations now and bump with clean PHPStan.
 3. **Carry-overs (morning review)** — Excel export `FromQuery` (MED-002), `composer audit` gate in CI (LOW-002), dev MariaDB strict mode (LOW-004), drop `laravel/sail` (LOW-003), MailHog → Mailpit when convenient (LOW-005), revisit the session-log account filter at scale (LOW-001).
+
+## Resolution (closed 2026-10-24)
+
+| ID | Status | Commit |
+|----|--------|--------|
+| MED-R2-001 | Resolved: Larastan v3.13.2 is committed in basics13 and `phpstan analyse` passes | — |
+| MED-R2-002 | Fixed: `AuditedRecordFactory` uses `fake()->unique()->word()`; Excel tests rerun 5× green, basics13 suite 859 green | basics13 `d6ac241` |
+| INFO-R2-* | No action (accepted by design) | — |
+| Carry-overs | Closed in `../CODE-REVIEW.md` "Resolution" | — |

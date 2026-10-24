@@ -238,7 +238,7 @@ Challenged and dropped (devil's advocate):
 4. **LOW-004** — Drop `--sql-mode=""` from the local MariaDB so dev matches CI/production behavior.
 5. **LOW-003 / LOW-005** — Remove unused `laravel/sail`; plan the MailHog → Mailpit swap when convenient.
 6. **LOW-001** — No action now; revisit the session-log account filter when the user count grows.
-7. After `add-database-menus` lands (in-flight OpenSpec change), request a focused follow-up review of it.
+7. ~~After `add-database-menus` lands, request a focused follow-up review of it.~~ Done: `add-database-menus/CODE-REVIEW.md` (round 2, closed).
 
 ## Resolution (closed 2026-10-24)
 
