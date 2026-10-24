@@ -43,6 +43,7 @@ Read only the row you touch:
 | Login register, lockout, failure alert | `specs/basics-login-audit` |
 | Application configuration (`BAS_settings`) | `specs/basics-settings` |
 | Flux views, shared components | `specs/basics-shared-views` |
+| Sidebar menus, navigation | `specs/basics-navigation-menus` |
 | Excel export of listings | `specs/excel-export` |
 | Epics and comments | `specs/epics-comments` |
 | Planning and timeline (read-only) | `specs/planning-timeline` |

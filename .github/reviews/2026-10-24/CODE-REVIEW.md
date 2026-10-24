@@ -1,166 +1,241 @@
 # Code Review
 
-Objeto: plan OpenSpec `openspec/changes/add-database-menus/` (proposal, design, tasks, spec `basics-navigation-menus`). Aún no hay código: se revisa el plan contra el código que va a tocar.
+**Date:** 2026-10-24 (audit started 2026-10-23; finished after midnight)
+**Scope:** Whole workspace (`projects/demo13/` host + `packages/{basics13,entities13,projects13,entity-projects13}`), with emphasis on the 2026-10-23/24 wave: sessions + login audit + device types, user types + delegated account management, settings, impersonation, Excel export, project members + visibility, dashboard, list toolbar/backToList.
+**Mode:** READ-ONLY. No code, tests, dependencies, configuration or data were modified.
+
+> **Note on delegation:** the 10 specialist subagent reviews were launched, but 9 failed with an upstream error ("Insufficient account funds") before producing output; only the DevOps specialist completed (report saved at `devops.md`). The remaining specialist passes (Laravel, Security, Database, Performance, Business, Architecture, Testing, Frontend, Maintainability) were performed directly by the orchestrator against the same agent checklists, focused on the new wave. Devil's-advocate challenges were applied inline (see Rejected Findings).
+
+> **Scope cutoff:** while this audit ran, the repos moved: new commits `Keep the list page, search and filters after every list action` (all three domain packages) and `add-database-menus` (basics13 `b8e5339`, entities13 `d1a232c`, projects13 `f1720c9`, host `894b7aa`), plus uncommitted working-tree changes in basics13 (lang JSONs, permissions/users views, `composer.lock`). The committed waves up to and including `user-types + dashboard` were reviewed in depth; `add-database-menus` is an in-flight OpenSpec change (`openspec/changes/add-database-menus/`) with a dirty working tree and is **excluded** — review it once it lands.
 
 ## Executive Summary
 
-El plan es viable y proporcionado en su estructura (una clase `NavigationMenu`, un componente anónimo, pivote "alguno de" los permisos). Hay tres problemas que deben corregirse antes de implementar:
+The 2026-10-23/24 feature wave (login audit/session register with lockout and device types, user types with delegated type-admin account management, application settings, super-admin impersonation, Excel export, project membership with visibility narrowing, dashboards) is well engineered and heavily tested (4,635 package tests + 21 host tests, all passing; PHPStan clean at host and all packages). Authorization boundaries are consistently enforced: every project/epic access goes through `ChecksProjectMembership` with `denyAsNotFound()` for non-members, every list/planning/timeline/dashboard/options query is narrowed by `ProjectVisibility`, and delegated user management draws one line (`DelegatesUserManagement`) shared by the policy, lists, selector and permission summary. No security vulnerabilities, no correctness bugs, and no package-boundary violations were found.
 
-1. **La caché por usuario no cumple su objetivo**: con `CACHE_STORE=database` cada lectura de caché es una consulta, y el diseño hace 3 lecturas por carga, frente a ~1 consulta de permisos hoy, que ya suele pagar la policy. Además obliga a invalidar desde muchos puntos y ya se ha encontrado uno sin cubrir (`removeRole`).
-2. **Cambia lo que ve cada usuario**: Work y Data hoy se muestran a todos y el plan les pone permisos `.view`. Esto contradice el objetivo declarado.
-3. **Los permisos inexistentes dejan el ítem público**: si al sembrar se omite un slug que no existe, el ítem queda sin permisos y lo ve todo el mundo. Planning, Timeline y Work dashboard no tienen slug propio.
+Actionable findings are few and minor: one Pint style failure in basics13 that **breaks its lint/CI job** (auto-fixable), one realistic memory risk in the Excel export path (50,000 rows materialized per request), an unbounded account dropdown in the session-log search modal, and a handful of low DevOps hygiene items (no `composer audit` in CI, unused `laravel/sail`, non-strict local MariaDB).
 
 ## Detected Stack
 
-Laravel 13, PHP 8.5, Livewire 4, Flux free, Tailwind 4, PHPUnit, Dusk, Pint, PHPStan nivel 7, Docker. Caché: `database` en `demo13/.env:43` y `array` en los `phpunit.xml`. Monorepo con paquetes `basics13`, `entities13`, `projects13` y `entity-projects13`.
+- PHP 8.5 (8.5.12 in containers), Laravel 13 (Livewire starter kit), Livewire 4.1 + Blaze, Flux (free), Tailwind 4, Blade + Vite
+- MariaDB (Docker), PHPUnit 12.5 (not Pest), paratest, Dusk 8.7, Pint 1.27, Larastan/PHPStan 3.9, maatwebsite/excel, Fortify (login/2FA/passkeys/verification)
+- Four path packages symlinked from `packages/` (each its own git repo): basics13, entities13, projects13, entity-projects13
+- Docker Compose (laravel13, laravel13-npm, MariaDB, phpMyAdmin, MailHog); GitHub Actions CI in all 5 repos; no API routes (Blade/Livewire only → API reviewer skipped)
+- Queues: database driver configured, no application jobs. Redis/Horizon: absent.
 
 ## Checks Executed
 
-| Check | Resultado |
-|---|---|
-| `openspec validate add-database-menus --strict` | OK |
-| PHPUnit, PHPStan, Pint, Dusk, build | NOT RUN: no hay código del cambio que comprobar |
-| Especialistas | Laravel, Security, Database, Performance, Business Logic, Architecture, Testing, Frontend, Maintainability. Omitidos: API (sin endpoints) y DevOps (sin infraestructura) |
-| Devil's Advocate | El subagente falló por límite de uso; el checklist de `devil-advocate.agent.md` lo aplicó el orquestador, verificando en el código `HasRoles::removeRole`, `PlanningListRequest`, `TimelineListRequest`, `routes/roles.php` y `sidebar.blade.php` |
+| Check | Scope | Result |
+|---|---|---|
+| `pint --test --parallel` | host demo13 | ✅ PASS (38 files) |
+| `pint --test --parallel` | 4 packages | ❌ **basics13 FAIL: 1 style issue** (`src/Auth/LoginAudit.php`, `unary_operator_spaces`/`not_operator_with_successor_space`); entities13/projects13/entity-projects13 PASS |
+| `phpstan analyse` (Larastan) | host + 4 packages | ✅ PASS (0 errors) |
+| `composer audit --no-interaction` | host | ✅ No advisories |
+| PHPUnit full suites (`testing13/phpunit.sh`, SQLite) | basics13 / entities13 / projects13 / entity-projects13 | ✅ 846+226+562+432 tests, 20,323 assertions, exit 0 (22 skipped: MariaDB integration group needs `BASICS13_MARIADB_DATABASE`; feature-flag/architecture skips) |
+| `php artisan test --compact` | host (isolated `laravel_phpunit` MySQL) | ✅ 21 tests, 96 assertions, exit 0 |
+| Dusk | — | **NOT RUN** per project rules (needs an isolated `laravel_dusk` browser run; user command from `projects/demo13/`: `../../testing13/dusktest.sh`) |
 
 ## Critical Findings
 
-Ninguno.
+None.
 
 ## High Findings
 
-### PERF-001 — La caché por usuario no evita consultas con el store `database`
-
-Severity: HIGH · Category: Performance / Architecture · File: openspec/changes/add-database-menus/design.md · Line: 18 · Confidence: HIGH
-
-Problem: el diseño lee `menu:version`, `menu:{user}:{v}` y `menu:items:{v}`.
-Evidence: `projects/demo13/.env:43` `CACHE_STORE=database`. `HasRoles` ya carga los slugs una vez por petición (`HasRoles.php:65`).
-Impact: entre 2 y 3 SELECT sobre `cache` por carga, en lugar de 0. El test "Recarga sin consultas" pasa con el store `array` y no prueba nada sobre producción. Además, la invalidación global queda repartida en muchos puntos de escritura (ver BUG-001 y BUG-003).
-Recommendation: cachear solo la lista global de ítems, con los slugs de sus permisos, e invalidarla desde las migraciones de siembra. Filtrar en cada petición con `hasPermissionTo` sobre los permisos ya cargados. Quitar las claves por usuario, el contador de versión y los hooks en roles y permisos. El requisito pasa a ser: "pintar el menú MUST NOT añadir consultas a las de los permisos del usuario". La visibilidad queda siempre al día y desaparecen DB-002, BUG-001, BUG-003 y MAINT-001.
-
-### BUG-002 — Work y Data pasan de visibles para todos a restringidos
-
-Severity: HIGH · Category: Business logic · File: openspec/changes/add-database-menus/tasks.md · Line: 3.1, 3.2 · Confidence: HIGH
-
-Evidence: en `projects/demo13/resources/views/layouts/app/sidebar.blade.php:24-56` los ítems no tienen `can()`. El diseño dice "sin cambiar lo que ve cada usuario hoy".
-Impact: los usuarios sin `projects.view` o `entities.view` pierden enlaces. Hoy esos enlaces les dan 403, así que el cambio puede ser deseable, pero no está declarado.
-Recommendation: decidirlo explícitamente. Si se restringe, declararlo en el proposal como cambio de comportamiento y listar el slug exacto de cada ítem.
-
-### BUG-004 — Un slug inexistente deja el ítem público
-
-Severity: HIGH · Category: Security / Correctness · File: design.md · Line: 16 · Confidence: HIGH
-
-Evidence: el diseño dice "omite los que no encuentra", y en la spec un ítem sin permisos lo ve cualquier usuario autenticado. Planning y Timeline autorizan con `viewAny(Project)`, es decir `projects.view` (`PlanningListRequest.php:23`, `TimelineListRequest.php:12`). Work dashboard no comprueba nada. No existen `planning.view` ni `timeline.view`.
-Impact: una errata en la siembra deja el ítem visible para todos sin que nada falle.
-Recommendation: si un slug no existe, la siembra MUST fallar. Fijar en tasks el permiso de cada ítem: Planning y Timeline → `projects.view`; Work dashboard → ninguno.
+None.
 
 ## Medium Findings
 
-### BUG-001 — `removeRole` no invalidaría el menú
+### MED-001 — basics13 CI lint job fails on one Pint rule violation
 
-Severity: MEDIUM · File: packages/basics13/src/Concerns/HasRoles.php · Line: 88-92 · Confidence: HIGH
-Evidence: `removeRole` hace `detach` sin pasar por `syncRoles`, y el plan solo invalida en `syncRoles`.
-Impact: el usuario sigue viendo ítems de un rol que ya no tiene.
-Recommendation: desaparece con la solución de PERF-001. Si se mantiene la caché por usuario, invalidar también aquí y añadir un test.
+Severity: MEDIUM
+Category: Testing / CI
+File: packages/basics13/src/Auth/LoginAudit.php
+Line: 285 (`! (clone $failures)->skip(...)` — space between `!` and the parenthesized expression)
+Confidence: HIGH
 
-### BUG-003 — Cambiar `is_super_admin` no invalida el menú
+Problem:
+`vendor/bin/pint --test` fails on `src/Auth/LoginAudit.php` (`unary_operator_spaces`, `not_operator_with_successor_space`). The basics13 workflow runs `vendor/bin/pint --test` in its lint job (`.github/workflows/tests.yml:80`), so the next push fails the package pipeline.
 
-Severity: MEDIUM · File: design.md · Line: 18 · Confidence: HIGH
-Recommendation: desaparece con PERF-001. Si no, incluir el flag en la clave de caché.
+Evidence:
+Local run: `FAIL … 1 style issue` for exactly this file (all 334 other basics13 files pass); the workflow's lint step verified by grep.
 
-### BUG-005 — Faltan ítems de administración en la siembra
+Impact:
+Red CI on every basics13 push until fixed; the fix is auto-formatting (`vendor/bin/pint src/Auth/LoginAudit.php`).
 
-Severity: MEDIUM · File: tasks.md · Line: 1.2 · Confidence: HIGH
-Evidence: Permissions y Permissions summary dependen hoy de `roles.view` (`sidebar.blade.php:87-101`), y Administration dashboard de `sessions.view` con `data-test="nav-admin-dashboard"`. Ninguno aparece en la lista de la tarea 1.2.
-Recommendation: listar la clave, el permiso y el `data-test` de los 9 ítems de administración.
+Recommendation:
+Run Pint on the file and commit. Also worth a package pre-commit/CI habit of running `pint --test` locally before pushing.
 
-### BUG-006 — Grupos vacíos tras filtrar rutas
+---
 
-Severity: MEDIUM · File: design.md · Line: 19 · Confidence: HIGH
-Evidence: los grupos vacíos se ocultan en `for()`, pero `Route::has` se aplica después, al pintar.
-Recommendation: aplicar `Route::has` dentro de `for()`, antes de ocultar los grupos vacíos.
+### MED-002 — Excel export materializes up to 50,000 hydrated Eloquent models per request
 
-### ARCH-001 — `basics13` siembra los grupos de dominio `work` y `data`
+Severity: MEDIUM
+Category: Performance
+File: packages/basics13/src/Support/Excel/ExcelExportService.php
+Line: 83–92 (`collection()`: `$query->get()` with `limit(50000)`, then `->map()` into a full `Collection`)
+Confidence: HIGH (mechanism certain; impact depends on row count)
 
-Severity: MEDIUM · File: design.md · Line: 17 · Confidence: HIGH
-Impact: el paquete neutral conoce la agrupación de los dominios, en contra de `package-boundaries`, y contradice la regla de la propia spec "solo ítems de sus propias rutas".
-Recommendation: `projects13` siembra `work`, `entities13` siembra `data` y `basics13` solo `administration`. `parent_key` sin FK permite cualquier orden de migraciones.
+Problem:
+`FromCollection` loads every exported row as a hydrated Eloquent model plus a mapped array copy in memory before the spreadsheet writer starts. All three export controllers (entities13 `EntityController::export`, projects13 `ProjectController::export`/`EpicController::export`) pass `maxRows: 50000`.
 
-### DB-001 — El pivote no se sincroniza en siembras posteriores
+Evidence:
+`ExcelExportService::collection()` does `$query->get()` (no chunking/streaming) and `Maatwebsite\Excel\Concerns\FromCollection` requires the full collection; `maxRows: 50000` in all three controllers.
 
-Severity: MEDIUM · File: tasks.md · Line: 1.2 · Confidence: MEDIUM
-Impact: si una versión posterior quita un permiso a un ítem, la fila antigua se queda en el pivote y, con la regla "alguno de", el acceso se amplía.
-Recommendation: por cada clave, borrar sus filas del pivote y reinsertarlas en una transacción. El `down()` de cada migración de dominio borra solo sus propias claves.
+Impact:
+With tens of thousands of rows, a single export request can exhaust the memory limit or tie up a worker for minutes; exports are user-triggered GET routes, so this is reachable by any user with list access.
 
-### TEST-001 — Tests que no prueban lo que dicen
-
-Severity: MEDIUM · File: tasks.md · Line: 2.2, 2.3, 4.1 · Confidence: HIGH
-Problem: el diseño dice que el store `array` "recalcula en cada petición", pero persiste dentro del mismo test. Además, "Cambio de idioma" no tiene test, no se fijan los 9 `data-test` que usa Dusk y no hay test de las exclusiones de ruta activa.
-Recommendation: medir solo las consultas a `BAS_menus` y a las tablas de permisos. Añadir un Feature test en demo13 que compruebe los `data-test` actuales y un caso por cada exclusión.
-
-### SEC-001 — La visibilidad debe respetar `{módulo}.manage`
-
-Severity: MEDIUM · File: spec.md · Line: 21 · Confidence: MEDIUM
-Impact: un join SQL sobre el pivote ocultaría "Roles" a quien solo tiene `roles.manage`.
-Recommendation: decidir con `hasPermissionTo`, que ya resuelve `manage` (`HasRoles.php:68`), y añadir el escenario "solo `roles.manage` ve Roles".
+Recommendation:
+Implement `FromQuery` instead of `FromCollection` (maatwebsite/excel then reads the query in chunks — the same filtered `Builder` is already available), or lower the cap to a realistic figure (e.g. 5,000–10,000 rows) and document it. Simplest safe fix: `FromQuery` + `WithHeadings`/mapping in `WithMapping`.
 
 ## Low Findings
 
-- **MAINT-001 — Duración de la caché contradictoria** (`design.md:18`): `rememberForever` frente a un TTL de 1 día, cuando la usuaria confirmó "sin TTL". Queda resuelto con PERF-001, porque una sola clave global no deja entradas huérfanas.
-- **MAINT-002 — `active_pattern` con un formato propio de comas y `!`** (`design.md:20`): usar dos columnas, `active_pattern` y `active_except`, que se pasan tal cual a `routeIs`.
-- **I18N-001 — Etiquetas de dominio** (`tasks.md` 1.3, 3.1, 3.2): cada paquete reutiliza sus propias claves en `resources/lang/{es,eu,fr,en}.json`. `basics13` solo guarda las de administración.
-- **DOC-001 — Incoherencia sobre el Dashboard**: el proposal dice "ítem del host o fijo" y el diseño decide "fijo". Alinear el proposal.
-- **SPEC-001 — La spec describe la implementación de la caché** ("independiente del idioma", "sin recalcular"): dejar solo lo observable, es decir, que las etiquetas siguen el idioma activo.
+### LOW-001 — Session-log search modal loads every account (trashed included) into a dropdown
+
+Severity: LOW
+Category: Performance / scalability
+File: packages/basics13/src/Queries/Sessions/SessionLogListQuery.php
+Line: 104–115 (`accountOptions()` → `pluck('name','id')` over all users with trashed)
+Confidence: HIGH
+
+Problem:
+The `user_id` filter of the access register's advanced search renders every account as `<option>` (deliberately including archived/trashed/super-admin, per the comment). It is an unbounded `pluck` inlined into the page payload.
+
+Evidence:
+`accountOptions()` has no limit; the field renders as a plain multi-select (`'type' => 'select', 'multiple' => true`).
+
+Impact:
+Fine at the current account count; page size and memory grow linearly with accounts.
+
+Recommendation:
+When the account count grows, switch the field to the existing searchable select-options pattern (`UserSelectOptionsRequest` endpoint) that the user form already uses. No change needed now.
+
+---
+
+### LOW-002 — No dependency advisory check in CI (any repo)
+
+Severity: LOW
+Category: DevOps
+File: projects/demo13/.github/workflows/tests.yml (and the 4 package workflows)
+Confidence: HIGH
+
+Problem/Evidence/Impact/Recommendation: see OPS-001 in `devops.md`. Today's manual `composer audit` on the host is clean, so the gap is detection lag (Dependabot weekly + cooldown ⇒ up to ~12 days), not a present vulnerability.
+
+---
+
+### LOW-003 — Unused dev dependency `laravel/sail`
+
+Severity: LOW
+Category: DevOps / dependencies
+File: projects/demo13/composer.json:30
+Confidence: HIGH
+
+See OPS-003 in `devops.md`. Recommend removing or documenting.
+
+---
+
+### LOW-004 — Local MariaDB runs non-strict (`--sql-mode=""`) while CI runs with defaults
+
+Severity: LOW
+Category: DevOps / environment parity
+File: projects/demo13/docker-compose.yml:242
+Confidence: MEDIUM
+
+See OPS-007 in `devops.md`. Values that would error in CI/production truncate silently in local dev; drop the override.
+
+---
+
+### LOW-005 — Unmaintained MailHog image in the dev stack
+
+Severity: LOW
+Category: DevOps
+File: projects/demo13/docker-compose.yml:273–278
+Confidence: MEDIUM
+
+See OPS-004 in `devops.md`. Dev-only, loopback-bound; plan a switch to Mailpit when convenient.
 
 ## Informational Findings
 
-- La impersonación es correcta: el menú es el del usuario autenticado, que es el impersonado.
-- El menú no sustituye a las policies, que siguen protegiendo las rutas.
-- La capability nueva está justificada y la spec tiene unas 49 líneas, dentro del presupuesto.
-- Las etiquetas y `data-test` se pintan con `{{ }}`.
+- **INFO-001 (OPS-002):** Host CI checks sibling packages out at default-branch HEAD and only the host runs Dusk — already recorded in ARCHITECTURE.md "Known Technical Debt"; unchanged.
+- **INFO-002 (OPS-009):** `amaia/*: "*"` constraints float freely if the path repositories are ever removed/versioned; `^1.0` would match the packages' own `version: 1.0.0`.
+- **INFO-003 (OPS-008):** The `laravel13-composer` compose helper deletes the committed `composer.lock`; a casual `--profile composer` run silently rebuilds it from unconstrained resolutions. Back up instead, or gate behind confirmation.
+- **INFO-004:** Login lockout is per-login without IP (`LoginAudit::lockoutKey`), so a known email can be deliberately locked out for `lockout_minutes` by anyone typing wrong passwords for it. This is a documented, deliberate tradeoff (the class docblock and the MariaDB `basics-login-audit` spec describe exactly this) and `lockout_minutes` is configurable in `BAS_settings`; recorded so it is a conscious decision, not an oversight.
+- **INFO-005:** The 22 skipped package tests are environment-gated by design (MariaDB integration group requires `BASICS13_MARIADB_DATABASE`; Fortify-feature and architecture checks skip when not applicable), not silent coverage loss.
+- **INFO-006:** `add-database-menus` (OpenSpec change in flight; new commits in all repos + dirty basics13 working tree) was excluded from this review — review it after it lands.
 
 ## Security
-SEC-001, BUG-004.
+
+Verified, no findings:
+
+- **Authorization / IDOR:** Project and epic policies answer `denyAsNotFound()` for non-members (`ChecksProjectMembership::decideOn`), so URLs do not reveal existence. Every list, planning, timeline, dashboard, project-options and epic-form project-options query is narrowed through `ProjectVisibility` (verified by grep: `ProjectListQuery`, `EpicListQuery`, `PlanningQuery`, `TimelineQuery`, `DashboardSummaryQuery`, `ProjectSelectOptionsQuery` (editable-only), `EpicRequest`). Member management (list/candidates/store/update/destroy) is gated by `manageMembers` (owner or `projects.manage`); member candidates expose only `{id, name}` of active, non-trashed, non-super-admin, non-member accounts.
+- **Delegated user management:** type admins (`users.manage_own` without global `users.edit`) are narrowed consistently by `DelegatesUserManagement` in the policy (`allows()`), the lists (`UserListQuery::visibleTo`), the selector, and the permission summary; peers (admins of a shared type), the actor itself, super-admins and global managers are out of reach. Role assignment by a type admin is limited to roles whose every permission the actor holds (`grantableRoleIds`); the type admin can never set the `is_admin` pivot flag (`UserRequest::types()`).
+- **Mass assignment:** `active` is never fillable from requests (dedicated archive/activate actions only; `UserRequest`/`UserTypeRequest` validated fields are name/notes/password/email only). Settings update reads only `values.{variable}` with per-type rules; type/name/description come from the seeding migration.
+- **Impersonation:** `UserPolicy::impersonate` requires the super-admin, never the super-admin account itself and never one's own account; routes are POST + auth + verified; the top bar shows the red impersonation banner and leave button; leaving restores the original user and the login audit closes the impersonation row.
+- **Login audit:** the password is never read; lockout uses a cache-based lock with `Cache::add` race protection; failure-spike alert is rate-limited to once per 5-minute window; `alert_email` is optional and validated.
+- **Session table:** `BAS_sessions` (correctly prefixed, no clash with Laravel's `sessions`) stores ip (45, IPv6), user_agent (512), uuid session_key unique; `impersonator_id` FK `nullOnDelete`.
+- **XSS/redirects:** Blade output is escaped (`{{ }}`) throughout the new views; `Controller::backToList()` only redirects when the previous URL equals the list route or extends it with `?…` — no open redirect.
+- **Secrets:** none in CI (no secrets present in the workflows; `persist-credentials: false`); dev credentials documented as local-only.
 
 ## Bugs / Correctness
-BUG-001 a BUG-006.
+
+None found in the reviewed wave. Points specifically checked: lockout counter vs. lock interaction (`RateLimiter::hit` then `Cache::add`, only the request that sets the lock writes the row); `whereKeyNot([])` on an empty active-user collection selects all accounts (Laravel `0=1` negation — intended); impersonation open/close session-key juggling in `LoginAudit` (login of the impersonator's own id closes the row and restores the key); user-type name uniqueness across four language columns with blank-to-NULL normalization and both MySQL/SQLite index-name spellings on the race fallback; `PRO_project_members` FK `cascadeOnDelete` on force delete and members kept through soft delete (restore restores access).
 
 ## Database
-DB-001. Se rechaza DB-002 (atomicidad del contador) porque desaparece con PERF-001.
+
+- New migrations reviewed: `BAS_settings`, `BAS_sessions` (+`device_type`, +`impersonator_id`), `BAS_user_types`, `BAS_user_user_type` (unique `project|user`-style composite keys where applicable), role-table `BAS_` prefix renames. Indexes present where queried: `BAS_sessions(created_at)`, `(user_id, created_at)`, `(event, created_at)`, unique `session_key`; `impersonator_id` FK.
+- Delete guards follow the established `lockForUpdate()` transaction pattern (`UserTypeController::destroy` comment confirms the deleting hook holds the row lock and refuses while accounts hold the type).
+- All `BAS_`/`PRO_`/`ENT_` table references updated consistently (verified via the `HasRoles`/`pluck('BAS_roles.id')` diffs; PHPStan clean with no ignored-error regressions of note).
+- No destructive migrations; `down()` steps drop only what `up()` created.
 
 ## Performance
-PERF-001.
+
+- MED-002 (Excel export memory) and LOW-001 (unbounded account dropdown) above.
+- `SessionDashboardQuery::summary()` runs ~10 small indexed queries on an admin-gated page; `activeUserIds()` is computed twice. Rejected as immaterial (see Rejected Findings).
+- `LoginAudit` adds one `Setting::get()` + one indexed user lookup per failed login and one active-check per login — deliberate, documented "no cache so a changed value applies on the next request" design.
 
 ## Architecture
-ARCH-001, MAINT-002.
+
+- **Package boundaries respected.** The bridge owns all cross-domain logic: `EntityCountsIntegration` (counts, delete guard, entity-selector narrowing to visible projects) lives in entity-projects13 and uses the new `Entities13\Contracts\EntityIntegration` extension points; entities13/projects13 remain independent of each other and of the bridge. `ProjectVisibility` is a projects13 concern the bridge consumes, not the reverse.
+- `basics13` additions (login audit, settings, Excel service, delegation) are domain-neutral infrastructure; no entity/project business logic leaked in.
+- The delegation/visibility model keeps one source of truth per boundary (`DelegatesUserManagement`, `ProjectVisibility`, `ChecksProjectMembership`) — no duplication of the rules across entry points.
+- No speculative abstractions introduced; the rejected-patterns list (no repositories/DTOs/services) is still honored.
 
 ## Testing
-TEST-001.
+
+- Full suites green (see Checks Executed); the wave is covered by dedicated suites (sessions/login-audit, user types/delegation, settings, impersonation, excel export, members/visibility, dashboard) reflected in the 846 basics13 + 562 projects13 test counts with 13,880 + 2,845 assertions.
+- Skips are environment-gated, not silent (INFO-005).
+- Dusk not run in this review (project rule); per ARCHITECTURE.md, projects/epics trash/archived/drawer flows are feature-tested only — unchanged known coverage posture.
+- Placement follows the project rules (Unit without DB, Feature with real rows; MariaDB group tagged).
 
 ## Production
-Sin hallazgos propios. PERF-001 cubre el crecimiento de la tabla `cache`.
+
+- `.env.example`: `APP_DEBUG=false`, empty key; debugbar/pail dev-only; log viewer deny-by-default. Docker dev credentials and exposed admin ports are documented local-only assumptions (ARCHITECTURE.md "Production Assumptions").
+- CI green except the basics13 lint job (MED-001). No `composer audit` gate in CI (LOW-002).
 
 ## Maintainability
-MAINT-001, I18N-001, DOC-001, SPEC-001.
+
+- New code follows sibling structure exactly (controller + trash/archived controllers + requests + policies + queries + transformers + views + 4-language JSON per resource).
+- Documentation quality is high: non-obvious decisions are explained in docblocks (lockout key without IP, day-bounds instead of `whereDate`, left-join rationale, blank-to-NULL name normalization, deny-as-not-found).
+- Minor: `UserRequest` has grown to ~300 lines handling global-editor and type-admin paths for roles and types; still cohesive and well-commented — watch it as a future split candidate only if it keeps growing (no action now).
 
 ## Rejected Findings
 
-| Hallazgo | Motivo |
-|---|---|
-| Atomicidad y carreras de `menu:version`, y desalojo del contador (Database, Security) | Desaparece con PERF-001 |
-| Orden de migraciones entre paquetes (Database) | `parent_key` no tiene FK, así que no rompe nada. Con fallo explícito ante slug inexistente (BUG-004) se detecta un orden erróneo |
-| FK propia sobre `parent_key` con cascade (Database) | Complejidad sin un problema demostrado. El `down()` borra las claves propias (DB-001) |
-| Invalidación al archivar o borrar un usuario (Security) | El usuario inactivo no llega a ver el menú, porque la autenticación lo bloquea |
-| Test de coherencia menú ↔ `viewAny` para cada ítem (Frontend) | Duplica BUG-004 y TEST-001 |
-| Granularidad global de la invalidación (Performance) | Coste bajo, y desaparece con PERF-001 |
-| `data-test` nuevos en ítems que no lo tenían (Business Logic) | Inofensivo |
+Challenged and dropped (devil's advocate):
+
+- **"`DeviceType::label()` uses bare `__()` without namespace → missing translations"** — verified: `basics13` registers `loadJsonTranslationsFrom` and `Desktop/Mobile/Tablet` exist in all four lang JSONs. False positive.
+- **"`whereKeyNot([])` on empty active-user ids builds broken SQL"** — Laravel renders `0=1` negated; semantics are exactly "nothing excluded". False positive.
+- **"Setting::get() is uncached → per-login query"** — deliberate documented design ("no cache, so a changed value applies on the next request"); admin page and lockout only. Stylistic/known tradeoff.
+- **"handleLogin re-checks `active` although the active-users listener already rejects"** — explicitly documented as order-independent hardening. Rejected.
+- **"SessionDashboardQuery::summary calls activeUserIds twice / runs many counts"** — admin-only page, indexed queries, no evidence of impact. Speculative optimization.
+- **"Lockout enables account-DoS"** — deliberate, documented design choice with a configurable window (kept as INFO-004, not a defect).
+- **"leaveImpersonation 404s if the original account was deleted"** — requires a super-admin to be deleted mid-impersonation; recoverable by logging out. Edge case not worth code.
+- **OPS-005 (dev image as prod base) and OPS-006 (duplicated dev creds)** — documented local-only assumptions in ARCHITECTURE.md; kept as notes in devops.md, not findings with action items.
+- **"Member candidates include soft-deleted users"** — soft-delete global scope excludes them; `active=true` + `is_super_admin=false` + not-a-member already narrow it. False positive.
 
 ## Action Plan
 
-1. **PERF-001**: rediseñar la caché como una lista global de ítems, invalidada solo en la siembra, con filtrado en memoria mediante `hasPermissionTo`. Actualizar la spec, el design y las tareas 2.2 y 2.3. Esto elimina BUG-001, BUG-003, MAINT-001 y SPEC-001. Requiere confirmación de la usuaria, porque cambia lo que se acordó sobre la caché.
-2. **BUG-002 y BUG-004**: decidir si Work y Data se restringen o no. Fijar el permiso exacto de cada ítem y hacer que la siembra falle ante un slug inexistente.
-3. **BUG-005 y TEST-001**: listar los 9 ítems de administración con su clave y `data-test`, y fijarlos con un Feature test en demo13.
-4. **ARCH-001 e I18N-001**: cada dominio siembra su grupo y sus etiquetas.
-5. **DB-001 y BUG-006**: sincronizar el pivote en cada siembra y aplicar `Route::has` dentro de `for()`.
-6. **SEC-001**: añadir el escenario de `manage`.
-7. **MAINT-002 y DOC-001**: usar la columna `active_except` y alinear el proposal.
+1. **MED-001** — Run `vendor/bin/pint` on `packages/basics13/src/Auth/LoginAudit.php` and commit; the basics13 lint/CI job fails on it today. (1 minute, unblocks CI.)
+2. **MED-002** — Switch `ExcelExportService` to `FromQuery` (chunked reads) or lower the 50,000-row cap in the three export controllers; verify with a large seeded export. (Small, contained change in basics13 + optional controller cap edits.)
+3. **LOW-002** — Add `composer audit --no-interaction --abort-on-unfixable` to the `ci` job of the workflows (host first, packages after).
+4. **LOW-004** — Drop `--sql-mode=""` from the local MariaDB so dev matches CI/production behavior.
+5. **LOW-003 / LOW-005** — Remove unused `laravel/sail`; plan the MailHog → Mailpit swap when convenient.
+6. **LOW-001** — No action now; revisit the session-log account filter when the user count grows.
+7. After `add-database-menus` lands (in-flight OpenSpec change), request a focused follow-up review of it.
